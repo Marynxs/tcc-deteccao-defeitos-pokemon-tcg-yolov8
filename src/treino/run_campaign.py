@@ -32,7 +32,7 @@ def main() -> None:
     p.add_argument("--imgsz", type=int, default=1280)
     p.add_argument("--batch", type=int, default=4)
     p.add_argument("--epochs", type=int, default=300)
-    p.add_argument("--patience", type=int, default=50)
+    p.add_argument("--patience", type=int, default=100)
     p.add_argument("--tentativas", type=int, default=3,
                    help="quantas vezes retomar uma rodada que caiu")
     p.add_argument("--dry-run", action="store_true",

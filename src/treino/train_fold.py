@@ -138,9 +138,17 @@ def main() -> None:
     p.add_argument("--force-batch", action="store_true",
                    help="permite lote acima do limite seguro medido nesta placa")
     p.add_argument("--epochs", type=int, default=300)
-    # A Secao 3.1.6 do TCC2 declara paciencia inicial de 50, a ser confirmada
-    # nos testes preliminares e depois mantida fixa nas quatro configuracoes.
-    p.add_argument("--patience", type=int, default=50)
+    # A Secao 3.1.6 do TCC2 previa paciencia inicial de 50, a ser confirmada nos
+    # testes preliminares. O piloto mostrou que 50 encerra cedo demais: a melhor
+    # epoca caiu num pico de ruido da validacao interna, que tem so 26 imagens e
+    # cujo mAP salta 21% do proprio nivel entre epocas vizinhas.
+    # Prechelt (1998), sobre 1296 execucoes, mede que criterios mais lentos
+    # elevam de cerca de 60% para cerca de 80% a chance de terminar com o melhor
+    # resultado da execucao, custando cerca de 4x mais tempo. Aqui o tempo cabe,
+    # e o custo de errar o checkpoint e maior do que no caso que ele estudou:
+    # o trabalho compara quatro configuracoes, entao o erro de selecao vira
+    # variancia dentro do proprio teste pareado.
+    p.add_argument("--patience", type=int, default=100)
     p.add_argument("--model", default="yolov8s.pt")
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--cache", default="disk", help="disk, ram ou vazio")
