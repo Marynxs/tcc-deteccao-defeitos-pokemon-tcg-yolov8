@@ -55,6 +55,11 @@ def oito_direcoes() -> list[np.ndarray]:
     com o de 90, restando apenas DUAS direcoes distintas. As oito saem girando
     ciclicamente o anel de oito vizinhos do 3x3, uma posicao por vez.
     """
+    # Honestidade sobre o alcance: tomado o modulo da resposta, as oito
+    # reduzem-se a QUATRO eixos distintos, porque uma derivada direcional tem
+    # eixo e nao sentido, e K e -K dao o mesmo modulo. Quatro e o maximo
+    # geometrico de um kernel 3x3 com passo de 45 graus, e ainda assim e o
+    # dobro das duas direcoes que np.rot90 entregava.
     anel = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)]
     valores = [EMBOSS[i, j] for i, j in anel]
     kernels = []
