@@ -106,12 +106,37 @@ def resolver(config: int, fold: int) -> tuple[str, dict, dict]:
     return rotulo, origem, hiper
 
 
+# Lote maximo que roda estavel nesta placa por resolucao. Nao e limite de
+# memoria: com batch 4 a 1280 o pico e de 7,1 GB dos 15,9 GB, e batch 8 chegaria
+# a cerca de 12,5 GB, que caberia. O que acontece a batch 8 e o MIOpen falhar ao
+# lancar a convolucao (miopenStatusInternalError, HIP 719), a GPU travar e o
+# driver amdgpu resetar a placa, derrubando a sessao grafica junto. Duas
+# tentativas, dois travamentos. O ganho de velocidade seria da ordem de 10%,
+# porque 92% do tempo de epoca e a fase de treino e ela escala com a quantidade
+# de trabalho, nao com o numero de iteracoes. Nao vale o risco.
+LOTE_SEGURO = {1280: 4, 960: 6, 640: 8}
+
+
+def verificar_lote(args) -> None:
+    limite = LOTE_SEGURO.get(args.imgsz)
+    if limite is None or args.batch <= limite or args.force_batch:
+        return
+    raise SystemExit(
+        f"batch {args.batch} a {args.imgsz} trava a GPU nesta placa "
+        f"(gfx1200): o MIOpen falha ao lancar a convolucao e o driver reseta o\n"
+        f"dispositivo, derrubando a sessao grafica. O limite medido e "
+        f"batch {limite}.\nUse --force-batch se quiser tentar assim mesmo."
+    )
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--config", type=int, required=True, help="1..4 do fatorial")
     p.add_argument("--fold", type=int, required=True, help="0..4")
     p.add_argument("--imgsz", type=int, default=1280)
     p.add_argument("--batch", type=int, default=4)
+    p.add_argument("--force-batch", action="store_true",
+                   help="permite lote acima do limite seguro medido nesta placa")
     p.add_argument("--epochs", type=int, default=300)
     # A Secao 3.1.6 do TCC2 declara paciencia inicial de 50, a ser confirmada
     # nos testes preliminares e depois mantida fixa nas quatro configuracoes.
@@ -128,6 +153,7 @@ def main() -> None:
     p.add_argument("--dry-run", action="store_true", help="so mostra o que faria")
     args = p.parse_args()
 
+    verificar_lote(args)
     rotulo, origem, hiper = resolver(args.config, args.fold)
     nome = args.name or f"cfg{args.config}_fold{args.fold}_{args.imgsz}"
     saida = RUNS / nome
