@@ -59,3 +59,7 @@ docs/
 
 # Ferramenta de apoio de uso local
 src/ferramentas/
+
+# Pesos pre-treinados baixados pela Ultralytics
+*.pt
+weights/

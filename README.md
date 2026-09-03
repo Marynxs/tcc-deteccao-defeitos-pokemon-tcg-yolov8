@@ -42,7 +42,7 @@ ser material cedido por terceiro.
 ```
 tcc1/     Monografia do TCC1, entregue e aprovada. Congelada.
 tcc2/     Monografia do TCC2, em elaboração, mais os slides da defesa.
-src/      Código do pipeline de preparação dos dados.
+src/      Código: preparação dos dados e treinamento.
 ```
 
 ## Pipeline de dados
@@ -57,6 +57,23 @@ repositório:
 | 3 | `crop_and_adjust.py` | Corta pela caixa detectada e recalcula todas as anotações YOLO para o novo enquadramento. Importa a detecção da etapa anterior, de modo que as duas etapas enxergam a mesma caixa. |
 | 4 | `run_pipeline.py` | Executa as etapas 2 e 3 sobre o conjunto completo de 164 imagens. |
 | 5 | `generate_folds.py` | Gera as cinco dobras por carta, estratificadas, e grava os arquivos de partição. |
+
+## Treinamento
+
+`src/treino/train_fold.py` treina uma das quatro configurações do fatorial em
+uma dobra e avalia na dobra retida:
+
+```bash
+python src/treino/train_fold.py --config 1 --fold 0 --imgsz 1280 --batch 4
+python src/treino/train_fold.py --config 1 --fold 0 --dry-run   # só mostra o que faria
+```
+
+O `--dry-run` imprime os hiperparâmetros de aumento de dados já resolvidos, para
+conferência direta contra a Tabela 4 da monografia. A avaliação da dobra retida
+não passa pelo arquivo de configuração do treino: aquele aponta para a validação
+interna, que alimentou a parada antecipada e portanto já influenciou os pesos.
+Cada execução grava um `resumo.json` com tempo, pico de memória de vídeo e as
+métricas finais.
 
 ```bash
 python src/dados/run_pipeline.py      # etapas 2 e 3 sobre as 164 imagens
@@ -82,12 +99,20 @@ invariante for violada.
 
 ```bash
 python3 -m venv .venv
-./.venv/bin/pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm7.0
+./.venv/bin/pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm7.2
 ./.venv/bin/pip install ultralytics opencv-python numpy pillow
 ```
 
-Treinamento em AMD Radeon RX 9060 XT (gfx1200) com ROCm 7.0 sob Linux. O ROCm
-não treina no Windows.
+Treinamento em AMD Radeon RX 9060 XT (gfx1200) com ROCm sob Linux. O ROCm não
+treina no Windows.
+
+**A versão do PyTorch importa.** Com `torch 2.10.0+rocm7.0` todo treino nesta
+placa morre com `hipErrorIllegalAddress` antes de completar uma época, e o ponto
+da falha muda a cada execução, ora no kernel de supressão não máxima, ora no
+cálculo da perda. O sintoma é de corrupção de memória, não de um operador
+defeituoso: não depende da resolução, da precisão nem do número de processos de
+carga. A partir de `2.14.0+rocm7.2` o problema desaparece. Daí o índice
+`rocm7.2` acima.
 
 **Não instalar `albumentations`.** O pipeline de detecção do Ultralytics
 instancia um bloco `Albumentations` que, se o pacote estiver presente, aplica
