@@ -72,9 +72,42 @@ CONFIGS = {
 }
 
 
-def montar_yaml(destino: Path, treino: Path, validacao: Path) -> Path:
+def remapear(lista: Path, origem: str, destino_dir: Path) -> Path:
+    """Reescreve uma lista de dobra apontando para outra pasta de imagens.
+
+    As listas geradas por generate_folds.py trazem caminho ABSOLUTO para
+    Dataset_YOLO/dataset/images. Passar essas listas para uma configuracao de
+    realce faria o treino ler as imagens RGB sem nenhum aviso: a Ultralytics
+    encontra os arquivos, encontra os rotulos, e treina a coisa errada. Foi
+    exatamente o que aconteceu na primeira tentativa do teste de variantes.
+    """
+    if origem == RGB:
+        return lista
+    velho = f"/{RGB}/images/"
+    novo = f"/{origem}/images/"
+    linhas = []
+    for l in lista.read_text(encoding="utf-8").splitlines():
+        l = l.strip()
+        if not l:
+            continue
+        if velho not in l:
+            raise SystemExit(f"caminho inesperado em {lista}: {l}")
+        alvo = Path(l.replace(velho, novo))
+        if not alvo.is_file():
+            raise SystemExit(f"imagem de realce ausente: {alvo}")
+        linhas.append(str(alvo))
+    destino_dir.mkdir(parents=True, exist_ok=True)
+    saida = destino_dir / f"{lista.stem}_{origem}.txt"
+    saida.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    return saida
+
+
+def montar_yaml(destino: Path, treino: Path, validacao: Path,
+                origem: str = RGB) -> Path:
     """Escreve um data.yaml apontando para as listas de imagens dadas."""
     destino.parent.mkdir(parents=True, exist_ok=True)
+    treino = remapear(treino, origem, destino.parent)
+    validacao = remapear(validacao, origem, destino.parent)
     destino.write_text(
         yaml.safe_dump(
             {
@@ -220,13 +253,13 @@ def main() -> None:
         inicio = time.time()
         modelo.train(resume=True)
         _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao,
-                 time.time() - inicio)
+                 time.time() - inicio, origem)
         return
 
     modelo = YOLO(args.model)
     inicio = time.time()
     modelo.train(
-        data=str(montar_yaml(saida / "treino.yaml", treino, val_interna)),
+        data=str(montar_yaml(saida / "treino.yaml", treino, val_interna, origem)),
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
@@ -254,17 +287,18 @@ def main() -> None:
         **hiper,
     )
     duracao = time.time() - inicio
-    _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao)
+    _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao, origem)
 
 
-def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao) -> None:
+def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao,
+             origem=RGB) -> None:
     """Avalia o melhor checkpoint no fold retido e grava o resumo da rodada."""
     # A avaliacao do fold retido NAO pode passar pelo yaml do treino: aquele
     # arquivo aponta para a validacao interna, que serviu ao early stopping e
     # portanto ja influenciou o modelo.
     melhor = YOLO(saida / "weights" / "best.pt")
     metricas = melhor.val(
-        data=str(montar_yaml(saida / "avaliacao.yaml", treino, avaliacao)),
+        data=str(montar_yaml(saida / "avaliacao.yaml", treino, avaliacao, origem)),
         imgsz=args.imgsz,
         batch=args.batch,
         channels_last=False,
