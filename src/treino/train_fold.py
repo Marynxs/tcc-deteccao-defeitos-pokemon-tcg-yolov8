@@ -112,12 +112,18 @@ def main() -> None:
     p.add_argument("--fold", type=int, required=True, help="0..4")
     p.add_argument("--imgsz", type=int, default=1280)
     p.add_argument("--batch", type=int, default=4)
-    p.add_argument("--epochs", type=int, default=150)
-    p.add_argument("--patience", type=int, default=40)
+    p.add_argument("--epochs", type=int, default=300)
+    # A Secao 3.1.6 do TCC2 declara paciencia inicial de 50, a ser confirmada
+    # nos testes preliminares e depois mantida fixa nas quatro configuracoes.
+    p.add_argument("--patience", type=int, default=50)
     p.add_argument("--model", default="yolov8s.pt")
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--cache", default="disk", help="disk, ram ou vazio")
     p.add_argument("--no-amp", action="store_true", help="treina em fp32")
+    p.add_argument("--resume", action="store_true",
+                   help="retoma do ultimo checkpoint se a execucao foi interrompida")
+    p.add_argument("--force", action="store_true",
+                   help="refaz mesmo que ja exista resumo.json")
     p.add_argument("--name", default=None)
     p.add_argument("--dry-run", action="store_true", help="so mostra o que faria")
     args = p.parse_args()
@@ -132,6 +138,14 @@ def main() -> None:
     for lista in (treino, val_interna, avaliacao):
         if not lista.is_file():
             raise SystemExit(f"lista ausente: {lista}")
+
+    # Uma execucao so e considerada concluida quando gravou o resumo.json, que e
+    # a ultima coisa que este script escreve. Assim uma campanha interrompida no
+    # meio pode ser relancada inteira: as rodadas prontas sao puladas e a que
+    # morreu retoma do ultimo checkpoint.
+    if (saida / "resumo.json").is_file() and not args.force:
+        print(f"\n{nome}: ja concluida (resumo.json existe). Use --force para refazer.")
+        return
 
     print(f"\nconfiguracao {args.config}: {rotulo}")
     print(f"fold          {args.fold}")
@@ -151,6 +165,22 @@ def main() -> None:
 
     if torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
+
+    # A Ultralytics grava weights/last.pt ao fim de CADA epoca. Como uma epoca
+    # custa cerca de 12 s, uma queda de energia ou um travamento da placa custa
+    # no maximo uma epoca de trabalho, nao a execucao inteira. Com resume=True a
+    # biblioteca le os argumentos de dentro do proprio checkpoint, entao nao se
+    # passa mais nenhum: mudar um hiperparametro aqui seria silenciosamente
+    # ignorado e a execucao retomada nao corresponderia ao que se pediu.
+    ultimo = saida / "weights" / "last.pt"
+    if args.resume and ultimo.is_file():
+        print(f"\nretomando de {ultimo}")
+        modelo = YOLO(ultimo)
+        inicio = time.time()
+        modelo.train(resume=True)
+        _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao,
+                 time.time() - inicio)
+        return
 
     modelo = YOLO(args.model)
     inicio = time.time()
@@ -183,7 +213,11 @@ def main() -> None:
         **hiper,
     )
     duracao = time.time() - inicio
+    _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao)
 
+
+def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao) -> None:
+    """Avalia o melhor checkpoint no fold retido e grava o resumo da rodada."""
     # A avaliacao do fold retido NAO pode passar pelo yaml do treino: aquele
     # arquivo aponta para a validacao interna, que serviu ao early stopping e
     # portanto ja influenciou o modelo.
@@ -197,6 +231,13 @@ def main() -> None:
         name=f"{nome}_avaliacao",
         exist_ok=True,
         plots=True,
+        # A analise estatistica do trabalho tem a CARTA como unidade, nao o fold:
+        # cada carta e avaliada uma unica vez, em exatamente uma configuracao por
+        # rodada, o que da 82 pares para o teste de Wilcoxon em vez de 5. Isso
+        # exige a predicao individual de cada imagem, e nao apenas a metrica
+        # agregada do fold. Sem este save_json seria preciso repetir as 20
+        # execucoes so para recuperar as predicoes.
+        save_json=True,
     )
 
     pico = (
