@@ -17,6 +17,7 @@ VARIANTES = {
     "a": "luminancia, emboss 3x3, CLAHE (o que o TCC1 descrevia)",
     "b": "luminancia, CLAHE, emboss de 8 direcoes (Sawada 2024)",
     "d": "luminancia, CLAHE, cristas multiescala por Hessiana (Gruber 2021)",
+    "e": "composto: L original, L com CLAHE, Frangi (tres canais informativos)",
 }
 
 
@@ -26,6 +27,16 @@ VARIANTES = {
 # media 21% do proprio nivel entre epocas vizinhas. Uma diferenca abaixo dessa
 # ordem de grandeza nao se distingue de flutuacao.
 MARGEM_MINIMA = 0.20
+
+
+def melhor_interna(v: str) -> float:
+    """Melhor mAP@0,5 que a variante alcancou na validacao interna."""
+    import csv
+    f = RUNS / f"cfg3v{v}_fold0_1280" / "results.csv"
+    if not f.is_file():
+        return 0.0
+    return max((float(r["metrics/mAP50(B)"]) for r in csv.DictReader(f.open())),
+               default=0.0)
 
 
 def avaliar(dados: dict, vencedora: str, segunda: str) -> dict:
@@ -39,9 +50,19 @@ def avaliar(dados: dict, vencedora: str, segunda: str) -> dict:
     supera_rgb = base is not None and a > base["map50"]
     ganho_rgb = (a / base["map50"] - 1) if base and base["map50"] > 0 else None
 
-    conclusivo = margem >= MARGEM_MINIMA and lidera_5095
+    # Terceira condicao, a mais reveladora: a ordem obtida na validacao interna
+    # concorda com a do fold retido? Se a mesma execucao aparece em primeiro por
+    # um criterio e em ultimo por outro, a ordenacao e ruido, e margem grande
+    # nao significa nada.
+    ordem_interna = sorted(dados, key=melhor_interna, reverse=True)
+    ordem_retido = sorted(dados, key=lambda v: dados[v]["map50"], reverse=True)
+    ordens_batem = ordem_interna[0] == ordem_retido[0]
+
+    conclusivo = margem >= MARGEM_MINIMA and lidera_5095 and ordens_batem
     return {"margem": margem, "lidera_5095": lidera_5095, "conclusivo": conclusivo,
-            "supera_rgb": supera_rgb, "ganho_rgb": ganho_rgb, "base": base}
+            "supera_rgb": supera_rgb, "ganho_rgb": ganho_rgb, "base": base,
+            "ordens_batem": ordens_batem,
+            "ordem_interna": ordem_interna, "ordem_retido": ordem_retido}
 
 
 def resumo(v: str) -> dict | None:
@@ -80,6 +101,10 @@ def main() -> None:
         print(f"  margem sobre a segunda colocada: {veredito['margem']*100:.0f}% "
               f"(minimo adotado: {MARGEM_MINIMA*100:.0f}%)")
         print(f"  lidera tambem no mAP@0,5:0,95: {'sim' if veredito['lidera_5095'] else 'NAO'}")
+        print(f"  ordem pela validacao interna: {' > '.join(v.upper() for v in veredito['ordem_interna'])}")
+        print(f"  ordem pelo fold retido      : {' > '.join(v.upper() for v in veredito['ordem_retido'])}")
+        if not veredito["ordens_batem"]:
+            print(f"  AS DUAS ORDENS DISCORDAM: a ordenacao entre variantes e ruido.")
         print(f"  A campanha segue com a {vencedora.upper()}, mas a escolha NAO esta")
         print(f"  demonstrada e precisa ser revista com as 5 dobras.")
     if veredito["base"]:
@@ -132,6 +157,17 @@ def main() -> None:
             f"{MARGEM_MINIMA*100:.0f}% adotada como referência, e "
             f"{'lidera' if veredito['lidera_5095'] else 'NÃO lidera'} o "
             f"mAP@0,5:0,95.",
+            "",
+            f"Ordem pela validação interna: "
+            f"{' > '.join(v.upper() for v in veredito['ordem_interna'])}. "
+            f"Ordem pelo fold retido: "
+            f"{' > '.join(v.upper() for v in veredito['ordem_retido'])}. "
+            + ("As duas concordam no primeiro colocado."
+               if veredito["ordens_batem"] else
+               "**As duas discordam do primeiro colocado**, o que indica que a "
+               "ordenação entre as variantes é dominada por ruído: uma margem "
+               "grande no fold retido não significa superioridade real quando o "
+               "mesmo experimento inverte a ordem sob o outro critério."),
             "",
             "A margem de referência não é teste estatístico: com uma dobra por "
             "variante não existe teste possível. Ela vem do ruído medido na "
