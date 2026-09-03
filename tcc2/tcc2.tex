@@ -571,13 +571,16 @@ aos trabalhos selecionados para inclusão.
 \textit{``statistical comparison'' AND ``classifiers'' AND ``cross-validation''} 
     & GS, IEEE, SD, MDPI & 3 & 1 \\
 \midrule
+\textit{``Neural Networks'' AND ``Early Stopping''} 
+    & GS, IEEE, SD, MDPI & 2 & 1 \\
+\midrule
 \textit{``small object detection'' AND ``input resolution'' OR ``image size''} 
     & GS, IEEE, SD, MDPI & 9 & 3 \\
 \midrule
 Fontes não acadêmicas (contextualização de mercado e documentação técnica) 
     & Diversas & — & 2 \\
 \midrule
-\textbf{Total} & & \textbf{73} & \textbf{24} \\
+\textbf{Total} & & \textbf{75} & \textbf{25} \\
 \bottomrule
 \end{tabular}
 \legend{GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.
@@ -589,15 +592,18 @@ em língua inglesa, disponíveis em periódicos ou anais de conferências.
 A seleção considerou principalmente estudos revisados por pares e 
 \textit{surveys} recentes quando diretamente relacionados ao problema 
 investigado ou necessários para fundamentar conceitos técnicos 
-específicos. Excepcionalmente, foram incluídos três trabalhos anteriores 
+específicos. Excepcionalmente, foram incluídos quatro trabalhos anteriores 
 a 2021 por se tratarem de referências fundacionais: o \textit{dataset} COCO 
 \cite{Lin2014}, base de pré-treinamento do YOLOv8; 
 \citeonline{Kohavi1995}, referência fundacional sobre validação cruzada 
 em cenários com dados limitados, diretamente aplicável ao contexto 
-deste trabalho; e \citeonline{Demsar2006}, referência fundacional sobre 
+deste trabalho; \citeonline{Demsar2006}, referência fundacional sobre 
 comparação estatística entre algoritmos de aprendizado, cuja recomendação 
 metodológica fundamenta o procedimento de comparação adotado na 
-Seção~\ref{subsec:comparacao_estatistica}.
+Seção~\ref{subsec:comparacao_estatistica}; e \citeonline{Prechelt1998}, 
+referência fundacional sobre a escolha do critério de parada antecipada, 
+que fundamenta o valor de paciência adotado na 
+Seção~\ref{subsec:hiperparametros}.
 
 De forma complementar, também foram consultadas fontes não acadêmicas, 
 como páginas institucionais e relatórios setoriais, utilizadas 
@@ -1685,12 +1691,37 @@ treinamento de cada rodada, correspondendo a cerca de 13 cartas (26
 imagens). Esse subconjunto é distinto do fold de avaliação, que 
 permanece completamente isolado durante o treinamento e é utilizado 
 exclusivamente para reportar o desempenho final de cada configuração 
-experimental. A paciência inicial será de 50 épocas, valor compatível 
-com o tamanho reduzido do conjunto de dados e alinhado aos padrões da 
-biblioteca Ultralytics para YOLOv8 \cite{Dobrzycki2025}. O valor final 
-da paciência será ajustado nos testes preliminares, sendo mantido fixo 
-em todas as quatro configurações experimentais para garantir 
-comparabilidade entre os resultados.
+experimental. A paciência foi estabelecida nos testes 
+preliminares. \citeonline{Prechelt1998}, ao avaliar critérios de parada 
+sobre 1296 execuções de treinamento, observa que curvas reais de erro de 
+validação quase sempre apresentam mais de um mínimo local e que critérios 
+mais lentos elevam de aproximadamente 60\% para aproximadamente 80\% a 
+probabilidade de a execução terminar com o melhor resultado que ela própria 
+alcançou, ao custo de cerca de quatro vezes mais tempo de treinamento. O 
+autor recomenda critérios rápidos, salvo quando o ganho reduzido compensa 
+o aumento expressivo de tempo.
+
+Neste trabalho a compensação se justifica por duas razões. A primeira é de 
+custo: mesmo quadruplicado, o tempo total das execuções permanece viável no 
+cronograma. A segunda decorre do desenho experimental adotado. 
+\citeonline{Prechelt1998} analisa o treinamento de um modelo isolado, 
+situação em que a escolha subótima do ponto de parada afeta apenas aquele 
+resultado. Aqui, quatro configurações são comparadas entre si por teste 
+pareado, de modo que a incerteza na seleção do ponto de parada se converte 
+em variância dentro da própria comparação, reduzindo a capacidade do teste 
+de identificar diferenças reais entre as configurações. Adota-se, portanto, 
+paciência de 100 épocas, com teto de 300, mantida fixa em todas as quatro 
+configurações experimentais para garantir comparabilidade entre os 
+resultados.
+
+Registra-se como limitação que o subconjunto de validação interno é 
+reduzido e que a estimativa de mAP obtida sobre ele apresenta variabilidade 
+elevada entre épocas consecutivas. \citeonline{Prechelt1998} observa que o 
+sobreajuste pode passar despercebido justamente porque o conjunto de 
+validação é finito e, portanto, não perfeitamente representativo do 
+problema. Essa variabilidade não introduz viés no desempenho reportado, uma 
+vez que o \textit{fold} de avaliação permanece isolado do treinamento e da 
+seleção do ponto de parada, mas contribui para a variância das comparações.
 
 Como ponto de partida para os testes preliminares, 
 serão adotados os valores padrão recomendados pela
