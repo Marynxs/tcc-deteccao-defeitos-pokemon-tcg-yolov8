@@ -38,3 +38,24 @@ arquivos/
 
 # Configurações do Claude Code
 .claude/
+
+# ---------------------------------------------------------------
+# Dados, ambiente e material de apoio (nao versionados)
+# ---------------------------------------------------------------
+# Conjunto de dados: 6,5 GB. Fornecido por empresa parceira.
+Dataset_YOLO/
+
+# PDFs dos artigos consultados: 136 MB, com restricoes de licenca.
+referencias/
+
+# Ambiente virtual Python
+.venv/
+__pycache__/
+*.pyc
+
+# Documentos de trabalho e contexto, de uso local
+CLAUDE.md
+docs/
+
+# Ferramenta de apoio de uso local
+src/ferramentas/

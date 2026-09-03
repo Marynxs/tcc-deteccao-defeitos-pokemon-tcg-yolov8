@@ -1,238 +1,111 @@
-# Template de TCC em Ciência da Computação - Senac Santo Amaro
+# Detecção de Defeitos em Cartas Pokémon TCG com YOLOv8
 
-Template de Trabalho de Conclusão de Curso (TCC) para o Centro Universitário Senac - Santo Amaro, desenvolvido em LaTeX utilizando a classe `abntex2`.
+Trabalho de Conclusão de Curso em Ciência da Computação, Centro Universitário
+SENAC Santo Amaro.
 
-## 📋 Sobre o Template
+**Autor:** Matheus da Silva Marini
+**Orientador:** Prof. Afonso César Lelis Brandão
+**Entrega:** segundo semestre de 2026
 
-Este template foi desenvolvido para auxiliar os alunos do curso de **Bacharelado em Ciência da Computação** do Senac Santo Amaro na elaboração de seus Trabalhos de Conclusão de Curso, seguindo as normas da ABNT e os padrões acadêmicos da instituição.
+## O trabalho
 
-## 📁 Estrutura do Projeto
+Avaliação de estratégias de treinamento aplicadas ao YOLOv8 para detecção de
+defeitos superficiais em cartas Pokémon TCG, em cenário com baixo volume de
+dados. O objetivo não é construir um sistema de graduação automática, mas medir,
+de forma controlada, como diferentes estratégias de treinamento afetam o
+desempenho do detector quando há poucos exemplos anotados.
 
-O template é composto pelos seguintes arquivos:
+O desenho é um estudo de ablação fatorial 2x2, combinando duas variáveis
+independentes:
 
-- **`tcc.tex`**: Arquivo principal do documento LaTeX contendo toda a estrutura do TCC
-- **`bibliografia.bib`**: Arquivo de referências bibliográficas no formato BibTeX
+| | Representação RGB | Realce de superfície |
+|---|---|---|
+| **Sem aumento de dados** | Configuração 1 | Configuração 3 |
+| **Com aumento de dados** | Configuração 2 | Configuração 4 |
 
-## 🎯 Elementos Incluídos
+A avaliação usa validação cruzada estratificada em cinco dobras, com folds fixos
+entre as quatro configurações, e comparação por teste de Wilcoxon pareado tendo
+a carta como unidade de análise.
 
-O template contém as seguintes seções pré-configuradas:
+## Conjunto de dados
 
-### Elementos Pré-textuais
-- ✅ Capa
-- ✅ Folha de rosto
-- ✅ Dedicatória (opcional)
-- ✅ Agradecimentos
-- ✅ Epígrafe (opcional)
-- ✅ Resumo em português
-- ✅ Abstract em inglês
-- ✅ Lista de ilustrações
-- ✅ Lista de tabelas
-- ✅ Lista de abreviaturas e siglas
-- ✅ Sumário
+82 cartas fornecidas por empresa brasileira especializada em graduação,
+totalizando 164 imagens (frente e verso) e 1.038 instâncias anotadas em classe
+única, `defeito`. As anotações derivam dos registros de avaliadores
+profissionais.
 
-### Elementos Textuais
-- ✅ Introdução (com contexto, justificativa e objetivos)
-- 📝 Desenvolvimento (seções a serem preenchidas pelo aluno)
-- 📝 Resultados
-- 📝 Conclusão
+O conjunto **não é versionado** neste repositório, por seu volume (6,5 GB) e por
+ser material cedido por terceiro.
 
-### Elementos Pós-textuais
-- ✅ Referências bibliográficas (utilizando BibTeX)
+## Estrutura
 
-## 🚀 Como Usar
+```
+tcc1/     Monografia do TCC1, entregue e aprovada. Congelada.
+tcc2/     Monografia do TCC2, em elaboração, mais os slides da defesa.
+src/      Código do pipeline de preparação dos dados.
+```
 
-### Organização de ativos
+## Pipeline de dados
 
-Crie uma pasta `assets` ao lado de `tcc.tex` para guardar imagens, vídeos ou outras mídias que você irá referenciar. Dentro dela, mantenha subpastas como `images/`, `figures/` ou `media/` e use caminhos relativos (`assets/images/minha_figura.png`) nas figuras do LaTeX.
+Os scripts em `src/dados/` executam nesta ordem, sempre a partir da raiz do
+repositório:
 
-### Pré-requisitos
-
-Você precisará de uma distribuição LaTeX instalada no seu computador:
-
-- **Windows**: [MiKTeX](https://miktex.org/) ou [TeX Live](https://www.tug.org/texlive/)
-- **macOS**: [MacTeX](https://www.tug.org/mactex/)
-- **Linux**: TeX Live (geralmente disponível nos repositórios da distribuição)
-
-#### Instalando `pdflatex` no Codespaces/Linux e no Windows
-
-No GitHub Codespaces (ou qualquer Linux atual), instale o TeX Live com:
+| Ordem | Script | O que faz |
+|---|---|---|
+| 1 | `organize_cards.py` | Padroniza a nomenclatura das imagens de origem e gera a planilha de mapeamento. |
+| 2 | `card_detector.py` | Detecta a carta na foto. Modelo de fundo por z-score em Lab normalizado pelo desvio robusto, com evidência de textura e validação pela proporção física 63x88 mm. |
+| 3 | `crop_and_adjust.py` | Corta pela caixa detectada e recalcula todas as anotações YOLO para o novo enquadramento. Importa a detecção da etapa anterior, de modo que as duas etapas enxergam a mesma caixa. |
+| 4 | `run_pipeline.py` | Executa as etapas 2 e 3 sobre o conjunto completo de 164 imagens. |
+| 5 | `generate_folds.py` | Gera as cinco dobras por carta, estratificadas, e grava os arquivos de partição. |
 
 ```bash
-sudo apt update
-sudo apt install --yes texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+python src/dados/run_pipeline.py      # etapas 2 e 3 sobre as 164 imagens
+python src/dados/generate_folds.py     # particionamento, com conferência automática
 ```
 
-No Windows, instale o MiKTeX (https://miktex.org/download) e, após a instalação, abra o console do MiKTeX para garantir que `pdflatex` está no `PATH`. Isso garante que `pdflatex` esteja disponível tanto no terminal local quanto no Codespaces.
+Resultado da preparação: 164 de 164 imagens processadas, 1.038 de 1.038
+anotações preservadas, nenhuma descartada. A ocupação média da carta no quadro
+passa de 82,4% para 93,7%.
 
-### Compilação
+### Particionamento
 
-#### No Terminal
+A unidade do particionamento é a carta, não a imagem: frente e verso da mesma
+carta pertencem sempre à mesma dobra, por serem a mesma peça física. A
+estratificação é feita pelo número de faces com defeito, de modo que as cinco
+cartas sem defeito em nenhuma face fiquem distribuídas uma por dobra. Cada carta
+é avaliada exatamente uma vez, na dobra a que pertence.
 
-Para compilar o documento, execute os seguintes comandos na ordem:
+O `generate_folds.py` confere o resultado por conta própria e falha se qualquer
+invariante for violada.
+
+## Ambiente
 
 ```bash
-pdflatex tcc.tex
-bibtex tcc
-pdflatex tcc.tex
-pdflatex tcc.tex
+python3 -m venv .venv
+./.venv/bin/pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm7.0
+./.venv/bin/pip install ultralytics opencv-python numpy pillow
 ```
 
-**Por que compilar múltiplas vezes?**
-- A primeira compilação gera o documento base
-- O `bibtex` processa as referências bibliográficas
-- As próximas duas compilações atualizam as referências cruzadas e o sumário
+Treinamento em AMD Radeon RX 9060 XT (gfx1200) com ROCm 7.0 sob Linux. O ROCm
+não treina no Windows.
 
-## ✏️ Personalizando o Template
+**Não instalar `albumentations`.** O pipeline de detecção do Ultralytics
+instancia um bloco `Albumentations` que, se o pacote estiver presente, aplica
+`Blur`, `MedianBlur`, `ToGray` e `CLAHE` a 1% das imagens de todas as
+configurações. O último contaminaria a linha de base RGB com o tratamento que a
+Configuração 3 investiga.
 
-### Informações Básicas
+## Compilar as monografias
 
-Edite as seguintes linhas no arquivo `tcc.tex` (aproximadamente linhas 75-89):
-
-```latex
-\titulo{Título do Seu TCC}
-\autor{Seu Nome Completo}
-\local{São Paulo - Brasil}
-\data{2025}
-\orientador{Nome do Seu Orientador}
-% \coorientador{Nome do Coorientador} % Descomente se houver coorientador
+```bash
+cd tcc2
+pdflatex tcc2.tex && bibtex tcc2 && pdflatex tcc2.tex && pdflatex tcc2.tex
 ```
 
-### Resumo e Abstract
+Requer TeX Live com `abntex2` e `pgfgantt`:
 
-Substitua o conteúdo das seções `\begin{resumo}` e `\begin{resumo}[Abstract]` pelos resumos do seu trabalho (entre as linhas 257-299).
-
-### Lista de Siglas
-
-Adicione ou remova siglas na seção `\begin{siglas}` (linhas 318-324):
-
-```latex
-\begin{siglas}
-  \item[API] Application Programming Interface
-  \item[TCC] Trabalho de Conclusão de Curso
-\end{siglas}
+```bash
+sudo apt install texlive-latex-recommended texlive-latex-extra \
+  texlive-fonts-recommended texlive-lang-portuguese texlive-publishers \
+  texlive-pictures texlive-bibtex-extra
 ```
-
-### Conteúdo Principal
-
-Edite os capítulos e seções após a linha 333, mantendo a estrutura:
-
-```latex
-\chapter{Título do Capítulo}
-\section{Título da Seção}
-\subsection{Título da Subseção}
-
-Seu conteúdo aqui...
-```
-
-### Referências Bibliográficas
-
-Adicione suas referências no arquivo `bibliografia.bib` seguindo o formato BibTeX. Exemplos já estão incluídos no arquivo.
-
-Para citar uma referência no texto, use:
-```latex
-\cite{chave_da_referencia}
-```
-
-## 📦 Pacotes e Recursos Incluídos
-
-O template já inclui diversos pacotes úteis:
-
-- **Formatação**: `geometry`, `indentfirst`, `microtype`
-- **Gráficos e figuras**: `graphicx`, `tikz`, `float`
-- **Código-fonte**: `listings` (com estilos pré-configurados para C, R, Python e JSON)
-- **Matemática**: `amsmath`
-- **Tabelas**: `csvsimple`
-- **Citações ABNT**: `abntex2cite`
-
-### Inserindo Código-fonte
-
-O template possui estilos pré-definidos para código:
-
-```latex
-\begin{lstlisting}[style=python, caption={Exemplo em Python}]
-def hello_world():
-    print("Hello, World!")
-\end{lstlisting}
-```
-
-Estilos disponíveis: `psceudo`, `r_code`, `json`, `python`
-
-### Inserindo Figuras
-
-```latex
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=0.8\textwidth]{caminho/para/imagem.png}
-    \caption{Legenda da figura}
-    \label{fig:minha_figura}
-\end{figure}
-```
-
-### Inserindo Tabelas
-
-```latex
-\begin{table}[htb]
-    \centering
-    \caption{Título da tabela}
-    \label{tab:minha_tabela}
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \textbf{Coluna 1} & \textbf{Coluna 2} & \textbf{Coluna 3} \\
-        \hline
-        Dado 1 & Dado 2 & Dado 3 \\
-        \hline
-    \end{tabular}
-\end{table}
-```
-
-## 📚 Recursos Adicionais
-
-### Documentação
-
-- [Manual do ABNTeX2](https://www.abntex.net.br/)
-- [Documentação LaTeX (LaTeX Project)](https://www.latex-project.org/help/documentation/)
-- [CTAN - Comprehensive TeX Archive Network](https://www.ctan.org/)
-
-### Tutoriais Recomendados
-
-- [LaTeX Wikibook](https://en.wikibooks.org/wiki/LaTeX)
-- [Guia de referências BibTeX](https://www.bibtex.com/g/bibtex-format/)
-
-## ⚠️ Dicas Importantes
-
-1. **Faça backups regulares** do seu trabalho
-2. **Compile frequentemente** para detectar erros cedo
-3. **Use controle de versão** (Git) para gerenciar alterações
-4. **Consulte seu orientador** regularmente sobre o formato e conteúdo
-5. **Revise as normas da ABNT** atualizadas antes da entrega final
-6. **Não deixe para a última hora** - TCC requer tempo e dedicação
-
-## 🔧 Versionamento com Git
-
-1. Inicialize um repositório (local ou no GitHub) e versionize `tcc.tex`, `bibliografia.bib` e a pasta `assets/`.
-2. Sempre revise o status com `git status`, confira diffs (`git diff`) e faça commits com mensagens claras, por exemplo: `git commit -am "Atualiza metodologia proposta"`.
-3. Use branches para trabalhar em capítulos diferentes (`tcc1-metodologia`, `tcc1-referencial` etc.) e abra Pull Requests se estiver colaborando com colegas ou orientador.
-4. Envie (`git push`) regularmente para o remoto para evitar perda de dados.
-5. Gere o PDF antes de entregas com `pdflatex` + `bibtex` e guarde o binário somente quando necessário; prefira manter no repositório apenas os fontes e ativos.
-
-### Como funciona o `.gitignore`
-
-O arquivo `.gitignore` deste repositório evita que saiam arquivos temporários do LaTeX (como `.aux`, `.log`, `.synctex.gz`, `.toc` etc.) e caches de editores (`.idea/`, `.vscode/`). Desse modo, apenas `*.tex`, `*.bib`, `*.pdf` e os ativos importantes são enviados para o repositório. Consulte o `.gitignore` para entender exatamente o que fica de fora antes de fazer commits.
-
-## 🤝 Suporte
-
-Para dúvidas sobre o template ou formatação:
-
-- Consulte seu orientador de TCC
-- Entre em contato com a coordenação do curso
-- Consulte a documentação do ABNTeX2
-
-## 📄 Licença
-
-Este template é fornecido para uso acadêmico dos alunos do Centro Universitário Senac - Santo Amaro.
-
----
-
-**Desenvolvido para a disciplina de TCC 1**  
-**Centro Universitário Senac - Santo Amaro**  
-**Curso: Bacharelado em Ciência da Computação**
