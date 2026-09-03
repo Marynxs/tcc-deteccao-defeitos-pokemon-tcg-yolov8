@@ -14,10 +14,16 @@ import numpy as np
 RAIZ = Path(__file__).resolve().parents[2]
 ORIGEM = RAIZ / "Dataset_YOLO" / "dataset"
 
-# Kernel de emboss classico. A soma dos coeficientes e 1, entao o operador
-# devolve a imagem somada ao gradiente direcional; subtrair a imagem isola a
-# parte de gradiente, que e o que interessa ao realce.
-EMBOSS = np.array([[-2, -1, 0], [-1, 1, 1], [0, 1, 2]], np.float32)
+# Kernel de emboss. A soma dos coeficientes e ZERO, de modo que o operador
+# devolve a derivada direcional pura; somada a 128, a saida fica centrada no
+# cinza medio, que e o aspecto classico de uma imagem embossada.
+#
+# A variante com soma 1, usada por algumas bibliotecas, devolve a imagem somada
+# ao gradiente. Somar 128 aquilo satura: numa carta clara a saida passa de 255 e
+# e cortada, com media perto de 200 em vez de 128, perdendo justamente o relevo
+# nas regioes claras. Conferido contra a figura ja presente no TCC, cuja media e
+# 127,07: so o kernel de soma zero a reproduz.
+EMBOSS = np.array([[-2, -1, 0], [-1, 0, 1], [0, 1, 2]], np.float32)
 
 
 def luminancia(bgr: np.ndarray) -> np.ndarray:
@@ -44,7 +50,9 @@ def variante_a(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
 def variante_b(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
     """CLAHE seguido de gradiente direcional de oito direcoes (Sawada2024)."""
     c = _clahe(limite, lado).apply(luminancia(bgr)).astype(np.float32)
-    respostas = [np.abs(cv2.filter2D(c, -1, np.rot90(EMBOSS, k)) - c) for k in range(4)]
+    # O kernel ja soma zero, entao filter2D devolve a derivada direcional pura:
+    # nao se subtrai a imagem, o que agora removeria sinal em vez de o termo DC.
+    respostas = [np.abs(cv2.filter2D(c, -1, np.rot90(EMBOSS, k))) for k in range(4)]
     return _normalizar(np.max(np.stack(respostas), axis=0))
 
 
