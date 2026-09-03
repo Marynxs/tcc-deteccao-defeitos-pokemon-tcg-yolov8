@@ -60,13 +60,15 @@ SEMPRE_DESLIGADOS = dict(
 )
 
 RGB = "dataset"
-REALCE = "dataset_realce"
+# Qual variante de realce usar. O teste preliminar compara tres; depois de
+# escolhida, a vencedora fica fixa nas Configuracoes 3 e 4.
+REALCE_PADRAO = "d"
 
 CONFIGS = {
     1: ("RGB sem aumento", RGB, SEM_AUMENTO),
     2: ("RGB com aumento", RGB, COM_AUMENTO_RGB),
-    3: ("realce sem aumento", REALCE, SEM_AUMENTO),
-    4: ("realce com aumento", REALCE, COM_AUMENTO_REALCE),
+    3: ("realce sem aumento", None, SEM_AUMENTO),
+    4: ("realce com aumento", None, COM_AUMENTO_REALCE),
 }
 
 
@@ -88,13 +90,16 @@ def montar_yaml(destino: Path, treino: Path, validacao: Path) -> Path:
     return destino
 
 
-def resolver(config: int, fold: int) -> tuple[str, dict, dict]:
+def resolver(config: int, fold: int, realce: str = REALCE_PADRAO) -> tuple[str, dict, dict]:
     if config not in CONFIGS:
         raise SystemExit(f"configuracao {config} nao existe, use 1..4")
     if not 0 <= fold < K:
         raise SystemExit(f"fold {fold} fora da faixa 0..{K - 1}")
 
     rotulo, origem, aumento = CONFIGS[config]
+    if origem is None:
+        origem = f"dataset_realce_{realce}"
+        rotulo = f"{rotulo} (variante {realce})"
     if not (ROOT / "Dataset_YOLO" / origem / "images").is_dir():
         raise SystemExit(
             f"a configuracao {config} ({rotulo}) precisa de "
@@ -155,6 +160,8 @@ def main() -> None:
     p.add_argument("--no-amp", action="store_true", help="treina em fp32")
     p.add_argument("--resume", action="store_true",
                    help="retoma do ultimo checkpoint se a execucao foi interrompida")
+    p.add_argument("--realce", default=REALCE_PADRAO, choices=("a", "b", "d"),
+                   help="variante de realce das Configuracoes 3 e 4")
     p.add_argument("--force", action="store_true",
                    help="refaz mesmo que ja exista resumo.json")
     p.add_argument("--name", default=None)
@@ -162,7 +169,7 @@ def main() -> None:
     args = p.parse_args()
 
     verificar_lote(args)
-    rotulo, origem, hiper = resolver(args.config, args.fold)
+    rotulo, origem, hiper = resolver(args.config, args.fold, args.realce)
     nome = args.name or f"cfg{args.config}_fold{args.fold}_{args.imgsz}"
     saida = RUNS / nome
 
