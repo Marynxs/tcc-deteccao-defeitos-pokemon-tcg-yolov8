@@ -146,10 +146,31 @@ def _normalizar(r: np.ndarray) -> np.ndarray:
     return np.clip((r - lo) / (hi - lo) * 255.0, 0, 255).astype(np.uint8)
 
 
+def variante_e(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
+    """Composto de tres canais informativos, em vez de um canal replicado.
+
+    As variantes A, B e D SUBSTITUEM a imagem pelo realce e replicam o resultado
+    nos tres canais. Isso descarta a informacao original, e os pesos pre-treinados
+    no COCO passam a receber algo que nao se parece com fotografia. Aqui o realce
+    e ACRESCENTADO: a rede recebe a imagem e o relevo ao mesmo tempo, e aprende
+    sozinha a pesar os dois.
+
+    Canal 0 (B): luminancia original, intacta
+    Canal 1 (G): luminancia com CLAHE, contraste local normalizado
+    Canal 2 (R): resposta de Frangi, o relevo
+    """
+    L = luminancia(bgr)
+    c = _clahe(limite, lado).apply(L)
+    relevo = _normalizar(np.max(np.stack(
+        [frangi_escala(c.astype(np.float32), s) for s in (1.5, 3.0, 5.0)]), axis=0))
+    return cv2.merge([L, c, relevo])
+
+
 VARIANTES = {
     "a": ("gradiente direcional seguido de CLAHE", variante_a),
     "b": ("CLAHE seguido de gradiente de 8 direcoes", variante_b),
     "d": ("cristas multiescala por Hessiana", variante_d),
+    "e": ("composto: L original, L com CLAHE, Frangi", variante_e),
 }
 
 
@@ -175,10 +196,11 @@ def main() -> None:
         if bgr is None:
             raise SystemExit(f"nao consegui ler {origem}")
         realce = funcao(bgr, args.clip_limit, args.tile)
-        # O YOLOv8 espera tres canais, e os pesos do COCO foram treinados assim.
-        # O realce e uma grandeza unica, entao vai replicado nos tres.
-        cv2.imwrite(str(destino / "images" / origem.name),
-                    cv2.merge([realce, realce, realce]))
+        # O YOLOv8 espera tres canais. As variantes de canal unico vao replicadas;
+        # a composta ja devolve os tres, cada um com informacao diferente.
+        if realce.ndim == 2:
+            realce = cv2.merge([realce, realce, realce])
+        cv2.imwrite(str(destino / "images" / origem.name), realce)
 
         rot = ORIGEM / "labels" / (origem.stem + ".txt")
         alvo = destino / "labels" / rot.name

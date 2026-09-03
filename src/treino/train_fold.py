@@ -193,7 +193,7 @@ def main() -> None:
     p.add_argument("--no-amp", action="store_true", help="treina em fp32")
     p.add_argument("--resume", action="store_true",
                    help="retoma do ultimo checkpoint se a execucao foi interrompida")
-    p.add_argument("--realce", default=REALCE_PADRAO, choices=("a", "b", "d"),
+    p.add_argument("--realce", default=REALCE_PADRAO, choices=("a", "b", "d", "e"),
                    help="variante de realce das Configuracoes 3 e 4")
     p.add_argument("--force", action="store_true",
                    help="refaz mesmo que ja exista resumo.json")
