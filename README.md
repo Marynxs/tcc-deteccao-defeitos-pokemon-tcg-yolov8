@@ -75,6 +75,24 @@ interna, que alimentou a parada antecipada e portanto já influenciou os pesos.
 Cada execução grava um `resumo.json` com tempo, pico de memória de vídeo e as
 métricas finais.
 
+A campanha completa, quatro configurações em cinco dobras, sai de
+`run_campaign.py`. Ele pula as rodadas que já gravaram `resumo.json` e retoma do
+último checkpoint aquelas que caíram, de modo que relançar o mesmo comando após
+uma interrupção continua de onde parou:
+
+```bash
+python src/treino/run_campaign.py --dry-run   # mostra o plano sem treinar
+python src/treino/run_campaign.py             # roda o que falta
+```
+
+`monitor_web.py` sobe um servidor local que acompanha o treino em andamento no
+navegador, com progresso, tempo decorrido, estimativa de término e a curva do
+mAP por época. Usa apenas a biblioteca padrão:
+
+```bash
+python src/treino/monitor_web.py    # http://127.0.0.1:8765
+```
+
 ```bash
 python src/dados/run_pipeline.py      # etapas 2 e 3 sobre as 164 imagens
 python src/dados/generate_folds.py     # particionamento, com conferência automática
