@@ -145,10 +145,9 @@ proposta, será implementado um pipeline experimental baseado em
 YOLOv8s com \textit{fine-tuning} a partir de pesos pré-treinados no 
 dataset COCO, avaliado por meio de um estudo de ablação fatorial com 
 quatro configurações controladas que combinam aumento de dados 
-(\textit{data augmentation}) e uso de imagens fotométricas derivadas 
-geradas pelo autor via filtro emboss seguido de equalização 
-adaptativa de histograma (CLAHE) como representação alternativa de 
-entrada. O conjunto de dados é composto por 82 cartas fornecidas por 
+(\textit{data augmentation}) e uso de imagens de realce de 
+micro-relevo geradas pelo autor a partir do canal de luminância, como 
+representação alternativa de entrada. O conjunto de dados é composto por 82 cartas fornecidas por 
 uma empresa brasileira especializada em graduação, totalizando 164 
 imagens por configuração experimental, com anotações em formato de caixas delimitadoras derivadas 
 de registros de avaliadores especializados em graduação de cartas TCG. A avaliação adotará validação cruzada 
@@ -162,7 +161,7 @@ análise.
 
 \noindent
 \textbf{Palavras-chave}: Visão Computacional. Detecção de Defeitos. 
-Pokémon TCG. Small Datasets. YOLOv8. Pré-processamento Fotométrico.
+Pokémon TCG. Small Datasets. YOLOv8. Realce de Micro-Relevo.
 \end{resumo}
 
 % ---------------------------------------------------------------
@@ -316,7 +315,7 @@ treinamento para detecção de defeitos em cartas Pokémon TCG, conduzida
 sobre um conjunto de dados composto por 82 cartas fornecido por uma 
 empresa brasileira especializada em graduação. As estratégias avaliadas 
 incluem \textit{transfer learning}, aumento de dados 
-(\textit{data augmentation}) e uso de imagens fotométricas derivadas, 
+(\textit{data augmentation}) e uso de imagens de realce de micro-relevo, 
 avaliadas em configurações controladas para quantificar
 a contribuição individual e combinada de cada abordagem. A avaliação será realizada por meio de métricas 
 quantitativas consolidadas na literatura, com o objetivo de identificar 
@@ -347,10 +346,9 @@ não-uniformidade seja amplamente reconhecido na área de visão computacional
 industrial, no contexto de cartas colecionáveis seu impacto pode ser intensificado
 pela presença de artes visualmente complexas, superfícies holográficas e defeitos
 de baixa visibilidade. Para mitigar seu impacto sobre a detecção de defeitos sutis, 
-técnicas de realce de superfície baseadas em filtragem de 
-gradiente e equalização de histograma têm sido aplicadas como 
-etapa de pré-processamento em sistemas de inspeção visual 
-\cite{Chen2021, Sawada2024}.
+operadores de filtragem têm sido aplicados como etapa de 
+pré-processamento em sistemas de inspeção visual 
+\cite{Sawada2024, Jiang2023}.
 
 O segundo desafio são os reflexos em superfícies holográficas 
 (\textit{foil}), presentes em cartas de maior raridade, que refletem 
@@ -424,11 +422,11 @@ Para alcançar o objetivo geral, foram definidos os seguintes objetivos específ
     \item Implementar quatro configurações experimentais baseadas em YOLOv8 com
     \textit{transfer learning}, incluindo uma configuração de referência com imagens
     RGB convencionais, e variações com aumento de dados (\textit{data augmentation})
-    e imagens fotométricas derivadas.
+    e imagens de realce de micro-relevo.
 
     \item Conduzir um estudo de ablação baseado na comparação controlada entre 
     quatro configurações experimentais, analisando o impacto individual e combinado 
-    do aumento de dados e das imagens fotométricas derivadas no desempenho do modelo.
+    do aumento de dados e das imagens de realce de micro-relevo no desempenho do modelo.
 
     \item Comparar o desempenho das diferentes configurações por meio 
     de métricas quantitativas consolidadas em detecção de objetos, 
@@ -491,7 +489,7 @@ estratégias pode compensar a escassez de exemplos rotulados.
 
 Na prática, os resultados desta investigação podem evidenciar em que 
 medida estratégias como \textit{transfer learning}, aumento de dados 
-e o uso de imagens fotométricas derivadas permanecem eficazes quando 
+e o uso de imagens de realce de micro-relevo permanecem eficazes quando 
 aplicadas a um conjunto reduzido de dados reais, sem depender de 
 plataformas robóticas de captura ou de \textit{datasets} extensos. 
 Essa análise é relevante para contextos em que a anotação é cara e o 
@@ -511,7 +509,7 @@ essenciais de visão computacional aplicados à inspeção visual automatizada,
 com ênfase em \textit{Deep Learning}, redes neurais convolucionais, detecção
 de objetos e na arquitetura YOLO. Em seguida, são abordadas estratégias
 relevantes para cenários com baixo volume de dados, como \textit{transfer learning},
-aumento de dados e uso de imagens fotométricas derivadas, além das métricas utilizadas
+aumento de dados e uso de imagens de realce de micro-relevo, além das métricas utilizadas
 na avaliação de detectores. Por fim, são analisados trabalhos relacionados ao
 problema investigado, com o objetivo de situar a pesquisa no estado da arte e
 evidenciar a lacuna que motiva a proposta deste trabalho.
@@ -574,13 +572,16 @@ aos trabalhos selecionados para inclusão.
 \textit{``Neural Networks'' AND ``Early Stopping''} 
     & GS, IEEE, SD, MDPI & 2 & 1 \\
 \midrule
+\textit{``filter'' AND ``surface defect detection'' AND ``deep learning''} 
+    & GS, IEEE, SD, MDPI & 5 & 1 \\
+\midrule
 \textit{``small object detection'' AND ``input resolution'' OR ``image size''} 
     & GS, IEEE, SD, MDPI & 9 & 3 \\
 \midrule
 Fontes não acadêmicas (contextualização de mercado e documentação técnica) 
     & Diversas & — & 2 \\
 \midrule
-\textbf{Total} & & \textbf{75} & \textbf{25} \\
+\textbf{Total} & & \textbf{80} & \textbf{26} \\
 \bottomrule
 \end{tabular}
 \legend{GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.
@@ -619,7 +620,7 @@ especializados.
 \label{sec:fundamentos}
 \label{sec:referencial}
 
-Esta seção apresenta os principais conceitos teóricos necessários para fundamentar a proposta deste trabalho. São discutidos os fundamentos de \textit{Deep Learning}, Redes Neurais Convolucionais, visão computacional, inspeção visual automatizada, defeitos visuais em cartas colecionáveis, detecção de objetos, arquitetura YOLO, \textit{transfer learning}, detecção de objetos em cenários com dados limitados, aumento de dados, pré-processamento fotométrico, detecção de objetos pequenos, estudo de ablação, validação cruzada, comparação estatística entre configurações e métricas de avaliação. Esses conceitos sustentam a metodologia experimental adotada e permitem compreender as decisões técnicas envolvidas na comparação das estratégias de treinamento avaliadas.
+Esta seção apresenta os principais conceitos teóricos necessários para fundamentar a proposta deste trabalho. São discutidos os fundamentos de \textit{Deep Learning}, Redes Neurais Convolucionais, visão computacional, inspeção visual automatizada, defeitos visuais em cartas colecionáveis, detecção de objetos, arquitetura YOLO, \textit{transfer learning}, detecção de objetos em cenários com dados limitados, aumento de dados, pré-processamento e realce de micro-relevo, detecção de objetos pequenos, estudo de ablação, validação cruzada, comparação estatística entre configurações e métricas de avaliação. Esses conceitos sustentam a metodologia experimental adotada e permitem compreender as decisões técnicas envolvidas na comparação das estratégias de treinamento avaliadas.
 
 \subsection{Deep Learning e Redes Neurais Convolucionais}
 \label{subsec:dl_cnn}
@@ -902,7 +903,7 @@ de imagens RGB de cartas Pokémon TCG, com a classe única
 \textit{defeito}. Essa configuração serve como referência 
 do estudo de ablação, permitindo quantificar o ganho de 
 desempenho atribuível ao aumento de dados e ao uso de 
-imagens fotométricas derivadas, conforme detalhado no 
+imagens de realce de micro-relevo, conforme detalhado no 
 Capítulo~\ref{cap:desenvolvimento}.
 
 % ---------------------------------------------------------------
@@ -982,7 +983,7 @@ sutis, desbalanceados e difíceis de distinguir do fundo da imagem
 protocolo formal de \textit{Few-Shot Object Detection}, mas se insere
 no contexto da detecção de objetos com baixo volume de dados, avaliando
 estratégias como \textit{transfer learning}, aumento de dados e uso de
-imagens fotométricas derivadas para melhorar o desempenho do detector
+imagens de realce de micro-relevo para melhorar o desempenho do detector
 \cite{Situ2023}.
 
 % ---------------------------------------------------------------
@@ -1004,7 +1005,7 @@ operações como espelhamento horizontal e vertical, rotação,
 recorte aleatório (\textit{random crop}) e variação de escala.
 Essas transformações alteram a posição e a orientação dos
 objetos na imagem sem modificar suas características visuais
-intrínsecas \cite{Situ2023}. As transformações fotométricas,
+intrínsecas \cite{Dobrzycki2025}. As transformações fotométricas,
 por sua vez, modificam as propriedades de cor e iluminação
 da imagem, incluindo variações de brilho, contraste, saturação
 e adição de ruído. Essas técnicas são especialmente úteis
@@ -1030,41 +1031,62 @@ permitindo quantificar seu impacto individual e combinado no desempenho
 do modelo.
 
 % ---------------------------------------------------------------
-\subsection{Pré-processamento fotométrico e realce de superfície}
+\subsection{Pré-processamento e realce de micro-relevo}
 \label{subsec:fotometria}
 
 A qualidade das imagens de entrada é um fator determinante para o 
 desempenho de modelos de visão computacional aplicados à inspeção 
 visual. Em condições reais de captura, variações de iluminação, 
 sombras e reflexos podem introduzir ruídos visuais que dificultam 
-a identificação de defeitos sutis \cite{Zheng2021}. Para mitigar 
-esse efeito, técnicas de realce de superfície baseadas em filtragem 
-de gradiente são empregadas como etapa de pré-processamento, 
-amplificando variações locais de textura, relevo e contorno que 
-podem ser pouco evidentes na imagem RGB convencional \cite{Chen2021}.
+a identificação de defeitos sutis \cite{Zheng2021}. Métodos 
+baseados em filtragem, como transformada de Fourier, filtros de Gabor 
+e transformada \textit{wavelet}, integram o repertório clássico de 
+detecção de defeitos em superfícies \cite{Chen2021}. Em abordagens 
+baseadas em aprendizado profundo, operadores dessa natureza têm sido 
+empregados como etapa de pré-processamento, amplificando variações 
+locais de textura e relevo pouco evidentes na imagem RGB 
+convencional \cite{Sawada2024, Jiang2023}.
 
 No contexto da inspeção visual automatizada, filtros de gradiente
 direcional têm sido aplicados como etapa de pré-processamento para
 realce de defeitos em superfícies industriais. \citeonline{Sawada2024}
-aplicam filtro \textit{emboss} para extração de defeitos em
-superfícies pintadas, demonstrando que técnicas de gradiente
-direcional contribuem para melhorar a acurácia de extração em
-relação à abordagem sem pré-processamento. De forma complementar,
+empregam filtro \textit{emboss} de oito direções na etapa de extração
+de defeitos em superfícies pintadas, dentro de um pipeline clássico de
+morfologia matemática que antecede a classificação por rede
+convolucional. Os autores não avaliam isoladamente a contribuição do
+realce por gradiente, de modo que o trabalho evidencia a aplicabilidade
+da técnica ao problema, e não sua superioridade sobre a ausência de
+pré-processamento. De forma complementar,
 \citeonline{Jiang2023} aplicam \textit{Contrast Limited Adaptive
 Histogram Equalization} (CLAHE) como etapa de pré-processamento
 anterior à detecção com YOLO, evidenciando que a equalização
 adaptativa de histograma pode amplificar detalhes finos relevantes
-para detectores de objetos. No presente trabalho, as imagens
-fotométricas derivadas serão geradas pela aplicação sequencial
-dessas duas técnicas, isto é, filtro \textit{emboss} seguido de CLAHE,
-sobre as imagens RGB originais das cartas, utilizando a biblioteca
-OpenCV. O filtro \textit{emboss} produz uma representação em tons de
-cinza que realça variações de relevo e textura superficial, enquanto
-o CLAHE amplifica os detalhes finos do relevo resultante sem saturar
-regiões homogêneas. Até onde a revisão bibliográfica identificou,
-essa combinação sequencial como representação alternativa de entrada
-para um detector YOLOv8 não foi investigada na literatura de inspeção
-de cartas colecionáveis. O estudo de ablação avaliará empiricamente
+para detectores de objetos. Os operadores de gradiente direcional respondem à
+taxa de variação da intensidade, isto é, a bordas. Defeitos como riscos
+e vincos, contudo, não constituem bordas, e sim estruturas alongadas de
+espessura reduzida com intensidade semelhante nos dois lados, que
+correspondem a estruturas de segunda ordem. \citeonline{Gruber2021}
+sustentam que a filtragem baseada nos autovalores da matriz Hessiana é
+adequada à inspeção de superfícies precisamente porque os defeitos
+observados são acompanhados de estruturas dessa natureza, e registram
+que o desvio padrão do núcleo gaussiano determina a escala das
+estruturas amplificadas. Essa seletividade de escala é relevante no
+presente caso, uma vez que a carta apresenta arte impressa cujos
+contornos possuem escala e contraste superiores aos dos defeitos
+investigados, e que operadores de primeira ordem amplificam de forma
+indistinta.
+
+No presente trabalho, o realce de micro-relevo é obtido no canal de
+luminância do espaço de cor CIELAB, e não sobre os três canais RGB,
+de modo que a equalização adaptativa atue sobre a informação de brilho,
+em que o relevo se manifesta, sem introduzir desvio cromático. A
+variante específica do operador de realce foi definida por teste
+preliminar, descrito na Seção~\ref{subsec:hiperparametros}, no qual
+foram comparadas alternativas de primeira e de segunda ordem sobre a
+mesma dobra. Até onde a revisão bibliográfica identificou, o emprego de
+uma representação de realce de micro-relevo como entrada alternativa de
+um detector YOLOv8 não foi investigado na literatura de inspeção de
+cartas colecionáveis. O estudo de ablação avaliará empiricamente
 se essa representação contribui para o desempenho do detector no
 cenário de baixo volume de dados considerado neste trabalho.
 
@@ -1338,7 +1360,7 @@ Uma tabela comparativa ajuda a sintetizar as diferenças entre os trabalhos:
         \midrule
         Objetivo & Graduação automática de cantos & Detecção de defeitos em superfícies de produtos & Comparação de YOLO + TL para defeitos & Comparação de estratégias em low-data para cartas TCG \\
         \midrule
-        Tecnologia & DenseNet201 + TL + calibração & YOLOv8 modificado + augmentation & YOLO\_v2 + 11 CNNs pré-treinadas + TL & YOLOv8 + TL + augmentation + imagens fotométricas derivadas \\
+        Tecnologia & DenseNet201 + TL + calibração & YOLOv8 modificado + augmentation & YOLO\_v2 + 11 CNNs pré-treinadas + TL & YOLOv8 + TL + augmentation + imagens de realce de micro-relevo \\
         \midrule
         Validação & Acurácia e calibração de confiança & mAP em NEU-DET, PKU-PCB e COCO & Precisão, tempo computacional e IoU & Precisão, recall, F1-score e mAP \\
         \midrule
@@ -1458,22 +1480,28 @@ Fonte: Elaborado pelo autor (2026).}
 \end{table}
 
 Além das imagens RGB convencionais, que preservam a aparência visual original
-das cartas, também será construída uma representação fotométrica derivada a
-partir dessas imagens. Essa representação será gerada pela aplicação sequencial de filtro 
-de gradiente direcional (\textit{emboss}) e equalização adaptativa 
-de histograma (CLAHE) sobre as imagens RGB originais, com o objetivo 
-de realçar variações locais de textura, relevo e possíveis 
-irregularidades superficiais \cite{Sawada2024, Chen2021}.
+das cartas, também será construída uma representação de realce de micro-relevo a
+partir dessas imagens. Essa representação é gerada a partir do canal de 
+luminância das imagens RGB originais, com o objetivo de realçar 
+variações locais de textura, relevo e possíveis irregularidades 
+superficiais \cite{Chen2021}. Três variantes do operador de realce 
+foram comparadas em teste preliminar: gradiente direcional seguido de 
+equalização adaptativa de histograma; equalização adaptativa seguida de 
+gradiente direcional de oito direções, na formulação de 
+\citeonline{Sawada2024}; e resposta multiescala aos autovalores da 
+matriz Hessiana, na formulação de \citeonline{Gruber2021}. O 
+procedimento de seleção e os valores adotados constam da 
+Seção~\ref{subsec:hiperparametros}.
 
 A Figura~\ref{fig:rgb_fotometrica} apresenta um exemplo das duas representações
 disponíveis no conjunto de dados. A imagem RGB convencional será utilizada como
-representação de referência, enquanto a imagem fotométrica derivada será avaliada
+representação de referência, enquanto a imagem de realce de micro-relevo será avaliada
 em uma das configurações do estudo de ablação, permitindo investigar se esse tipo
 de realce contribui para o desempenho do detector.
 
 \begin{figure}[H]
     \centering
-    \caption{Exemplo de carta do conjunto de dados nas duas representações disponíveis: imagem RGB convencional e imagem fotométrica derivada.}
+    \caption{Exemplo de carta do conjunto de dados nas duas representações disponíveis: imagem RGB convencional e imagem de realce de micro-relevo.}
     \label{fig:rgb_fotometrica}
     \begin{minipage}{0.45\textwidth}
         \centering
@@ -1488,12 +1516,12 @@ de realce contribui para o desempenho do detector.
         \includegraphics[width=0.90\textwidth]{assets/carta_fotometrica.png}
 
         \vspace{0.2cm}
-        {\small (b) Imagem fotométrica derivada}
+        {\small (b) Imagem de realce de micro-relevo}
     \end{minipage}
 
     
     
-    \legend{Fonte: Imagem RGB fornecida por empresa parceira; imagem fotométrica elaborada pelo autor a partir da imagem original (2026).}
+    \legend{Fonte: Imagem RGB fornecida por empresa parceira; imagem de realce elaborada pelo autor a partir da imagem original (2026).}
 \end{figure}
 
 Como parte da preparação do conjunto de dados, foi realizada 
@@ -1519,7 +1547,7 @@ e o verso de um mesmo exemplar pertençam sempre ao mesmo subconjunto.
 Cada configuração experimental utiliza 164 imagens, correspondentes à
 frente e ao verso das 82 cartas disponíveis. As configurações baseadas
 em imagens RGB utilizam as representações convencionais, enquanto as 
-configurações fotométricas utilizam as representações derivadas correspondentes.
+configurações de realce utilizam as representações correspondentes.
 Dado o baixo volume disponível, será adotada validação cruzada estratificada em cinco
 dobras (\textit{5-fold stratified cross-validation}), mantendo frente e verso da mesma
 carta sempre no mesmo fold \cite{Kohavi1995}. Em cada rodada, quatro folds 
@@ -1629,7 +1657,7 @@ pesos pré-treinados e serão ajustadas ao domínio das cartas por meio de
 Neste trabalho, a configuração base (\textit{baseline}) corresponderá ao
 YOLOv8 com \textit{transfer learning} treinado sobre as imagens RGB
 convencionais, sem aumento de dados adicional e sem uso das imagens
-fotométricas derivadas. Essa configuração servirá como referência para avaliar
+de realce de micro-relevo. Essa configuração servirá como referência para avaliar
 a contribuição individual e combinada do aumento de dados.
 
 Entre as variantes disponíveis do YOLOv8, todas pré-treinadas no 
@@ -1737,10 +1765,14 @@ os testes preliminares contemplarão a validação
 da variante do modelo, avaliando YOLOv8n como
 alternativa a YOLOv8s caso sejam observados sinais
 de \textit{overfitting}, bem como a definição dos
-parâmetros do pipeline de pré-processamento fotométrico.
-Esses parâmetros incluem o kernel do filtro emboss 
-($3{\times}3$), o \textit{clipLimit} (valor de referência: 3,0)
-e o \textit{tileGridSize} ($8{\times}8$ pixels) do CLAHE.
+parâmetros do pipeline de realce de micro-relevo.
+Esses parâmetros incluem o \textit{clipLimit} (valor de referência: 3,0)
+e o \textit{tileGridSize} ($8{\times}8$ pixels) do CLAHE, o tamanho do
+núcleo do operador de gradiente e as escalas do operador de segunda
+ordem. A escolha entre as três variantes de realce descritas na
+Seção~\ref{subsec:dados} também foi resolvida nessa etapa,
+adotando-se como critério o desempenho no \textit{fold} de avaliação de
+uma mesma dobra, sob protocolo idêntico ao das demais configurações.
 Todos os valores definidos nessa etapa serão mantidos fixos 
 entre as quatro configurações experimentais, garantindo que
 as diferenças de desempenho observadas sejam atribuíveis 
@@ -1773,7 +1805,7 @@ em YOLOv8 com \textit{transfer learning}, variando de forma
 controlada duas estratégias: o uso de aumento de dados
 (\textit{data augmentation}) e o tipo de representação visual
 da entrada, que pode ser a imagem RGB convencional ou a imagem
-fotométrica derivada gerada. Esse
+de realce de micro-relevo gerada. Esse
 desenho permite avaliar a contribuição individual e combinada
 de cada estratégia no desempenho do detector em um cenário
 com baixo volume de dados.
@@ -1786,13 +1818,13 @@ de adaptar o detector à classe de interesse \textit{defeito}, inexistente nas
 classes originais do COCO. Dessa forma, o \textit{transfer learning} não será 
 tratado como uma variável comparativa isolada no estudo de ablação, mas como 
 a base comum de treinamento sobre a qual serão avaliados o aumento de dados 
-e o uso de imagens fotométricas derivadas.
+e o uso de imagens de realce de micro-relevo.
 
 O aumento de dados será utilizado para ampliar artificialmente a variabilidade 
 do conjunto de treinamento. Para a representação RGB, serão aplicadas transformações
 geométricas (flip horizontal, rotação de até ±10°) e fotométricas (variação de brilho e saturação).
-Para a representação fotométrica, serão utilizadas apenas transformações geométricas, uma vez que a
-imagem embossada já passou por normalização via CLAHE, tornando inconsistente a aplicação de variações artificiais de brilho ou contraste.
+Para a representação de realce, serão utilizadas apenas transformações geométricas, uma vez que o
+realce já incorpora normalização de contraste local por CLAHE, tornando inconsistente a aplicação de variações artificiais de brilho ou contraste.
 
 A biblioteca Ultralytics aplica, por padrão, sete transformações de
 aumento de dados no treinamento de detectores: o mosaico
@@ -1862,14 +1894,15 @@ das imagens, e nunca antes do particionamento dos folds, de modo que
 versões transformadas de uma mesma carta não possam aparecer
 simultaneamente no conjunto de treinamento e no de avaliação.
 
-Já o uso das imagens fotométricas derivadas será avaliado como uma 
+Já o uso das imagens de realce de micro-relevo será avaliado como uma 
 representação alternativa de entrada, com o objetivo de verificar se 
 o realce de textura, relevo e irregularidades superficiais contribui 
-para a detecção de defeitos visuais. Essas imagens serão geradas pela 
-aplicação sequencial de filtro emboss e CLAHE sobre as imagens RGB 
-originais, utilizando a biblioteca OpenCV. O filtro emboss utiliza um 
-kernel direcional $3{\times}3$ fixo, e o CLAHE é configurado com 
-\textit{clipLimit} inicial de 3,0 e \textit{tileGridSize} de 
+para a detecção de defeitos visuais. Essas imagens são geradas a partir 
+do canal de luminância das imagens originais, utilizando a biblioteca 
+OpenCV. O operador de realce foi definido entre três variantes 
+comparadas em teste preliminar, conforme a Seção~\ref{subsec:dados}. 
+O CLAHE, comum às três variantes, é configurado com 
+\textit{clipLimit} de 3,0 e \textit{tileGridSize} de 
 $8{\times}8$ pixels, valores de referência adotados como ponto de 
 partida nos testes preliminares previstos na 
 Seção~\ref{subsec:hiperparametros}, nos quais serão avaliados 
@@ -1893,9 +1926,9 @@ Serão consideradas quatro configurações experimentais:
     \item YOLOv8 com \textit{transfer learning} e aumento de dados 
     em imagens RGB;
     \item YOLOv8 com \textit{transfer learning} em imagens 
-    fotométricas derivadas;
+    de realce de micro-relevo;
     \item YOLOv8 com \textit{transfer learning} e aumento de dados 
-    em imagens fotométricas derivadas.
+    em imagens de realce de micro-relevo.
 \end{enumerate}
 
 A configuração 1 serve como referência do estudo de ablação,
