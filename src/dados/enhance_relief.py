@@ -47,36 +47,89 @@ def variante_a(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
     return _clahe(limite, lado).apply(e)
 
 
+def oito_direcoes() -> list[np.ndarray]:
+    """Os oito kernels de emboss, a 45 graus um do outro.
+
+    Nao se obtem isso com np.rot90, que gira de 90 em 90: como a resposta e
+    tomada em modulo, o giro de 180 graus coincide com o original e o de 270
+    com o de 90, restando apenas DUAS direcoes distintas. As oito saem girando
+    ciclicamente o anel de oito vizinhos do 3x3, uma posicao por vez.
+    """
+    anel = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)]
+    valores = [EMBOSS[i, j] for i, j in anel]
+    kernels = []
+    for giro in range(8):
+        k = np.zeros((3, 3), np.float32)
+        for pos, (i, j) in enumerate(anel):
+            k[i, j] = valores[(pos - giro) % 8]
+        kernels.append(k)
+    return kernels
+
+
+KERNELS_8 = oito_direcoes()
+
+
 def variante_b(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
-    """CLAHE seguido de gradiente direcional de oito direcoes (Sawada2024)."""
+    """CLAHE seguido de gradiente direcional de oito direcoes (Sawada2024).
+
+    O artigo indica a tecnica ("8-directional emboss filter") mas nao publica os
+    coeficientes; o kernel base adotado aqui e escolha deste trabalho.
+    """
     c = _clahe(limite, lado).apply(luminancia(bgr)).astype(np.float32)
-    # O kernel ja soma zero, entao filter2D devolve a derivada direcional pura:
-    # nao se subtrai a imagem, o que agora removeria sinal em vez de o termo DC.
-    respostas = [np.abs(cv2.filter2D(c, -1, np.rot90(EMBOSS, k))) for k in range(4)]
+    respostas = [np.abs(cv2.filter2D(c, -1, k)) for k in KERNELS_8]
     return _normalizar(np.max(np.stack(respostas), axis=0))
 
 
-def _hessiana(g: np.ndarray, sigma: float) -> np.ndarray:
-    """Autovalor de maior modulo da matriz Hessiana, na escala dada."""
+BETA = 0.5   # sensibilidade a "quao alongada" e a estrutura, valor usual de Frangi
+
+
+def frangi_escala(g: np.ndarray, sigma: float) -> np.ndarray:
+    """Medida de Frangi numa escala, para cristas claras e escuras.
+
+    Nao basta o maior autovalor da Hessiana: ele responde igual a uma crista
+    fina e a um borrao. Frangi separa as duas com a razao entre os autovalores
+    (Rb), que vale perto de zero numa estrutura alongada e perto de um num
+    borrao, e pesa o resultado pela intensidade da estrutura (S), que suprime
+    ruido em regiao lisa.
+    """
     f = cv2.GaussianBlur(g, (0, 0), sigma)
-    gxx = cv2.Sobel(f, cv2.CV_32F, 2, 0, ksize=3)
-    gyy = cv2.Sobel(f, cv2.CV_32F, 0, 2, ksize=3)
-    gxy = cv2.Sobel(f, cv2.CV_32F, 1, 1, ksize=3)
+    # normalizacao por sigma^2: sem ela, escalas maiores respondem sempre menos
+    # e a combinacao multiescala fica dominada pela menor.
+    s2 = sigma ** 2
+    gxx = cv2.Sobel(f, cv2.CV_32F, 2, 0, ksize=3) * s2
+    gyy = cv2.Sobel(f, cv2.CV_32F, 0, 2, ksize=3) * s2
+    gxy = cv2.Sobel(f, cv2.CV_32F, 1, 1, ksize=3) * s2
+
     tr, det = gxx + gyy, gxx * gyy - gxy * gxy
     raiz = np.sqrt(np.maximum(tr * tr / 4 - det, 0))
-    l1, l2 = tr / 2 + raiz, tr / 2 - raiz
-    return np.where(np.abs(l1) > np.abs(l2), l1, l2)
+    a, b = tr / 2 + raiz, tr / 2 - raiz
+    # l1 e o de MENOR modulo, l2 o de maior, como na definicao de Frangi
+    troca = np.abs(a) > np.abs(b)
+    l1 = np.where(troca, b, a)
+    l2 = np.where(troca, a, b)
+
+    rb2 = (l1 / (l2 + 1e-10)) ** 2
+    s = np.sqrt(l1 ** 2 + l2 ** 2)
+    c = 0.5 * s.max() if s.max() > 0 else 1.0
+    v = np.exp(-rb2 / (2 * BETA ** 2)) * (1.0 - np.exp(-(s ** 2) / (2 * c ** 2)))
+
+    # Um risco costuma ser escuro sobre fundo claro (l2 > 0) e o whitening de
+    # canto e claro sobre fundo escuro (l2 < 0). A carta tem os dois, entao a
+    # resposta cobre as duas polaridades em vez de descartar uma delas.
+    return np.where(np.isfinite(v), v, 0.0)
 
 
 def variante_d(bgr: np.ndarray, limite: float, lado: int, sigmas=(1.5, 3.0, 5.0)) -> np.ndarray:
-    """Resposta multiescala aos autovalores da Hessiana (Gruber2021).
+    """Medida de Frangi multiescala (Gruber2021, que a usa em inspecao de superficie).
 
     Risco e vinco sao cristas e vales, estruturas de segunda ordem, e nao
-    bordas. As escalas foram fixadas na faixa de tamanhos medida no conjunto:
-    mediana de 8,66 px na menor dimensao, na escala 1280.
+    bordas. As escalas cobrem a faixa de tamanhos medida no conjunto, cuja
+    mediana da menor dimensao e 8,66 px na escala 1280; para uma crista de
+    largura w o sigma util fica em torno de w/2. Os valores de sigma e o beta
+    sao escolha deste trabalho: o artigo indica a tecnica, nao os parametros.
     """
     c = _clahe(limite, lado).apply(luminancia(bgr)).astype(np.float32)
-    return _normalizar(np.max(np.stack([np.abs(_hessiana(c, s)) for s in sigmas]), axis=0))
+    return _normalizar(np.max(np.stack([frangi_escala(c, s) for s in sigmas]), axis=0))
 
 
 def _normalizar(r: np.ndarray) -> np.ndarray:
