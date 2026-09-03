@@ -85,6 +85,37 @@ def read_history(run: Path) -> list[dict]:
     return linhas
 
 
+_GPU_CACHE: dict = {"quando": 0.0, "dado": {}}
+
+
+def estado_gpu() -> dict:
+    """Uso e temperatura da placa, via rocm-smi, com cache de 5 s."""
+    import subprocess
+    agora = time.time()
+    if agora - _GPU_CACHE["quando"] < 5:
+        return _GPU_CACHE["dado"]
+    d = {}
+    try:
+        saida = subprocess.run(
+            ["rocm-smi", "--showuse", "--showmeminfo", "vram", "--showtemp"],
+            capture_output=True, text=True, timeout=5).stdout
+        for linha in saida.splitlines():
+            if "GPU[0]" not in linha:
+                continue
+            if "GPU use (%)" in linha:
+                d["uso"] = float(linha.rsplit(":", 1)[1])
+            elif "VRAM Total Used Memory" in linha:
+                d["vram_usada"] = float(linha.rsplit(":", 1)[1]) / 1024 ** 3
+            elif "VRAM Total Memory" in linha:
+                d["vram_total"] = float(linha.rsplit(":", 1)[1]) / 1024 ** 3
+            elif "junction" in linha:
+                d["temp"] = float(linha.rsplit(":", 1)[1])
+    except Exception:
+        pass
+    _GPU_CACHE.update(quando=agora, dado=d)
+    return d
+
+
 def build_status() -> dict:
     run = latest_run()
     if run is None:
@@ -136,7 +167,14 @@ def build_status() -> dict:
         "inicio": (run / "results.csv").stat().st_mtime - decorrido,
         "atual": atual,
         "melhor": melhor,
-        "serie": [{"e": d["epoca"], "m": d["map50"]} for d in hist],
+        "serie": [
+            {"e": d["epoca"], "m50": d["map50"], "m5095": d["map5095"],
+             "p": d["precisao"], "r": d["recall"],
+             "box": d["box"], "cls": d["cls"], "dfl": d["dfl"]}
+            for d in hist
+        ],
+        "desde_melhor": (feitas - melhor["epoca"]) if melhor else 0,
+        "gpu": estado_gpu(),
         "resumo": json.loads(resumo_file.read_text(encoding="utf-8")) if concluida else None,
     }
 
@@ -147,121 +185,260 @@ PAGE = r"""<!doctype html>
 <title>Treino YOLOv8</title>
 <style>
 :root{
-  --fundo:#0f1117; --painel:#171a24; --borda:#252a38;
-  --texto:#e9ecf5; --fraco:#878ea8;
-  --ambar:#ffb020; --verde:#3ddc97; --vermelho:#ff5f6d;
+  --fundo:#f7f7f5; --painel:#ffffff; --borda:#e3e2dd;
+  --texto:#111111; --fraco:#5c5b57; --tenue:#8b8a84;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --ok:#1baf7a; --alerta:#eda100; --erro:#e34948;
 }
+@media (prefers-color-scheme: dark){:root{
+  --fundo:#111311; --painel:#1a1c1a; --borda:#2c2f2c;
+  --texto:#f2f3f0; --fraco:#a9aaa4; --tenue:#75766f;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --ok:#199e70; --alerta:#c98500; --erro:#e66767;
+}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--fundo);color:var(--texto);
-  font:14px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
-  display:flex;justify-content:center;padding:32px 16px}
-.wrap{width:100%;max-width:760px}
-h1{margin:0 0 2px;font-size:19px;font-weight:650;letter-spacing:-.2px}
-.sub{color:var(--fraco);font-size:12.5px;margin-bottom:22px;
+  font:14px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;padding:20px 24px 40px}
+h1{margin:0 0 2px;font-size:20px;font-weight:650;letter-spacing:-.2px}
+.sub{color:var(--fraco);font-size:12.5px;margin-bottom:18px;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .card{background:var(--painel);border:1px solid var(--borda);
-  border-radius:12px;padding:20px;margin-bottom:14px}
-.topo{display:flex;justify-content:space-between;align-items:baseline;
-  gap:12px;margin-bottom:14px}
-.pct{font:600 34px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-variant-numeric:tabular-nums}
-.chip{font-size:11px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.09em;padding:4px 10px;border-radius:999px;
-  border:1px solid currentColor}
-.treinando{color:var(--ambar)} .concluida{color:var(--verde)}
-.parada{color:var(--vermelho)} .sem_rodada{color:var(--fraco)}
-.barra{height:22px;background:#0b0d13;border:1px solid var(--borda);
-  border-radius:6px;overflow:hidden;position:relative}
+  border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.topo{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:12px}
+.pct{font:600 36px/1 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.chip{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;
+  padding:4px 11px;border-radius:999px;border:1px solid currentColor}
+.treinando{color:var(--alerta)} .concluida{color:var(--ok)}
+.parada{color:var(--erro)} .sem_rodada{color:var(--tenue)}
+.barra{height:20px;background:var(--fundo);border:1px solid var(--borda);
+  border-radius:6px;overflow:hidden}
 .preenche{height:100%;width:0;transition:width .6s ease;
-  background:repeating-linear-gradient(115deg,var(--ambar) 0 14px,#e29a12 14px 28px)}
-.concluida .preenche,.preenche.ok{background:repeating-linear-gradient(
-  115deg,var(--verde) 0 14px,#31b47e 14px 28px)}
-.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
-  gap:1px;background:var(--borda);border:1px solid var(--borda);
-  border-radius:10px;overflow:hidden}
-.celula{background:var(--painel);padding:13px 15px}
-.rot{color:var(--fraco);font-size:10.5px;text-transform:uppercase;
-  letter-spacing:.08em;margin-bottom:5px}
-.val{font:600 19px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-variant-numeric:tabular-nums}
-.val small{font-size:12px;font-weight:400;color:var(--fraco)}
-.tit{font-size:11px;color:var(--fraco);text-transform:uppercase;
-  letter-spacing:.08em;margin:0 0 12px}
-svg{width:100%;height:110px;display:block}
-.aviso{color:var(--fraco);text-align:center;padding:36px 0}
-</style></head><body><div class="wrap">
+  background:repeating-linear-gradient(115deg,var(--alerta) 0 14px,#d19100 14px 28px)}
+.concluida-barra{background:repeating-linear-gradient(115deg,var(--ok) 0 14px,#158f63 14px 28px)!important}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  background:var(--painel);border:1px solid var(--borda);
+  border-radius:10px;overflow:hidden;margin-bottom:14px}
+.celula{padding:12px 14px;border-right:1px solid var(--borda);
+  border-bottom:1px solid var(--borda)}
+.rot{color:var(--fraco);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.val{font:600 18px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.val small{font-size:11.5px;font-weight:400;color:var(--fraco)}
+.tit{font-size:11px;color:var(--fraco);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.leg{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 10px;font-size:12px;color:var(--fraco)}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg i{width:16px;height:0;border-top-width:2.5px;border-top-style:solid;display:inline-block}
+.tres{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.plot{position:relative;width:100%}
+.plot svg{width:100%;display:block;overflow:visible}
+.tip{position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--painel);border:1px solid var(--borda);border-radius:8px;
+  padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.18);
+  font-variant-numeric:tabular-nums;white-space:nowrap;z-index:9}
+.tip b{display:block;margin-bottom:5px;font-size:11px;color:var(--fraco);font-weight:600}
+.tip div{display:flex;justify-content:space-between;gap:22px;line-height:1.7}
+.tip div span:last-child{font-weight:600}
+.tip i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+.aviso{color:var(--fraco);text-align:center;padding:40px 0}
+</style></head><body>
 <h1>Detecção de defeitos, treino YOLOv8</h1>
 <div class="sub" id="rodada">carregando...</div>
-<div class="card" id="painel">
+
+<div class="card">
   <div class="topo">
     <div><div class="rot">progresso</div><div class="pct" id="pct">--</div></div>
+    <div style="flex:1"></div>
     <div class="chip sem_rodada" id="estado">aguardando</div>
   </div>
   <div class="barra"><div class="preenche" id="preenche"></div></div>
-  <div class="rot" style="margin-top:10px" id="epocas">--</div>
+  <div class="rot" style="margin-top:9px" id="epocas">--</div>
 </div>
+
 <div class="grade" id="grade"></div>
-<div class="card" style="margin-top:14px">
-  <p class="tit">mAP@50 por época</p><svg id="graf" viewBox="0 0 700 110"
-   preserveAspectRatio="none"></svg>
+
+<div class="card">
+  <p class="tit">Precisão média (mAP) na validação interna</p>
+  <div class="leg" id="leg-map"></div>
+  <div class="plot" id="plot-map"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"
+    style="height:300px"></svg><div class="tip"></div></div>
 </div>
+
+<div class="card">
+  <p class="tit">Precisão e revocação na validação interna</p>
+  <div class="leg" id="leg-pr"></div>
+  <div class="plot" id="plot-pr"><svg viewBox="0 0 1000 220" preserveAspectRatio="none"
+    style="height:220px"></svg><div class="tip"></div></div>
 </div>
+
+<div class="tres">
+  <div class="card"><p class="tit">Perda de caixa (box)</p>
+    <div class="plot" id="plot-box"><svg viewBox="0 0 500 180" preserveAspectRatio="none"
+      style="height:180px"></svg><div class="tip"></div></div></div>
+  <div class="card"><p class="tit">Perda de classe (cls)</p>
+    <div class="plot" id="plot-cls"><svg viewBox="0 0 500 180" preserveAspectRatio="none"
+      style="height:180px"></svg><div class="tip"></div></div></div>
+  <div class="card"><p class="tit">Perda de distribuição (dfl)</p>
+    <div class="plot" id="plot-dfl"><svg viewBox="0 0 500 180" preserveAspectRatio="none"
+      style="height:180px"></svg><div class="tip"></div></div></div>
+</div>
+
 <script>
 const q=i=>document.getElementById(i);
+const cor=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const num=(v,c=4)=>(v==null||!isFinite(v))?"--":v.toFixed(c).replace(".",",");
 const hms=s=>{if(!isFinite(s)||s<0)return"--";s=Math.round(s);
   const h=Math.floor(s/3600),m=Math.floor(s%3600/60),g=s%60;
   return h?`${h}h ${String(m).padStart(2,"0")}min`:m?`${m}min ${String(g).padStart(2,"0")}s`:`${g}s`};
 const hora=t=>new Date(t*1000).toLocaleTimeString("pt-BR");
 const rots={treinando:"treinando",concluida:"concluída",parada:"parada",sem_rodada:"sem rodada"};
 
+// Cada grafico guarda o que precisa para responder ao mouse: a escala usada e os
+// pontos ja convertidos para coordenadas de tela. Sem isso o tooltip teria de
+// refazer a projecao a cada movimento.
+const graficos={};
+
+function desenhar(id, serie, campos, opcoes={}){
+  const box=q(id), svg=box.querySelector("svg");
+  const vb=svg.getAttribute("viewBox").split(" ").map(Number);
+  const W=vb[2], H=vb[3], E=44, D=26, T=10, B=24;
+  if(!serie.length){svg.innerHTML="";return}
+
+  const xs=serie.map(p=>p.e);
+  const x0=Math.min(...xs), x1=Math.max(...xs);
+  let y1=0;
+  for(const c of campos) for(const p of serie) if(isFinite(p[c.k])) y1=Math.max(y1,p[c.k]);
+  y1 = opcoes.desdeZero===false ? y1*1.05 : y1*1.08 || 1;
+  const y0 = 0;
+  const px=e=>E+(x1===x0?0:(e-x0)/(x1-x0))*(W-E-D);
+  const py=v=>H-B-((v-y0)/(y1-y0||1))*(H-B-T);
+
+  let g="";
+  // grade e rotulos: recessivos, para os dados carregarem a figura
+  const passos=4;
+  for(let i=0;i<=passos;i++){
+    const v=y0+(y1-y0)*i/passos, y=py(v);
+    g+=`<line x1="${E}" y1="${y}" x2="${W-D}" y2="${y}" stroke="${cor("--borda")}" stroke-width="1"/>`;
+    g+=`<text x="${E-7}" y="${y+4}" text-anchor="end" font-size="11"
+         fill="${cor("--tenue")}">${num(v,y1<1?2:1)}</text>`;
+  }
+  const marcas=Math.min(6,Math.max(2,Math.floor((x1-x0)/10)));
+  for(let i=0;i<=marcas;i++){
+    const e=Math.round(x0+(x1-x0)*i/marcas);
+    g+=`<text x="${px(e)}" y="${H-6}" text-anchor="middle" font-size="11"
+         fill="${cor("--tenue")}">${e}</text>`;
+  }
+  for(const c of campos){
+    const pts=serie.filter(p=>isFinite(p[c.k])).map(p=>`${px(p.e).toFixed(1)},${py(p[c.k]).toFixed(1)}`);
+    g+=`<polyline points="${pts.join(" ")}" fill="none" stroke="${cor(c.cor)}"
+         stroke-width="2" stroke-linejoin="round" stroke-dasharray="${c.traco||""}"
+         vector-effect="non-scaling-stroke"/>`;
+  }
+  g+=`<line id="cruz-${id}" y1="${T}" y2="${H-B}" stroke="${cor("--tenue")}"
+       stroke-width="1" stroke-dasharray="3 3" opacity="0"/>`;
+  for(const c of campos)
+    g+=`<circle id="pt-${id}-${c.k}" r="4.5" fill="${cor(c.cor)}" stroke="${cor("--painel")}"
+         stroke-width="2" opacity="0"/>`;
+  svg.innerHTML=g;
+  graficos[id]={serie,campos,px,py,W,H,E,D};
+}
+
+function ligarMouse(id){
+  const box=q(id), svg=box.querySelector("svg"), tip=box.querySelector(".tip");
+  const mostrar=ev=>{
+    const g=graficos[id]; if(!g||!g.serie.length)return;
+    const r=svg.getBoundingClientRect();
+    const escala=g.W/r.width;
+    const xv=(ev.clientX-r.left)*escala;
+    let melhor=g.serie[0], dist=Infinity;
+    for(const p of g.serie){const d=Math.abs(g.px(p.e)-xv); if(d<dist){dist=d;melhor=p}}
+    const cx=g.px(melhor.e);
+    const cruz=svg.querySelector(`#cruz-${id}`);
+    cruz.setAttribute("x1",cx); cruz.setAttribute("x2",cx); cruz.setAttribute("opacity","1");
+    let linhas="";
+    for(const c of g.campos){
+      const pt=svg.querySelector(`#pt-${id}-${c.k}`);
+      if(isFinite(melhor[c.k])){
+        pt.setAttribute("cx",cx); pt.setAttribute("cy",g.py(melhor[c.k]));
+        pt.setAttribute("opacity","1");
+      } else pt.setAttribute("opacity","0");
+      linhas+=`<div><span><i style="background:${cor(c.cor)}"></i>${c.rot}</span>
+               <span>${num(melhor[c.k],c.casas??4)}</span></div>`;
+    }
+    tip.innerHTML=`<b>Época ${melhor.e}</b>${linhas}`;
+    tip.style.opacity="1";
+    const larg=tip.offsetWidth, esq=cx/escala;
+    tip.style.left=Math.min(Math.max(esq+12,0),r.width-larg-4)+"px";
+    tip.style.top="8px";
+  };
+  const esconder=()=>{
+    const g=graficos[id]; if(!g)return;
+    tip.style.opacity="0";
+    const cruz=svg.querySelector(`#cruz-${id}`); if(cruz)cruz.setAttribute("opacity","0");
+    for(const c of g.campos){
+      const pt=svg.querySelector(`#pt-${id}-${c.k}`); if(pt)pt.setAttribute("opacity","0");
+    }
+  };
+  box.addEventListener("mousemove",mostrar);
+  box.addEventListener("mouseleave",esconder);
+  box.addEventListener("touchmove",e=>{mostrar(e.touches[0]);e.preventDefault()},{passive:false});
+}
+
+function legenda(id,campos){
+  q(id).innerHTML=campos.map(c=>
+    `<span><i style="border-top-color:${cor(c.cor)};border-top-style:${c.traco?"dashed":"solid"}"></i>${c.rot}</span>`
+  ).join("");
+}
+
 function celula(rot,val,extra){return `<div class="celula"><div class="rot">${rot}</div>
   <div class="val">${val}${extra?` <small>${extra}</small>`:""}</div></div>`}
 
-function grafico(serie){
-  const svg=q("graf");
-  if(!serie.length){svg.innerHTML="";return}
-  const W=700,H=110,P=6;
-  const mx=Math.max(...serie.map(p=>p.m),1e-6);
-  const n=Math.max(serie.length-1,1);
-  const pts=serie.map((p,i)=>[P+i/n*(W-2*P),H-P-(p.m/mx)*(H-2*P)]);
-  const linha=pts.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const area=`${P},${H-P} ${linha} ${(W-P).toFixed(1)},${H-P}`;
-  const [bx,by]=pts[serie.reduce((b,p,i)=>serie[b].m>=p.m?b:i,0)];
-  svg.innerHTML=`<polygon points="${area}" fill="rgba(255,176,32,.14)"/>
-    <polyline points="${linha}" fill="none" stroke="#ffb020" stroke-width="2"
-      stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-    <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3.5" fill="#3ddc97"/>`;
-}
+const CAMPOS_MAP=[{k:"m50",rot:"mAP@0,5",cor:"--s1"},
+                  {k:"m5095",rot:"mAP@0,5:0,95",cor:"--s2",traco:"7 4"}];
+const CAMPOS_PR =[{k:"p",rot:"precisão",cor:"--s1"},
+                  {k:"r",rot:"revocação",cor:"--s3",traco:"7 4"}];
 
+let ligado=false;
 async function tick(){
   let d; try{d=await (await fetch("/api/status",{cache:"no-store"})).json()}catch(e){return}
   if(d.estado==="sem_rodada"){q("rodada").textContent="nenhuma rodada encontrada";
     q("grade").innerHTML='<div class="aviso">Aguardando o treino começar.</div>';return}
 
   q("rodada").textContent=d.rodada;
-  q("pct").textContent=d.pct.toFixed(1)+"%";
+  q("pct").textContent=d.pct.toFixed(1).replace(".",",")+"%";
   q("preenche").style.width=Math.min(d.pct,100)+"%";
-  q("preenche").classList.toggle("ok",d.estado==="concluida");
+  q("preenche").classList.toggle("concluida-barra",d.estado==="concluida");
   const c=q("estado"); c.className="chip "+d.estado; c.textContent=rots[d.estado]||d.estado;
   q("epocas").textContent=`época ${d.feitas} de ${d.alvo}`+
     (d.epochs_planejadas&&d.alvo<d.epochs_planejadas
-      ? ` (limite da paciência; teto planejado ${d.epochs_planejadas})`:"");
+      ? ` — limite dado pela paciência de ${d.paciencia}; teto planejado ${d.epochs_planejadas}`:"");
 
-  const a=d.atual||{},b=d.melhor||{};
+  const a=d.atual||{},b=d.melhor||{},g=d.gpu||{};
+  const restam=Math.max((d.paciencia||0)-(d.desde_melhor||0),0);
   q("grade").innerHTML=[
     celula("começou às",hora(d.inicio)),
     celula("já rodou",hms(d.decorrido)),
     celula("falta",d.estado==="concluida"?"--":hms(d.restante_seg),
       d.estado==="concluida"?"":`${d.restantes} épocas`),
-    celula("por época",d.por_epoca.toFixed(1)+"s"),
-    celula("mAP@50 atual",(a.map50??0).toFixed(4)),
-    celula("melhor mAP@50",(b.map50??0).toFixed(4),`época ${b.epoca??"--"}`),
-    celula("recall",(a.recall??0).toFixed(4)),
-    celula("perdas",`${(a.box??0).toFixed(2)}`,
-      `cls ${(a.cls??0).toFixed(2)} · dfl ${(a.dfl??0).toFixed(2)}`),
+    celula("por época",d.por_epoca.toFixed(1).replace(".",",")+"s"),
+    celula("melhor mAP@0,5",num(b.map50),`época ${b.epoca??"--"}`),
+    celula("sem melhorar há",`${d.desde_melhor} ép.`,`paciência acaba em ${restam}`),
+    celula("mAP@0,5 atual",num(a.map50)),
+    celula("mAP@0,5:0,95",num(a.map5095)),
+    celula("precisão",num(a.precisao)),
+    celula("revocação",num(a.recall)),
+    celula("perdas",num(a.box,2),`cls ${num(a.cls,2)} · dfl ${num(a.dfl,2)}`),
+    celula("GPU",g.uso!=null?g.uso.toFixed(0)+"%":"--",
+      g.vram_usada!=null?`${num(g.vram_usada,1)}/${num(g.vram_total||0,1)} GB${g.temp?` · ${g.temp.toFixed(0)}°C`:""}`:""),
   ].join("");
-  grafico(d.serie||[]);
-  document.title=`${d.pct.toFixed(0)}% · treino YOLOv8`;
+
+  const s=d.serie||[];
+  legenda("leg-map",CAMPOS_MAP); legenda("leg-pr",CAMPOS_PR);
+  desenhar("plot-map",s,CAMPOS_MAP);
+  desenhar("plot-pr", s,CAMPOS_PR);
+  desenhar("plot-box",s,[{k:"box",rot:"box",cor:"--s1",casas:3}]);
+  desenhar("plot-cls",s,[{k:"cls",rot:"cls",cor:"--s2",casas:2}]);
+  desenhar("plot-dfl",s,[{k:"dfl",rot:"dfl",cor:"--s3",casas:3}]);
+  if(!ligado){["plot-map","plot-pr","plot-box","plot-cls","plot-dfl"].forEach(ligarMouse);ligado=true}
+  document.title=`${d.pct.toFixed(0)}% · ép. ${d.feitas} · treino YOLOv8`;
 }
 tick(); setInterval(tick,2000);
 </script></body></html>
