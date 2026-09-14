@@ -62,7 +62,7 @@ SEMPRE_DESLIGADOS = dict(
 RGB = "dataset"
 # Qual variante de realce usar. O teste preliminar compara tres; depois de
 # escolhida, a vencedora fica fixa nas Configuracoes 3 e 4.
-REALCE_PADRAO = "d"
+REALCE_PADRAO = "b"
 
 CONFIGS = {
     1: ("RGB sem aumento", RGB, SEM_AUMENTO),
@@ -152,7 +152,12 @@ def resolver(config: int, fold: int, realce: str = REALCE_PADRAO) -> tuple[str, 
 # tentativas, dois travamentos. O ganho de velocidade seria da ordem de 10%,
 # porque 92% do tempo de epoca e a fase de treino e ela escala com a quantidade
 # de trabalho, nao com o numero de iteracoes. Nao vale o risco.
-LOTE_SEGURO = {1280: 4, 960: 6, 640: 8}
+# O 1696 entra como projecao, nao como medicao: a 1280 o pico foi 7,07 GB com
+# batch 4, e a memoria escala com o numero de pixels, (1696/1280)^2 = 1,76, o que
+# leva a cerca de 12,4 GB dos 15,9 disponiveis. Sem uma entrada aqui o limite
+# ficaria em None e QUALQUER lote passaria calado, que e o caminho para o reset
+# de GPU que ja derrubou a sessao grafica duas vezes.
+LOTE_SEGURO = {1696: 4, 1280: 4, 960: 6, 640: 8}
 
 
 def verificar_lote(args) -> None:

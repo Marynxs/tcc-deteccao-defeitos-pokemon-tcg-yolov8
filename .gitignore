@@ -63,3 +63,12 @@ src/ferramentas/
 # Pesos pre-treinados baixados pela Ultralytics
 *.pt
 weights/
+
+# Fotos das cartas novas enviadas pela empresa: 437 MB
+grading_reports_photos/
+
+# Relatorios informais para o orientador, fora do TCC
+relatorio_orientador/
+
+# Planilha de acompanhamento das cartas, dado de trabalho
+Cartas TCG.xlsx
