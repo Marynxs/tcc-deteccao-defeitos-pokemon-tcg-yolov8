@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 
 RAIZ = Path(__file__).resolve().parents[2]
-ORIGEM = RAIZ / "Dataset_YOLO" / "dataset"
+ORIGEM = RAIZ / "Dataset_YOLO" / "dataset"   # reapontado por --pool
 
 # Kernel de emboss. A soma dos coeficientes e ZERO, de modo que o operador
 # devolve a derivada direcional pura; somada a 128, a saida fica centrada no
@@ -177,12 +177,17 @@ VARIANTES = {
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--variante", choices=sorted(VARIANTES), required=True)
+    p.add_argument("--pool", default="pool",
+                   help="pool de dados: pool (82 cartas) ou pool_206 (206 cartas)")
     p.add_argument("--clip-limit", type=float, default=3.0)
     p.add_argument("--tile", type=int, default=8)
     args = p.parse_args()
 
     rotulo, funcao = VARIANTES[args.variante]
-    destino = RAIZ / "Dataset_YOLO" / f"dataset_realce_{args.variante}"
+    global ORIGEM
+    sufixo = args.pool[len("pool"):]
+    ORIGEM = RAIZ / "Dataset_YOLO" / f"dataset{sufixo}"
+    destino = RAIZ / "Dataset_YOLO" / f"dataset{sufixo}_realce_{args.variante}"
     (destino / "images").mkdir(parents=True, exist_ok=True)
     (destino / "labels").mkdir(parents=True, exist_ok=True)
 

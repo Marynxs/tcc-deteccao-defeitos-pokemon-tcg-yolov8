@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-RUNS = RAIZ / "Dataset_YOLO" / "runs"
+RUNS = RAIZ / "Dataset_YOLO" / "runs"   # reapontado por --pool
 TREINADOR = Path(__file__).resolve().parent / "train_fold.py"
 PYTHON = RAIZ / ".venv" / "bin" / "python"
 
@@ -35,9 +35,16 @@ def main() -> None:
     p.add_argument("--patience", type=int, default=100)
     p.add_argument("--tentativas", type=int, default=3,
                    help="quantas vezes retomar uma rodada que caiu")
+    p.add_argument("--cache", default="disk", help="disk, ram ou vazio; repassado ao train_fold")
+    p.add_argument("--pool", default="pool",
+                   help="pool de dados: pool (82 cartas) ou pool_206 (206 cartas)")
     p.add_argument("--dry-run", action="store_true",
                    help="lista o plano sem treinar nada")
     args = p.parse_args()
+
+    global RUNS
+    RUNS = RAIZ / "Dataset_YOLO" / f"runs{args.pool[len('pool'):]}"
+    print(f"pool {args.pool}: rodadas em {RUNS}\n")
 
     configs = [int(c) for c in args.configs.split(",")]
     folds = [int(f) for f in args.folds.split(",")]
@@ -67,6 +74,7 @@ def main() -> None:
             "--config", str(config), "--fold", str(fold),
             "--imgsz", str(args.imgsz), "--batch", str(args.batch),
             "--epochs", str(args.epochs), "--patience", str(args.patience),
+            "--pool", args.pool, "--cache", args.cache,
         ]
 
         for tentativa in range(1, args.tentativas + 1):

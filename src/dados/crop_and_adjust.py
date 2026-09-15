@@ -4,7 +4,10 @@ Etapa 2 do pipeline. Reaproveita card_detector.detect_card_box, de modo que
 deteccao e corte sempre concordam, e converte cada anotacao para o novo
 enquadramento, clipando as que ficam parcialmente fora em vez de descarta-las.
 
-Medido no conjunto completo: 1038/1038 anotacoes preservadas, 0 descartadas.
+Fotos que ja chegam recortadas na carta (sem fundo) passam inteiras, e um
+corte que descartaria anotacao e rejeitado: anotacao nunca fica fora da carta.
+
+Medido nas 82 cartas: 1038/1038 anotacoes preservadas, 0 descartadas.
 """
 from pathlib import Path
 from PIL import Image, ImageDraw
@@ -87,6 +90,26 @@ def read_labels(lbl_path):
         return [l for l in f if l.strip()]
 
 
+ANNOTATION_PAD_PX = 5     # folga ao redor de anotacao que forca o corte a crescer
+
+
+def union_with_annotations(box, lines, w_orig, h_orig):
+    """Expande a caixa de corte ate conter toda anotacao, com folga."""
+    x0, y0, x1, y1 = box
+    for line in lines:
+        p = line.strip().split()
+        if len(p) != 5:
+            continue
+        xc, yc, w, h = (float(v) for v in p[1:])
+        bx0 = xc * w_orig - w * w_orig / 2 - ANNOTATION_PAD_PX
+        by0 = yc * h_orig - h * h_orig / 2 - ANNOTATION_PAD_PX
+        bx1 = xc * w_orig + w * w_orig / 2 + ANNOTATION_PAD_PX
+        by1 = yc * h_orig + h * h_orig / 2 + ANNOTATION_PAD_PX
+        x0, y0 = min(x0, int(bx0)), min(y0, int(by0))
+        x1, y1 = max(x1, int(bx1) + 1), max(y1, int(by1) + 1)
+    return max(0, x0), max(0, y0), min(w_orig, x1), min(h_orig, y1)
+
+
 def recalculate_all(lines, w_orig, h_orig, x0, y0, crop_w, crop_h):
     new_lines, n_clipped, n_discarded = [], 0, 0
     for line in lines:
@@ -134,23 +157,50 @@ def process():
         name = img_path.stem
         lbl_path = lbl_folder / f"{name}.txt"
 
+        lines = read_labels(lbl_path)
+
         with Image.open(img_path) as im:
             w_orig, h_orig = im.size
             box, info = detector.detect_card_box(im)
 
-            # Imagem suspeita na Etapa 1 nao entra no dataset
+            # Fotos que ja chegam recortadas na carta nao tem fundo para o
+            # detector achar. Sem deteccao a imagem passa INTEIRA, em vez de
+            # ser pulada: a carta ja ocupa o quadro todo, nao ha o que cortar.
+            passthrough_reason = None
             if box is None or detector.is_box_suspicious(info):
-                reason = "sem deteccao" if box is None else f"area={info['rel_area']*100:.1f}%"
-                print(f"[PULADA - suspeita na Etapa 1: {reason}] {img_path.name}")
-                skipped.append((img_path.name, reason))
-                continue
+                passthrough_reason = "sem deteccao" if box is None else f"area={info['rel_area']*100:.1f}%"
+                box = (0, 0, w_orig, h_orig)
+                info = dict(info, rel_area=1.0)
 
             x0, y0, x1, y1 = box
             crop_w, crop_h = x1 - x0, y1 - y0
-            crop_img = im.crop((x0, y0, x1, y1))
+            new_lines, n_clipped, n_discarded = recalculate_all(lines, w_orig, h_orig, x0, y0, crop_w, crop_h)
 
-        lines = read_labels(lbl_path)
-        new_lines, n_clipped, n_discarded = recalculate_all(lines, w_orig, h_orig, x0, y0, crop_w, crop_h)
+            # Uma anotacao nunca fica fora da carta. Se o corte descartaria
+            # alguma, a deteccao entrou PARA DENTRO da carta (acontece quando a
+            # foto ja veio recortada e a borda escura da carta e lida como
+            # fundo). Nesse caso o corte esta errado, e a imagem passa inteira.
+            if n_discarded and passthrough_reason is None:
+                passthrough_reason = f"{n_discarded} anotacao(oes) cairia(m) fora"
+                x0, y0, x1, y1 = 0, 0, w_orig, h_orig
+                info = dict(info, rel_area=1.0)
+
+            # Erro fino: o corte entra so um pouco numa anotacao. Em fundo
+            # branco o detector as vezes poe a borda da carta DENTRO da faixa
+            # cinza do contorno, e um defeito anotado ali seria decapitado. A
+            # caixa cresce ate conter toda anotacao, com folga; onde nenhuma
+            # anotacao encosta na borda do corte, nada muda.
+            elif n_clipped:
+                x0, y0, x1, y1 = union_with_annotations(box, lines, w_orig, h_orig)
+
+            if passthrough_reason or n_clipped:
+                crop_w, crop_h = x1 - x0, y1 - y0
+                new_lines, n_clipped, n_discarded = recalculate_all(lines, w_orig, h_orig, x0, y0, crop_w, crop_h)
+
+            if passthrough_reason:
+                skipped.append((img_path.name, passthrough_reason))
+
+            crop_img = im.crop((x0, y0, x1, y1))
 
         total_boxes += len(lines)
         total_clipped += n_clipped
@@ -219,8 +269,9 @@ def _report(total, n_entrada, dims_before, dims_after, occ_before, occ_after,
     gain = (od / oa - 1) * 100
 
     print(f"Imagens de entrada ................. {n_entrada}")
-    print(f"Cortadas com sucesso ............... {total}")
-    print(f"Puladas (suspeitas na Etapa 1) ..... {len(skipped)}")
+    print(f"Processadas ........................ {total}")
+    print(f"  cortadas ......................... {total - len(skipped)}")
+    print(f"  passadas inteiras (sem corte) .... {len(skipped)}")
     print()
     print(f"Dimensao media ANTES ............... {da[:,0].mean():.0f} x {da[:,1].mean():.0f} px")
     print(f"Dimensao media DEPOIS .............. {dd[:,0].mean():.0f} x {dd[:,1].mean():.0f} px")
@@ -243,11 +294,11 @@ def _report(total, n_entrada, dims_before, dims_after, occ_before, occ_after,
     print()
     print(f"Imagens com .txt vazio (sem defeito) {without_annotation}")
     if skipped:
-        print(f"\nImagens PULADAS - revisar manualmente:")
+        print(f"\nImagens PASSADAS INTEIRAS (a carta ja ocupava o quadro):")
         for name, reason in skipped:
             print(f"    {name}  ({reason})")
     else:
-        print("\nNenhuma imagem pulada.")
+        print("\nToda imagem foi cortada.")
 
 
 # ==========================================================================

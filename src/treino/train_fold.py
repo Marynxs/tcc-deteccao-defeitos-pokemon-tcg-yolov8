@@ -16,6 +16,7 @@ from ultralytics import YOLO
 ROOT = Path(__file__).resolve().parents[2]
 FOLDS = ROOT / "Dataset_YOLO" / "folds"
 RUNS = ROOT / "Dataset_YOLO" / "runs"
+SUFIXO = ""   # "" para o pool de 82 cartas, "_206" para o de 206; ver usar_pool()
 
 SEED = 42
 K = 5
@@ -123,6 +124,23 @@ def montar_yaml(destino: Path, treino: Path, validacao: Path,
     return destino
 
 
+def usar_pool(pool: str) -> None:
+    """Aponta folds, runs e datasets para o pool pedido (pool, pool_206, ...).
+
+    Cada pool tem a propria pasta de runs: misturar rodadas das 82 cartas com
+    as das 206 na mesma pasta faria run_campaign pular rodadas "ja concluidas"
+    que na verdade sao de outro dataset.
+    """
+    global FOLDS, RUNS, RGB, SUFIXO
+    SUFIXO = pool[len("pool"):]
+    FOLDS = ROOT / "Dataset_YOLO" / f"folds{SUFIXO}"
+    RUNS = ROOT / "Dataset_YOLO" / f"runs{SUFIXO}"
+    RGB = f"dataset{SUFIXO}"
+    for k in (1, 2):
+        rotulo, _, aumento = CONFIGS[k]
+        CONFIGS[k] = (rotulo, RGB, aumento)
+
+
 def resolver(config: int, fold: int, realce: str = REALCE_PADRAO) -> tuple[str, dict, dict]:
     if config not in CONFIGS:
         raise SystemExit(f"configuracao {config} nao existe, use 1..4")
@@ -131,7 +149,7 @@ def resolver(config: int, fold: int, realce: str = REALCE_PADRAO) -> tuple[str, 
 
     rotulo, origem, aumento = CONFIGS[config]
     if origem is None:
-        origem = f"dataset_realce_{realce}"
+        origem = f"dataset{SUFIXO}_realce_{realce}"
         rotulo = f"{rotulo} (variante {realce})"
     if not (ROOT / "Dataset_YOLO" / origem / "images").is_dir():
         raise SystemExit(
@@ -203,9 +221,12 @@ def main() -> None:
     p.add_argument("--force", action="store_true",
                    help="refaz mesmo que ja exista resumo.json")
     p.add_argument("--name", default=None)
+    p.add_argument("--pool", default="pool",
+                   help="pool de dados: pool (82 cartas) ou pool_206 (206 cartas)")
     p.add_argument("--dry-run", action="store_true", help="so mostra o que faria")
     args = p.parse_args()
 
+    usar_pool(args.pool)
     verificar_lote(args)
     rotulo, origem, hiper = resolver(args.config, args.fold, args.realce)
     nome = args.name or f"cfg{args.config}_fold{args.fold}_{args.imgsz}"
@@ -227,6 +248,7 @@ def main() -> None:
         return
 
     print(f"\nconfiguracao {args.config}: {rotulo}")
+    print(f"pool          {args.pool}  (folds{SUFIXO}/, runs{SUFIXO}/)")
     print(f"fold          {args.fold}")
     print(f"imagens       Dataset_YOLO/{origem}/images")
     print(f"modelo        {args.model}   imgsz {args.imgsz}   batch {args.batch}")
@@ -257,7 +279,7 @@ def main() -> None:
         modelo = YOLO(ultimo)
         inicio = time.time()
         modelo.train(resume=True)
-        _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao,
+        _avaliar(args, nome, saida, rotulo, hiper, treino, val_interna, avaliacao,
                  time.time() - inicio, origem)
         return
 
@@ -292,11 +314,52 @@ def main() -> None:
         **hiper,
     )
     duracao = time.time() - inicio
-    _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao, origem)
+    _avaliar(args, nome, saida, rotulo, hiper, treino, val_interna, avaliacao, duracao, origem)
 
 
-def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao,
-             origem=RGB) -> None:
+def _f1_com_limiar_fixo(melhor, args, nome, saida, retido):
+    """F1 na dobra retida, com o limiar de confianca escolhido na validacao interna.
+
+    A Ultralytics reporta precisao e revocacao no limiar que maximiza o F1 do
+    PROPRIO conjunto avaliado (ap_per_class: i = argmax do F1 suavizado). Ler
+    esses valores da dobra retida e ajustar o limiar no conjunto de teste, o
+    vies de selecao descrito por Cawley e Talbot (2010). Aqui o limiar vem da
+    validacao interna, que ja serviu ao early stopping e portanto ja e "dado de
+    treino", e e aplicado fixo a dobra retida.
+    """
+    from ultralytics.utils.metrics import smooth
+
+    interna = melhor.val(
+        data=str(saida / "treino.yaml"),       # val = validacao interna
+        imgsz=args.imgsz,
+        batch=args.batch,
+        channels_last=False,
+        project=str(RUNS),
+        name=f"{nome}_val_interna",
+        exist_ok=True,
+        plots=False,
+        verbose=False,
+    )
+    # mesmo criterio da biblioteca (suavizacao 0,1 antes do argmax), so que
+    # aplicado a curva da validacao interna e nao a da dobra retida
+    i = int(smooth(interna.box.f1_curve.mean(0), 0.1).argmax())
+    conf = float(interna.box.px[i])
+    p = float(retido.box.p_curve.mean(0)[i])
+    r = float(retido.box.r_curve.mean(0)[i])
+    f1 = 2 * p * r / (p + r + 1e-16)
+    f1_otimista = float(retido.box.f1_curve.mean(0).max())
+    return {
+        "conf_do_f1": round(conf, 4),
+        "f1": round(f1, 4),
+        "precisao_no_limiar": round(p, 4),
+        "recall_no_limiar": round(r, 4),
+        "f1_val_interna": round(float(interna.box.f1_curve.mean(0)[i]), 4),
+        "f1_otimista_limiar_da_propria_dobra": round(f1_otimista, 4),
+    }
+
+
+def _avaliar(args, nome, saida, rotulo, hiper, treino, val_interna, avaliacao,
+             duracao, origem=RGB) -> None:
     """Avalia o melhor checkpoint no fold retido e grava o resumo da rodada."""
     # A avaliacao do fold retido NAO pode passar pelo yaml do treino: aquele
     # arquivo aponta para a validacao interna, que serviu ao early stopping e
@@ -319,6 +382,8 @@ def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao,
         # execucoes so para recuperar as predicoes.
         save_json=True,
     )
+
+    f1_info = _f1_com_limiar_fixo(melhor, args, nome, saida, metricas)
 
     pico = (
         torch.cuda.max_memory_reserved() / 1024**3
@@ -343,8 +408,12 @@ def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao,
         "pico_vram_gb": round(pico, 2),
         "map50": round(float(metricas.box.map50), 4),
         "map50_95": round(float(metricas.box.map), 4),
+        # precisao e recall abaixo sao os da Ultralytics: medidos no limiar que
+        # maximiza o F1 da propria dobra retida, portanto otimistas. Os valores
+        # honestos, com limiar fixado na validacao interna, estao em f1_info.
         "precisao": round(float(metricas.box.mp), 4),
         "recall": round(float(metricas.box.mr), 4),
+        **f1_info,
         "aumento": hiper,
     }
     (saida / "resumo.json").write_text(
@@ -359,6 +428,8 @@ def _avaliar(args, nome, saida, rotulo, hiper, treino, avaliacao, duracao,
     print(f"mAP@50 (retido)    {resumo['map50']:.4f}")
     print(f"mAP@50-95 (retido) {resumo['map50_95']:.4f}")
     print(f"recall (retido)    {resumo['recall']:.4f}")
+    print(f"F1 (retido)        {resumo['f1']:.4f}  no limiar {resumo['conf_do_f1']:.3f} "
+          f"escolhido na val. interna (otimista: {resumo['f1_otimista_limiar_da_propria_dobra']:.4f})")
     print(f"\nresumo em {saida / 'resumo.json'}")
 
 

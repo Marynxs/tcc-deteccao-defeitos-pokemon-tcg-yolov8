@@ -1,22 +1,36 @@
 """Divide o dataset em cinco folds estratificados, por carta.
 
 A unidade e a carta, nunca a imagem: frente e verso caem sempre no mesmo fold.
-A estratificacao e pelo numero de faces com defeito, para que as cinco cartas
-sem defeito fiquem uma por fold. Cada carta e avaliada exatamente uma vez, o
-que produz as 82 observacoes pareadas usadas na comparacao estatistica.
+Cartas de mesma ilustracao (docs/grupos_mesma_arte.json) tambem ficam juntas,
+como uma unidade indivisivel, para o modelo nao chegar a avaliacao ja tendo
+visto aquele fundo no treino. A estratificacao e pelo numero de faces com
+defeito, para as cartas sem defeito se espalharem entre os folds.
 
 Os folds sao gravados em disco e ficam fixos entre as quatro configuracoes.
 
-    python src/dados/generate_folds.py           # gera e confere
-    python src/dados/generate_folds.py --verify  # so confere o que ja existe
+    python src/dados/generate_folds.py                    # pool/ (padrao)
+    python src/dados/generate_folds.py --pool pool_206    # outro pool
+    python src/dados/generate_folds.py --verify           # so confere
+    python src/dados/generate_folds.py --groups caminho.json
 """
 import json, re, sys, collections, random
 from pathlib import Path
 
+
+def _arg(flag, default):
+    if flag in sys.argv:
+        return sys.argv[sys.argv.index(flag) + 1]
+    return default
+
+
 ROOT = Path("Dataset_YOLO")
-SRC_IMAGES, SRC_LABELS = ROOT / "pool/images_final", ROOT / "pool/labels_final"
-DEST = ROOT / "dataset"
-FOLDS = ROOT / "folds"
+POOL_NAME = _arg("--pool", "pool")
+SUFFIX = POOL_NAME[len("pool"):]          # "" para pool/, "_206" para pool_206/
+SRC_IMAGES = ROOT / POOL_NAME / "images_final"
+SRC_LABELS = ROOT / POOL_NAME / "labels_final"
+DEST = ROOT / f"dataset{SUFFIX}"
+FOLDS = ROOT / f"folds{SUFFIX}"
+GROUPS_FILE = Path(_arg("--groups", "docs/grupos_mesma_arte.json"))
 K = 5
 INTERNAL_VAL_FRACTION = 0.20
 SEED = 42
@@ -26,7 +40,7 @@ SEED = 42
 # imagem (img2label_paths). Pastas chamadas "images_final"/"labels_final"
 # derrubam essa troca: nenhum label e encontrado, toda imagem e tratada como
 # vazia, e o treino roda ate o fim SEM ERRO E SEM AVISO. Dai esta estrutura
-# canonica, montada com hardlink para nao duplicar 1,1 GB.
+# canonica, montada com hardlink para nao duplicar o dataset.
 def build_structure():
     """Cria dataset/images e dataset/labels por hardlink."""
     (DEST / "images").mkdir(parents=True, exist_ok=True)
@@ -56,16 +70,42 @@ def collect_cards():
     return dict(cards)
 
 
-def stratify(cards):
-    """Estrato = numero de faces com pelo menos uma anotacao (0, 1 ou 2)."""
+def load_groups(cards):
+    """Grupos de mesma ilustracao restritos as cartas presentes no pool."""
+    if not GROUPS_FILE.exists():
+        print(f"aviso: {GROUPS_FILE} nao existe, cada carta e uma unidade")
+        return []
+    raw = json.loads(GROUPS_FILE.read_text(encoding="utf-8"))
+    groups = [[c for c in g if c in cards] for g in raw]
+    return [g for g in groups if len(g) > 1]
+
+
+def build_units(cards, groups):
+    """Unidade = grupo de mesma arte, ou a carta sozinha. unit_id -> [cartas]"""
+    in_group = {c for g in groups for c in g}
+    units = {f"g{i}": sorted(g) for i, g in enumerate(groups)}
+    for c in cards:
+        if c not in in_group:
+            units[c] = [c]
+    return units
+
+
+def stratify(cards, units):
+    """Estrato = menor numero de faces com defeito entre as cartas da unidade.
+
+    O minimo faz uma unidade que contem carta sem defeito ser tratada como
+    rara, e distribuida com o mesmo cuidado que uma carta sem defeito sozinha.
+    """
+    def faces_com_defeito(c):
+        return sum(1 for _, n in cards[c].values() if n > 0)
     strata_of = collections.defaultdict(list)
-    for c, faces in cards.items():
-        strata_of[sum(1 for _, n in faces.values() if n > 0)].append(c)
+    for u, membros in units.items():
+        strata_of[min(faces_com_defeito(c) for c in membros)].append(u)
     return strata_of
 
 
-def assign_folds(strata):
-    """Reparte cada estrato ciclicamente entre os K folds."""
+def assign_folds(strata, units):
+    """Reparte cada estrato ciclicamente entre os K folds, por unidade."""
     rnd = random.Random(SEED)
     fold_of = {}
     for chave in sorted(strata):
@@ -74,24 +114,36 @@ def assign_folds(strata):
         # o deslocamento por estrato evita que os primeiros folds
         # recebam sempre a sobra de todos os strata
         offset = (chave * 2) % K
-        for i, card in enumerate(group):
-            fold_of[card] = (i + offset) % K
+        for i, u in enumerate(group):
+            for c in units[u]:
+                fold_of[c] = (i + offset) % K
     return fold_of
 
 
-def build_rounds(cards, fold_of):
+def build_rounds(cards, fold_of, units):
     rnd = random.Random(SEED + 1)
+    unit_of = {c: u for u, ms in units.items() for c in ms}
     rounds = []
     for k in range(K):
         eval_cards = sorted(c for c, f in fold_of.items() if f == k)
-        block = sorted(c for c, f in fold_of.items() if f != k)
-        rnd.shuffle(block)
-        n_val = round(len(block) * INTERNAL_VAL_FRACTION)
+        # a validacao interna tambem e recortada por unidade, para um grupo
+        # de mesma arte nao ficar metade no treino e metade na validacao
+        block_units = sorted({unit_of[c] for c, f in fold_of.items() if f != k})
+        rnd.shuffle(block_units)
+        n_cards = sum(len(units[u]) for u in block_units)
+        n_val = round(n_cards * INTERNAL_VAL_FRACTION)
+        val, acc = [], 0
+        for u in block_units:
+            if acc >= n_val:
+                break
+            val.extend(units[u]); acc += len(units[u])
+        val = set(val)
+        block = [c for u in block_units for c in units[u]]
         rounds.append({
             "fold": k,
             "avaliacao": eval_cards,
-            "val_interna": sorted(block[:n_val]),
-            "treino": sorted(block[n_val:]),
+            "val_interna": sorted(val),
+            "treino": sorted(c for c in block if c not in val),
         })
     return rounds
 
@@ -101,11 +153,12 @@ def images_of(cards, lista):
             for c in lista for name, _ in cards[c].values()]
 
 
-def save(cards, fold_of, rounds):
+def save(cards, fold_of, rounds, groups):
     FOLDS.mkdir(parents=True, exist_ok=True)
     (FOLDS / "folds.json").write_text(json.dumps({
         "semente": SEED, "k": K,
         "fracao_val_interna": INTERNAL_VAL_FRACTION,
+        "grupos_mesma_arte": groups,
         "fold_por_carta": fold_of,
         "rounds": rounds,
     }, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -127,7 +180,7 @@ def save(cards, fold_of, rounds):
             "names: ['defeito']\n", encoding="utf-8")
 
 
-def verify(cards, fold_of, rounds):
+def verify(cards, fold_of, rounds, groups):
     print("\n" + "=" * 66)
     print("CONFERENCIA")
     print("=" * 66)
@@ -138,24 +191,34 @@ def verify(cards, fold_of, rounds):
         print(f"  [{'OK ' if cond else 'ERRO'}] {txt}")
         ok = ok and cond
 
-    chk(len(cards) == 82, f"82 cards ({len(cards)})")
-    chk(all(len(f) == 2 for f in cards.values()), "toda card com frente e verso")
+    n_cards = len(cards)
+    n_src = len(list(SRC_IMAGES.glob("*.png")))
     n_img = sum(len(f) for f in cards.values())
-    chk(n_img == 164, f"164 images ({n_img})")
     n_anot = sum(n for f in cards.values() for _, n in f.values())
-    chk(n_anot == 1038, f"1038 anotacoes ({n_anot})")
-    chk(len(fold_of) == len(cards), "toda card tem fold")
+    n_anot_src = sum(sum(1 for l in open(p) if l.strip()) for p in SRC_LABELS.glob("*.txt"))
+    chk(n_img == n_src, f"{n_src} imagens do pool presentes em dataset/ ({n_img})")
+    chk(all(len(f) == 2 for f in cards.values()), "toda carta com frente e verso")
+    chk(n_anot == n_anot_src, f"{n_anot_src} anotacoes do pool preservadas ({n_anot})")
+    chk(len(fold_of) == n_cards, "toda carta tem fold")
 
     times = collections.Counter(c for r in rounds for c in r["avaliacao"])
-    chk(set(times.values()) == {1}, "cada card avaliada exatamente 1 vez")
-    chk(len(times) == 82, f"82 cards avaliadas ao todo ({len(times)})")
+    chk(set(times.values()) == {1}, "cada carta avaliada exatamente 1 vez")
+    chk(len(times) == n_cards, f"{n_cards} cartas avaliadas ao todo ({len(times)})")
 
     for r in rounds:
         s = set(r["treino"]) | set(r["val_interna"]) | set(r["avaliacao"])
-        chk(len(s) == 82 and not (set(r["treino"]) & set(r["avaliacao"])),
+        chk(len(s) == n_cards and not (set(r["treino"]) & set(r["avaliacao"])),
             f"fold {r['fold']}: particao completa e sem sobreposicao")
 
-    print(f"\n  {'fold':>5} {'avaliacao':>10} {'val.int':>9} {'treino':>8} {'imgs eval_cards':>10}")
+    for g in groups:
+        folds_do_grupo = {fold_of[c] for c in g}
+        chk(len(folds_do_grupo) == 1, f"grupo {'+'.join(g)} inteiro no fold {folds_do_grupo}")
+        for r in rounds:
+            papeis = {p for p in ("treino", "val_interna", "avaliacao")
+                      for c in g if c in r[p]}
+            chk(len(papeis) == 1, f"  fold {r['fold']}: grupo nao dividido entre papeis")
+
+    print(f"\n  {'fold':>5} {'avaliacao':>10} {'val.int':>9} {'treino':>8} {'imgs eval':>10}")
     for r in rounds:
         print(f"  {r['fold']:>5} {len(r['avaliacao']):>10} {len(r['val_interna']):>9} "
               f"{len(r['treino']):>8} {len(r['avaliacao'])*2:>10}")
@@ -176,16 +239,21 @@ def verify(cards, fold_of, rounds):
 
 
 if __name__ == "__main__":
+    print(f"pool: {POOL_NAME}  ->  {DEST}/  e  {FOLDS}/")
     if "--verify" not in sys.argv:
         n = build_structure()
-        print(f"estrutura dataset/images e dataset/labels: {n} hardlinks novos")
+        print(f"estrutura {DEST}/images e {DEST}/labels: {n} hardlinks novos")
     cards = collect_cards()
+    groups = load_groups(cards)
+    print(f"grupos de mesma arte no pool: {len(groups)} ({sum(len(g) for g in groups)} cartas)")
     if "--verify" in sys.argv:
         d = json.loads((FOLDS / "folds.json").read_text(encoding="utf-8"))
         fold_of, rounds = d["fold_por_carta"], d["rounds"]
+        groups = d.get("grupos_mesma_arte", groups)
     else:
-        fold_of = assign_folds(stratify(cards))
-        rounds = build_rounds(cards, fold_of)
-        save(cards, fold_of, rounds)
+        units = build_units(cards, groups)
+        fold_of = assign_folds(stratify(cards, units), units)
+        rounds = build_rounds(cards, fold_of, units)
+        save(cards, fold_of, rounds, groups)
         print(f"gravado em {FOLDS}/")
-    sys.exit(0 if verify(cards, fold_of, rounds) else 1)
+    sys.exit(0 if verify(cards, fold_of, rounds, groups) else 1)
