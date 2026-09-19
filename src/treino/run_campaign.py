@@ -81,7 +81,14 @@ def main() -> None:
             # A primeira tentativa comeca do zero; as seguintes retomam do
             # last.pt, que a Ultralytics grava ao fim de cada epoca. Uma queda
             # da placa custa no maximo a epoca em andamento.
-            cmd = base + (["--resume"] if tentativa > 1 else [])
+            # Se a campanha inteira foi relancada (queda de energia, reinicio do
+            # PC) e ja existe last.pt sem resumo.json, a primeira tentativa
+            # tambem retoma: sem isso a Ultralytics recria a pasta e apaga o
+            # checkpoint (aconteceu em 17/09/2026, 49 epocas perdidas).
+            ha_checkpoint = (RUNS / nome / "weights" / "last.pt").is_file()
+            cmd = base + (["--resume"] if (tentativa > 1 or ha_checkpoint) else [])
+            if ha_checkpoint and tentativa == 1:
+                print(f"{nome}: last.pt encontrado sem resumo.json, retomando", flush=True)
             marca = f"[{i}/{len(rodadas)}] {nome} tentativa {tentativa}"
             print(f"{marca}: iniciando", flush=True)
             t0 = time.time()

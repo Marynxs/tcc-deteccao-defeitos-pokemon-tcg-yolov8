@@ -20,7 +20,7 @@ RUNS = ROOT / "Dataset_YOLO" / "runs"
 # Quantos segundos sem o results.csv mudar antes de considerar o treino parado.
 # Uma epoca custa cerca de 12 s a 1280; 90 s cobre com folga a epoca mais lenta
 # somada a validacao, sem demorar demais para perceber uma queda.
-IDLE_LIMIT = 90
+IDLE_LIMIT = 300   # a 206 cartas uma epoca leva 30 a 120 s (P2 ate 2x)
 
 
 def latest_run() -> Path | None:
@@ -471,7 +471,10 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--port", type=int, default=8765)
     p.add_argument("--no-browser", action="store_true")
+    p.add_argument("--runs", default="runs", help="pasta em Dataset_YOLO/ (runs, runs_206_rev...)")
     args = p.parse_args()
+    global RUNS
+    RUNS = ROOT / "Dataset_YOLO" / args.runs
 
     url = f"http://127.0.0.1:{args.port}/"
     servidor = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)

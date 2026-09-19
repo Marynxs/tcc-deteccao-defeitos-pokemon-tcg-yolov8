@@ -63,7 +63,7 @@ SEMPRE_DESLIGADOS = dict(
 RGB = "dataset"
 # Qual variante de realce usar. O teste preliminar compara tres; depois de
 # escolhida, a vencedora fica fixa nas Configuracoes 3 e 4.
-REALCE_PADRAO = "b"
+REALCE_PADRAO = "e"
 
 CONFIGS = {
     1: ("RGB sem aumento", RGB, SEM_AUMENTO),
@@ -276,6 +276,17 @@ def main() -> None:
     ultimo = saida / "weights" / "last.pt"
     if args.resume and ultimo.is_file():
         print(f"\nretomando de {ultimo}")
+        # Excecao unica ao "nao se passa mais nenhum argumento": o teto de epocas.
+        # Se a rodada parou no teto sem cumprir a paciencia (caso da cabeca P2, que
+        # aprende mais devagar), o lancador retoma com --epochs maior. A Ultralytics
+        # NAO aceita epochs como override no resume (check_resume so libera imgsz,
+        # batch, patience...), e resume_training exige start_epoch < epochs, entao
+        # o teto novo tem de ser gravado dentro do proprio checkpoint.
+        ckpt = torch.load(ultimo, map_location="cpu", weights_only=False)
+        if ckpt.get("train_args", {}).get("epochs", 0) < args.epochs:
+            print(f"teto de epocas no checkpoint: {ckpt['train_args']['epochs']} -> {args.epochs}")
+            ckpt["train_args"]["epochs"] = args.epochs
+            torch.save(ckpt, ultimo)
         modelo = YOLO(ultimo)
         inicio = time.time()
         modelo.train(resume=True)
@@ -283,7 +294,9 @@ def main() -> None:
                  time.time() - inicio, origem)
         return
 
-    modelo = YOLO(args.model)
+    # arquitetura em .yaml (ex.: yolov8s-p2.yaml, cabeca extra no passo 4) nasce sem pesos:
+    # carrega os do yolov8s.pt nas camadas que existem nas duas, as novas partem do zero
+    modelo = YOLO(args.model).load("yolov8s.pt") if args.model.endswith(".yaml") else YOLO(args.model)
     inicio = time.time()
     modelo.train(
         data=str(montar_yaml(saida / "treino.yaml", treino, val_interna, origem)),
@@ -354,6 +367,7 @@ def _f1_com_limiar_fixo(melhor, args, nome, saida, retido):
         "precisao_no_limiar": round(p, 4),
         "recall_no_limiar": round(r, 4),
         "f1_val_interna": round(float(interna.box.f1_curve.mean(0)[i]), 4),
+        "map50_val_interna": round(float(interna.box.map50), 4),
         "f1_otimista_limiar_da_propria_dobra": round(f1_otimista, 4),
     }
 

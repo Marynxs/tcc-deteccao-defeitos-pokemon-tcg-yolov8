@@ -1,0 +1,20 @@
+== recall por faixa de tamanho (dimensao menor @1280), 5 dobras retidas, limiar da validacao interna ==
+  cfg1_1280     TP  1237 FP  2398 FN  3571 | recall 0.257 precisao 0.340 | <8 px: 26/517 = 0.050  8 a 20 px: 1027/2853 = 0.360  >20 px: 184/1438 = 0.128
+  cfg2_1280     TP  1369 FP  1946 FN  3439 | recall 0.285 precisao 0.413 | <8 px: 14/517 = 0.027  8 a 20 px: 1077/2853 = 0.377  >20 px: 278/1438 = 0.193
+  cfg3_1280     TP  1021 FP  2522 FN  3787 | recall 0.212 precisao 0.288 | <8 px: 26/517 = 0.050  8 a 20 px: 857/2853 = 0.300  >20 px: 138/1438 = 0.096
+  cfg4_1280     TP  1252 FP  2206 FN  3556 | recall 0.260 precisao 0.362 | <8 px: 15/517 = 0.029  8 a 20 px: 1000/2853 = 0.351  >20 px: 237/1438 = 0.165
+  cfg2_1280_p2  TP  1359 FP  2637 FN  3449 | recall 0.283 precisao 0.340 | <8 px: 17/517 = 0.033  8 a 20 px: 1048/2853 = 0.367  >20 px: 294/1438 = 0.204
+
+== comparacao pareada por carta (Wilcoxon bilateral) ==
+  F1      cfg2_1280 vs cfg2_1280_p2: n=206 media 0.376 vs 0.339, mediana da dif +0.033, cfg2_1280 melhor em 124, pior em 70, empate 12, Wilcoxon p=0.0000
+  recall  cfg2_1280 vs cfg2_1280_p2: n=206 media 0.375 vs 0.373, mediana da dif +0.000, cfg2_1280 melhor em 80, pior em 68, empate 58, Wilcoxon p=0.6019
+  F1      cfg2_1280 vs cfg1_1280: n=206 media 0.376 vs 0.332, mediana da dif +0.033, cfg2_1280 melhor em 123, pior em 75, empate 8, Wilcoxon p=0.0000
+  recall  cfg2_1280 vs cfg1_1280: n=206 media 0.375 vs 0.333, mediana da dif +0.024, cfg2_1280 melhor em 108, pior em 48, empate 50, Wilcoxon p=0.0000
+  F1      cfg2_1280 vs cfg4_1280: n=206 media 0.376 vs 0.354, mediana da dif +0.024, cfg2_1280 melhor em 124, pior em 73, empate 9, Wilcoxon p=0.0018
+  recall  cfg2_1280 vs cfg4_1280: n=206 media 0.375 vs 0.353, mediana da dif +0.000, cfg2_1280 melhor em 97, pior em 51, empate 58, Wilcoxon p=0.0057
+  F1      cfg2_1280 vs cfg3_1280: n=206 media 0.376 vs 0.294, mediana da dif +0.078, cfg2_1280 melhor em 154, pior em 39, empate 13, Wilcoxon p=0.0000
+  recall  cfg2_1280 vs cfg3_1280: n=206 media 0.375 vs 0.290, mediana da dif +0.071, cfg2_1280 melhor em 126, pior em 34, empate 46, Wilcoxon p=0.0000
+  F1      cfg1_1280 vs cfg3_1280: n=206 media 0.332 vs 0.294, mediana da dif +0.051, cfg1_1280 melhor em 130, pior em 65, empate 11, Wilcoxon p=0.0000
+  recall  cfg1_1280 vs cfg3_1280: n=206 media 0.333 vs 0.290, mediana da dif +0.048, cfg1_1280 melhor em 115, pior em 50, empate 41, Wilcoxon p=0.0000
+  F1      cfg4_1280 vs cfg3_1280: n=206 media 0.354 vs 0.294, mediana da dif +0.045, cfg4_1280 melhor em 136, pior em 57, empate 13, Wilcoxon p=0.0000
+  recall  cfg4_1280 vs cfg3_1280: n=206 media 0.353 vs 0.290, mediana da dif +0.043, cfg4_1280 melhor em 109, pior em 40, empate 57, Wilcoxon p=0.0000
