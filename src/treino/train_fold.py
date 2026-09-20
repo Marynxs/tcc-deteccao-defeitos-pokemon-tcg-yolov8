@@ -221,6 +221,8 @@ def main() -> None:
     p.add_argument("--force", action="store_true",
                    help="refaz mesmo que ja exista resumo.json")
     p.add_argument("--name", default=None)
+    p.add_argument("--train-list", default=None,
+                   help="lista de treino alternativa (curva de aprendizado); val interna e dobra retida nao mudam")
     p.add_argument("--pool", default="pool",
                    help="pool de dados: pool (82 cartas) ou pool_206 (206 cartas)")
     p.add_argument("--dry-run", action="store_true", help="so mostra o que faria")
@@ -232,7 +234,7 @@ def main() -> None:
     nome = args.name or f"cfg{args.config}_fold{args.fold}_{args.imgsz}"
     saida = RUNS / nome
 
-    treino = FOLDS / f"fold{args.fold}_treino.txt"
+    treino = Path(args.train_list) if args.train_list else FOLDS / f"fold{args.fold}_treino.txt"
     val_interna = FOLDS / f"fold{args.fold}_val_interna.txt"
     avaliacao = FOLDS / f"fold{args.fold}_avaliacao.txt"
     for lista in (treino, val_interna, avaliacao):
