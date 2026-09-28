@@ -1,0 +1,128 @@
+{
+  "Acertos (TP)": [
+    {
+      "imagem": "carta_070_verso_png.rf.HVxiAs3R4N3L9NJaTWsc",
+      "valor": 29.967,
+      "caixa_px": [
+        460,
+        519,
+        507,
+        557
+      ]
+    },
+    {
+      "imagem": "carta_076_verso_png.rf.17YF6XENir9SZBpZth8y",
+      "valor": 23.491,
+      "caixa_px": [
+        908,
+        822,
+        939,
+        855
+      ]
+    },
+    {
+      "imagem": "carta_085_verso_png.rf.u8uw9LCmJvhlzo55muDx",
+      "valor": 19.825,
+      "caixa_px": [
+        255,
+        783,
+        281,
+        816
+      ]
+    },
+    {
+      "imagem": "carta_161_verso_png.rf.KJWxlngpGNM07WfhkKiN",
+      "valor": 17.993,
+      "caixa_px": [
+        183,
+        46,
+        210,
+        71
+      ]
+    }
+  ],
+  "Detecções sem anotação (FP)": [
+    {
+      "imagem": "carta_073_verso_png.rf.PnB5cL8RvVWsMpBJ00oM",
+      "valor": 0.646,
+      "caixa_px": [
+        579,
+        856,
+        634,
+        895
+      ]
+    },
+    {
+      "imagem": "carta_018_frente_png.rf.Ug9r6OD257GfpkUQtNxH",
+      "valor": 0.63,
+      "caixa_px": [
+        37,
+        29,
+        202,
+        167
+      ]
+    },
+    {
+      "imagem": "carta_065_verso_png.rf.34xjZCSnjhHHRpser0m7",
+      "valor": 0.617,
+      "caixa_px": [
+        1001,
+        46,
+        1024,
+        69
+      ]
+    },
+    {
+      "imagem": "carta_085_verso_png.rf.u8uw9LCmJvhlzo55muDx",
+      "valor": 0.614,
+      "caixa_px": [
+        793,
+        278,
+        815,
+        303
+      ]
+    }
+  ],
+  "Defeitos grandes perdidos (FN > 20 px)": [
+    {
+      "imagem": "carta_072_verso_png.rf.Rj1oaxypBrpIKtc4Wxrj",
+      "valor": 310.007,
+      "caixa_px": [
+        671,
+        1203,
+        1160,
+        1602
+      ]
+    },
+    {
+      "imagem": "carta_035_verso_png.rf.ASaZ32NUVlWAsD5Z5RIB",
+      "valor": 159.05,
+      "caixa_px": [
+        864,
+        490,
+        1098,
+        697
+      ]
+    },
+    {
+      "imagem": "carta_080_verso_png.rf.o3N8ltvmg2866vZ2jvsv",
+      "valor": 128.404,
+      "caixa_px": [
+        211,
+        555,
+        361,
+        802
+      ]
+    },
+    {
+      "imagem": "carta_149_verso_png.rf.NwG6lWOUPoHvgfNOm4Nl",
+      "valor": 120.566,
+      "caixa_px": [
+        760,
+        228,
+        927,
+        443
+      ]
+    }
+  ]
+}
