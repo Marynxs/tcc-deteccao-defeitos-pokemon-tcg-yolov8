@@ -131,37 +131,57 @@
 % RESUMO
 % ---------------------------------------------------------------
 \begin{resumo}
-Este documento apresenta a proposta inicial do Trabalho de Conclusão 
-de Curso (TCC1) desenvolvido no SENAC Santo Amaro. O objetivo deste 
-trabalho é avaliar o impacto de diferentes estratégias de treinamento 
-aplicadas ao modelo YOLOv8 para detecção de defeitos superficiais em 
-cartas Pokémon TCG em cenários com baixo volume de dados, identificando 
-quais combinações apresentam melhor desempenho com conjunto
-limitado de imagens. A justificativa baseia-se na 
-escassez de estudos que avaliem sistematicamente essas estratégias no 
-domínio de cartas colecionáveis, aliada ao alto custo de anotação e à 
-ausência de bases de dados públicas para esse contexto. Como solução 
-proposta, será implementado um pipeline experimental baseado em 
-YOLOv8s com \textit{fine-tuning} a partir de pesos pré-treinados no 
-dataset COCO, avaliado por meio de um estudo de ablação fatorial com 
-quatro configurações controladas que combinam aumento de dados 
-(\textit{data augmentation}) e uso de imagens de realce de 
-micro-relevo geradas pelo autor a partir do canal de luminância, como 
-representação alternativa de entrada. O conjunto de dados é composto por 82 cartas fornecidas por 
-uma empresa brasileira especializada em graduação, totalizando 164 
-imagens por configuração experimental, com anotações em formato de caixas delimitadoras derivadas 
-de registros de avaliadores especializados em graduação de cartas TCG. A avaliação adotará validação cruzada 
-estratificada em cinco dobras, com folds fixos entre as configurações. O 
-desempenho de cada configuração será reportado pelo mAP@0.5, Precisão, 
-Revocação e F1-\textit{score}, e a comparação entre as estratégias será 
-conduzida por teste de Wilcoxon pareado tendo a carta como unidade de 
-análise.
+Este trabalho avaliou o impacto de diferentes estratégias de
+treinamento aplicadas ao YOLOv8 na detecção de defeitos superficiais em
+cartas Pokémon TCG (\textit{Trading Card Game}). O objetivo foi
+identificar quais combinações apresentam melhor desempenho com um
+conjunto limitado de imagens. A escolha do tema baseou-se na escassez
+de estudos que avaliam sistematicamente essas estratégias no domínio de
+cartas colecionáveis. Nesse domínio, a graduação avalia a condição
+física de cada exemplar, mas a inspeção manual é lenta e sujeita à
+subjetividade do avaliador. Essas limitações motivam a sua automação
+por visão computacional. A anotação de defeitos, porém, é cara, e a
+busca bibliográfica realizada não identificou conjuntos de dados
+públicos de cartas Pokémon TCG com defeitos localizados. Nos
+experimentos, o modelo partiu de um YOLOv8s com \textit{transfer
+learning} a partir de pesos pré-treinados no conjunto público de imagens COCO. Quatro configurações cruzaram o
+uso ou não de aumento de dados com duas representações de entrada:
+imagens RGB convencionais e imagens de realce de micro-relevo. Sobre a
+configuração de melhor desempenho, avaliou-se o efeito de uma cabeça de
+detecção adicional para objetos pequenos (P2) e da resolução de
+entrada. O conjunto de dados reuniu 206 cartas, 412 imagens e 4.808
+anotações, parte delas sugerida por um modelo preliminar e validada
+pelo autor. O desempenho foi medido pelo mAP@0,5, pela precisão, pela
+revocação e pelo F1, em validação cruzada com cinco dobras. O F1 dá uma
+única nota por carta, o que permitiu comparar as configurações carta a
+carta pelo teste de Wilcoxon pareado, com correção de Holm. O aumento
+de dados melhorou o detector: a Configuração 2, com imagens RGB e
+aumento de dados, obteve o melhor desempenho, com F1 por carta de
+0,376, contra 0,332 da mesma configuração sem aumento de dados. O
+realce de micro-relevo foi inferior ao RGB quando não havia aumento de
+dados. Com aumento de dados, essa diferença desapareceu quando a
+avaliação desconsiderou as anotações sugeridas pelo modelo preliminar.
+A cabeça P2 apresentou desempenho inferior à configuração vencedora,
+com a mesma revocação e menor precisão. Essa variante não partiu de
+pesos pré-treinados na cabeça de detecção nem em parte das camadas
+intermediárias, e por isso o efeito isolado da cabeça P2 não pôde ser
+separado da ausência de pré-treino. Em uma dobra avaliada (45 cartas),
+aumentar a resolução de entrada de 640 para 1280 pixels elevou o
+mAP@0,5 de 0,156 para 0,309 e o F1 por carta de 0,266 para 0,399;
+esta última diferença foi confirmada pelo teste de Wilcoxon pareado.
+Uma curva de aprendizado com intervalo de confiança por
+\textit{bootstrap}, em duas dobras, mostrou que o desempenho ainda não havia estabilizado com o volume de dados
+disponível. A evidência do aumento de dados vem de cinco dobras, e a da
+resolução de entrada, de uma só. Por isso, com poucos dados, o aumento
+de dados melhorou o detector nas duas representações de entrada, e a
+maior resolução de entrada também o melhorou, mas com evidência mais
+limitada. O realce de micro-relevo não trouxe ganho.
 
 \vspace{\onelineskip}
 
 \noindent
-\textbf{Palavras-chave}: Visão Computacional. Detecção de Defeitos. 
-Pokémon TCG. Small Datasets. YOLOv8. Realce de Micro-Relevo.
+\textbf{Palavras-chave}: Visão Computacional. Detecção de Defeitos.
+Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
 \end{resumo}
 
 % ---------------------------------------------------------------
@@ -169,14 +189,58 @@ Pokémon TCG. Small Datasets. YOLOv8. Realce de Micro-Relevo.
 % ---------------------------------------------------------------
 \begin{resumo}[Abstract]
  \begin{otherlanguage*}{english}
-   % A ESCREVER: versão em inglês do resumo acima, com o mesmo conteúdo
-   % (problema, objetivo, método, resultados e conclusão).
+   This work evaluated the impact of different training strategies
+   applied to YOLOv8 on the detection of surface defects in Pokémon TCG
+   (\textit{Trading Card Game}) cards. The objective was to identify
+   which combinations perform best with a limited set of images. The
+   choice of topic was based on the scarcity of studies that
+   systematically evaluate these strategies in the domain of
+   collectible cards. In this domain, grading assesses the physical
+   condition of each item, but manual inspection is slow and subject
+   to the evaluator's subjectivity. These limitations motivate its
+   automation through computer vision. Defect annotation, however, is
+   expensive, and the bibliographic search carried out did not
+   identify public datasets of Pokémon TCG cards with localized
+   defects. In the experiments, the model started from a YOLOv8s with \textit{transfer learning} from
+   weights pre-trained on the public COCO image dataset. Four
+   configurations crossed the use or not of data augmentation with two
+   input representations: conventional RGB images and micro-relief
+   enhancement images. On top of the best-performing configuration,
+   the effect of an additional detection head for small objects (P2)
+   and of the input resolution was also evaluated. The dataset
+   comprised 206 cards, 412 images, and 4,808 annotations, part of
+   them suggested by a preliminary model and validated by the author.
+   Performance was measured by mAP@0.5, precision, recall and F1, in
+   five-fold cross-validation. F1 gives a single score per card, which
+   allowed the configurations to be compared card by card using a
+   paired Wilcoxon test with Holm correction. Data augmentation improved
+   the detector: Configuration 2, with RGB images and data augmentation,
+   achieved the best performance, with a per-card F1 of 0.376, against
+   0.332 for the same configuration without data augmentation.
+   Micro-relief enhancement was inferior to RGB when there was no data
+   augmentation. With data augmentation, this difference disappeared
+   when the evaluation disregarded the annotations suggested by the
+   preliminary model. The P2 head presented lower performance than the
+   winning configuration, with the same recall and lower precision.
+   This variant did not start from pre-trained weights in the detection
+   head or in part of the intermediate layers, so the isolated effect
+   of the P2 head could not be separated from the lack of pre-training.
+   In one evaluated fold (45 cards), increasing the input resolution
+   from 640 to 1280 pixels raised mAP@0.5 from 0.156 to 0.309 and the
+   per-card F1 from 0.266 to 0.399; the latter difference was confirmed
+   by the paired Wilcoxon test. A learning curve with a bootstrap confidence interval, over two folds,
+   showed that performance had not yet stabilized with the available
+   data volume. The evidence for data augmentation comes from five
+   folds, and that for input resolution from only one. Therefore, with
+   limited data, data augmentation improved the detector in both input
+   representations, and higher input resolution also improved it, but with more limited
+   evidence. Micro-relief enhancement brought no gain.
 
    \vspace{\onelineskip}
 
    \noindent
    \textbf{Keywords}: Computer Vision. Defect Detection. Pokémon TCG.
-   Small Datasets. YOLOv8. Photometric Preprocessing.
+   Small Datasets. YOLOv8. Micro-Relief Enhancement.
  \end{otherlanguage*}
 \end{resumo}
 
@@ -212,19 +276,32 @@ Pokémon TCG. Small Datasets. YOLOv8. Realce de Micro-Relevo.
 \toprule
 \textbf{Abreviatura/Sigla} & \textbf{Significado} \\
 \midrule
-ABNT   & Associação Brasileira de Normas Técnicas \\
 AP     & \textit{Average Precision} (Precisão Média) \\
 AVI    & \textit{Automated Visual Inspection} (Inspeção Visual Automatizada) \\
+C2f    & \textit{Cross Stage Partial Bottleneck with two Convolutions} (módulo convolucional do YOLOv8) \\
+CIELAB & Espaço de cor definido pela \textit{Commission Internationale de l'Éclairage}, com um canal de luminância (L) e dois de cor (a, b) \\
 CLAHE  & \textit{Contrast Limited Adaptive Histogram Equalization} \\
 CNN    & \textit{Convolutional Neural Network} (Rede Neural Convolucional) \\
 COCO   & \textit{Common Objects in Context} \\
+FN     & \textit{False Negative} (Falso Negativo) \\
+FP     & \textit{False Positive} (Falso Positivo) \\
 GPU    & \textit{Graphics Processing Unit} (Unidade de Processamento Gráfico) \\
+HSV    & \textit{Hue, Saturation, Value} (Matiz, Saturação, Valor) \\
 IoU    & \textit{Intersection over Union} \\
-mAP    & \textit{mean Average Precision} (Precisão Média Interpolada) \\
+mAP    & \textit{mean Average Precision} (Média das Precisões Médias) \\
+P2--P5 & Níveis da pirâmide de características do YOLOv8, identificados pelo passo de subamostragem em relação à imagem de entrada (P2 = passo 4 a P5 = passo 32) \\
+PANet  & \textit{Path Aggregation Network} \\
+PSA    & \textit{Professional Sports Authenticator} \\
+R-CNN  & \textit{Region-based Convolutional Neural Network} (Rede Neural Convolucional Baseada em Regiões) \\
 RGB    & \textit{Red, Green, Blue} \\
 SENAC  & Serviço Nacional de Aprendizagem Comercial \\
+SPPF   & \textit{Spatial Pyramid Pooling Fast} \\
+SSD    & \textit{Single Shot Detector} \\
 TCC    & Trabalho de Conclusão de Curso \\
 TCG    & \textit{Trading Card Game} (Jogo de Cartas Colecionáveis) \\
+TL     & \textit{Transfer Learning} \\
+TP     & \textit{True Positive} (Verdadeiro Positivo) \\
+UAV    & \textit{Unmanned Aerial Vehicle} (Veículo Aéreo Não Tripulado) \\
 YOLO   & \textit{You Only Look Once} \\
 \bottomrule
 \end{tabular}
@@ -250,7 +327,7 @@ YOLO   & \textit{You Only Look Once} \\
 \chapter{Introdução}
 \label{cap:introducao}
 
-Trading Card Games (TCG) são jogos de cartas colecionáveis nos quais 
+\textit{Trading Card Games} (TCG) são jogos de cartas colecionáveis nos quais
 cada carta possui atributos únicos, como raridade, ilustração, edição, 
 condição física e valor comercial. Além de sua função no contexto do 
 jogo, essas cartas são negociadas entre jogadores e colecionadores, 
@@ -272,16 +349,15 @@ a Beckett Grading Services introduziu, posteriormente, subnotas para
 atributos individuais da carta, ampliando o detalhamento do processo 
 de avaliação \cite{Shen2025}.
 
-O processo de graduação, no entanto, ainda é realizado de forma 
-predominantemente manual. Os avaliadores inspecionam cada carta com 
-lupas e iluminação controlada, o que torna a análise demorada, sujeita 
-à subjetividade de cada profissional e limitada em termos de 
-escalabilidade. Além disso, o manuseio frequente durante a inspeção 
-representa um risco à própria carta, pois o contato repetido pode 
-introduzir desgastes que reduzem a nota do item avaliado. Em um 
-mercado no qual diferenças sutis de conservação representam grandes 
-variações de preço, essa inconsistência tem consequências financeiras 
-diretas \cite{Nahar2025}.
+O processo de graduação, no entanto, ainda é realizado de forma
+predominantemente manual. Os avaliadores inspecionam cada carta com
+auxílio de instrumentos ópticos, como microscópios, o que torna a
+análise demorada, sujeita à subjetividade de cada profissional e
+difícil de escalar para acompanhar a demanda. Além disso, o manuseio
+durante a inspeção pode causar desgaste à própria carta. Em um mercado
+no qual uma carta pode valer de poucos dólares a centenas de milhares,
+conforme a raridade e o estado de conservação, a precisão dessa
+avaliação tem papel crítico no preço \cite{Nahar2025, Nahar2025b}.
 
 Como resposta a esses desafios, a automação baseada em visão 
 computacional tem sido investigada como alternativa à inspeção manual. 
@@ -302,29 +378,41 @@ de conjuntos de dados anotados em larga escala é custosa e trabalhosa,
 pois cada imagem exige rotulagem especializada com caixas delimitadoras 
 precisas para cada instância de defeito \cite{Situ2023}. No contexto de cartas TCG, 
 essa restrição é ainda mais pronunciada: a anotação requer avaliação especializada 
-de defeitos segundo critérios técnicos de graduação, e os estudos existentes no domínio dependeram 
-de infraestrutura dedicada para viabilizar seus conjuntos de dados 
+de defeitos segundo critérios técnicos de graduação, e o principal estudo identificado no domínio, conduzido sobre cartas esportivas, contou
+com o apoio de um parceiro da indústria para viabilizar seu conjunto de dados
 \cite{Nahar2025}.
 
-Pesquisadores já investigaram o uso de técnicas de visão computacional 
-para detecção de defeitos em cartas colecionáveis \cite{Nahar2025}, porém ainda há uma carência de estudos que avaliem 
-sistematicamente o impacto de diferentes estratégias de treinamento em 
-cenários com baixo volume de dados nesse domínio específico. Diante 
-disso, este trabalho propõe uma análise comparativa de estratégias de 
-treinamento para detecção de defeitos em cartas Pokémon TCG, conduzida 
-sobre um conjunto de dados composto por 82 cartas fornecido por uma 
-empresa brasileira especializada em graduação. As estratégias avaliadas 
-incluem \textit{transfer learning}, aumento de dados 
-(\textit{data augmentation}) e uso de imagens de realce de micro-relevo, 
-avaliadas em configurações controladas para quantificar
-a contribuição individual e combinada de cada abordagem. A avaliação será realizada por meio de métricas 
-quantitativas consolidadas na literatura, com o objetivo de identificar 
+Pesquisadores já investigaram o uso de técnicas de visão computacional
+para classificar defeitos em cartas colecionáveis \cite{Nahar2025}, porém ainda há uma carência de estudos que avaliem
+sistematicamente o impacto de diferentes estratégias de treinamento em
+cenários com baixo volume de dados nesse domínio específico. Durante a
+busca bibliográfica deste trabalho não foi identificado um conjunto de
+dados público de imagens de cartas Pokémon TCG com os defeitos
+localizados por caixas delimitadoras. O único conjunto público
+encontrado difere do necessário neste trabalho em dois pontos: reúne
+cartas esportivas, e não cartas Pokémon TCG, e traz recortes rotulados
+para classificação, sem a posição de cada defeito \cite{Nahar2025b}.
+Isso reforça a necessidade de construção de um conjunto próprio. Diante
+disso, este trabalho realizou uma análise comparativa de estratégias de
+treinamento para detecção de defeitos em cartas Pokémon TCG, conduzida
+sobre um conjunto de dados composto por 206 cartas fornecido por uma
+empresa brasileira especializada em graduação. Sobre um YOLOv8s com
+\textit{transfer learning} a partir de pesos pré-treinados no conjunto
+COCO, foram avaliados o aumento de dados (\textit{data augmentation}) e
+o realce de micro-relevo (uma transformação da imagem que destaca
+variações locais de intensidade associadas ao relevo da superfície,
+como vincos e amassados) como representação de entrada. Essas duas estratégias foram cruzadas em um estudo fatorial,
+que resultou em quatro configurações comparadas entre si. Em seguida,
+sobre a configuração de melhor desempenho nessa comparação, foram
+avaliadas uma cabeça de detecção adicional para objetos pequenos (P2) e
+a resolução de entrada de 1280 pixels, em comparação com a resolução
+padrão de 640 pixels. A avaliação foi realizada por meio de métricas
+quantitativas consolidadas na literatura, com o objetivo de identificar
 as combinações mais eficazes em cenários com dados limitados.
 
 % ---------------------------------------------------------------
 \section{Contextualização do problema}
 \label{sec:contextualizacao}
-\label{sec:contexto}
 
 Na graduação de cartas colecionáveis, a avaliação segue critérios 
 físicos padronizados que consideram superfície, bordas, cantos e 
@@ -337,74 +425,124 @@ modelos computacionais \cite{Nahar2025}.
 
 Do ponto de vista computacional, a detecção desses defeitos apresenta desafios
 semelhantes aos encontrados em inspeção industrial automatizada, mas agravados
-pelas características específicas das cartas TCG. O primeiro deles é a variação
-de iluminação durante a captura das imagens: inconsistências espaciais de brilho
-causadas pela geometria do equipamento de captura, pelo ângulo da câmera e por
-reflexos ambientais podem obscurecer defeitos reais ou gerar artefatos visuais
-interpretados erroneamente como danos \cite{Zheng2021}. Embora esse tipo de
-não-uniformidade seja amplamente reconhecido na área de visão computacional
-industrial, no contexto de cartas colecionáveis seu impacto pode ser intensificado
-pela presença de artes visualmente complexas, superfícies holográficas e defeitos
-de baixa visibilidade. Para mitigar seu impacto sobre a detecção de defeitos sutis, 
-operadores de filtragem têm sido aplicados como etapa de 
-pré-processamento em sistemas de inspeção visual 
+pelas características específicas das cartas TCG. O primeiro deles é a iluminação
+durante a captura das imagens: quando a iluminação não produz bom
+contraste entre o defeito e o fundo, ou quando introduz ruído na imagem,
+o reconhecimento de defeitos por métodos supervisionados se torna mais
+difícil \cite{Zheng2021}. No contexto de cartas colecionáveis, esse
+efeito pode ser intensificado pela presença de artes visualmente complexas,
+superfícies holográficas e defeitos de baixa visibilidade. Para mitigar seu impacto sobre a detecção de defeitos sutis,
+operadores de filtragem têm sido aplicados como etapa de
+pré-processamento em sistemas de inspeção visual
 \cite{Sawada2024, Jiang2023}.
 
-O segundo desafio são os reflexos em superfícies holográficas 
-(\textit{foil}), presentes em cartas de maior raridade, que refletem 
-luz de forma intensa e irregular, agravando o problema de iluminação 
-e dificultando a extração de características relevantes pelo modelo 
-\cite{Nahar2025}.
+O segundo desafio são os reflexos em superfícies holográficas
+(\textit{foil}). Em superfícies altamente refletoras, artefatos de
+reflexo podem mascarar as características visuais necessárias para
+identificar defeitos \cite{KimMG2026}. De modo análogo, o brilho da
+superfície holográfica pode reduzir o contraste entre o defeito e a
+região ao redor, e reflexos e sombras já são reconhecidos como fonte de
+problema na captura de imagens de cartas \cite{Nahar2025}. Entre as estratégias avaliadas
+neste trabalho, o realce de micro-relevo aumenta o contraste local da
+imagem e pode atenuar em parte essa perda de contraste; nenhuma delas,
+porém, atua sobre a captura da imagem, etapa em que o reflexo se forma.
 
-Um terceiro desafio diz respeito à natureza da tarefa de inspeção em si. 
-Abordagens baseadas em classificação por região, nas quais um modelo 
-atribui uma nota a uma área inteira da carta, não conseguem identificar 
-onde dentro dessa região o defeito está localizado \cite{Hussain2023}. 
-Um canto pode apresentar \textit{whitening} restrito à sua extremidade, 
-mas o classificador produz apenas uma nota global para aquela região, 
-sem indicar a posição ou a extensão do dano. Em sistemas de inspeção 
-visual automatizada, essa limitação é reconhecida: modelos baseados em 
-aprendizado profundo aprendem representações hierárquicas das imagens, 
-mas a ausência de localização espacial compromete tanto a 
-interpretabilidade quanto a precisão da avaliação \cite{Zheng2021}. 
-Por esse motivo, a detecção de objetos, que produz caixas delimitadoras 
-com classe e posição para cada defeito identificado, é mais adequada do 
-que a classificação pura para essa tarefa \cite{Ramos2025}.
+Um terceiro desafio diz respeito à natureza da tarefa de inspeção em si.
+Abordagens de classificação atribuem um rótulo à imagem, ou a um recorte
+dela, como um canto da carta, sem fornecer informação sobre a
+localização do defeito \cite{Hussain2023}. Um canto pode apresentar
+\textit{whitening} restrito à sua extremidade, mas o classificador
+produz apenas uma nota global para aquela região, sem indicar a posição
+ou a extensão do dano. Quando essa informação é necessária, a detecção
+de objetos, que localiza cada instância por caixa delimitadora e lhe
+atribui uma classe \cite{Ramos2025}, é apontada como preferível à
+classificação de imagens em inspeção de defeitos \cite{Hussain2023}.
+Neste trabalho, a detecção foi conduzida com uma única classe,
+denominada \textit{defeito}: o modelo localiza cada instância, mas não
+distingue o tipo de defeito nem sua gravidade. Mesmo sem essas
+informações, a localização tem valor próprio, pois indica ao avaliador
+em que pontos da carta concentrar a inspeção.
 
-Por fim, a construção de conjuntos de dados anotados nesse domínio 
-impõe restrições práticas que delimitam diretamente o escopo de 
-investigação possível. \citeonline{Nahar2025} utilizaram 593 cartas 
-escaneadas por um parceiro industrial para compor seu conjunto de 
-treinamento, volume que ilustra o que representa um conjunto de dados 
-de referência nesse domínio e evidencia por que cenários com poucos 
-exemplos rotulados, caracterizam uma restrição real que demanda estratégias de 
-treinamento específicas. Sistemas integrados de graduação automática 
-já foram desenvolvidos e implantados em ambiente de produção, 
-avaliando cantos, bordas e superfície de forma unificada em datasets 
-industriais de larga escala \cite{Nahar2025b}, o que evidencia tanto 
-a viabilidade técnica da automação quanto a distância entre os 
-recursos disponíveis em contexto industrial e os cenários com dados 
-limitados investigados neste trabalho.
+Um quarto desafio diz respeito ao tamanho dos defeitos. Antes de entrar
+na rede, a imagem é redimensionada para a resolução de entrada: na
+resolução de 640 pixels, por exemplo, ela é redimensionada, mantendo a
+proporção, até que seu lado maior meça 640 pixels. A rede, por sua vez,
+reduz essa imagem em etapas, e cada nível de detecção trabalha sobre um
+mapa de características em que um único ponto resume um bloco de pixels
+da imagem de entrada; o lado desse bloco é chamado de passo. No nível de
+passo 8, por exemplo, cada ponto resume um bloco de 8 $\times$ 8
+pixels, e o sinal de um defeito cujo menor lado é menor que 8 pixels
+ocupa só uma parte de cada bloco em que aparece e fica diluído no ponto
+que resume esse bloco. Na resolução de entrada de 640 pixels, que é a
+resolução padrão do YOLOv8, 57,6\% dos defeitos deste conjunto de dados
+têm o menor lado da caixa delimitadora abaixo de 8 pixels, o passo do
+nível de detecção mais fino do YOLOv8 original (P3); essa proporção cai
+para 10,8\% quando a resolução de entrada sobe para 1280 pixels. Essa
+restrição motivou a avaliação de uma cabeça de detecção adicional
+voltada a objetos pequenos (P2, de passo 4) e da resolução de entrada
+como estratégias deste trabalho.
+
+Por fim, a construção de conjuntos de dados anotados nesse domínio
+impõe restrições práticas que delimitam diretamente o escopo de
+investigação possível. Mesmo o principal estudo identificado no domínio
+trabalhou com um conjunto que os próprios autores caracterizam como
+pequeno \cite{Nahar2025}, o que evidencia por que cenários com poucos
+exemplos rotulados constituem uma restrição real que demanda
+estratégias de treinamento específicas. Um sistema integrado de
+graduação automática, apresentado por seus autores como pronto para uso
+em produção, avalia cantos, bordas e superfície de forma unificada, com
+algumas centenas de cartas (593 para cantos, 134 para bordas e 150 para
+superfície) \cite{Nahar2025b}. Esse sistema, porém, classifica recortes
+da carta, sem localizar os defeitos na imagem. A diferença para este
+trabalho é, portanto, sobretudo de tarefa: aqui, o modelo
+detecta cada defeito e o localiza por caixa delimitadora.
 
 % ---------------------------------------------------------------
 \section{Formulação do problema}
 \label{sec:formulacao}
 
-% A ESCREVER: o problema em forma de pergunta clara, delimitando o que
-% sera investigado e qual resultado se espera atingir dentro da Computacao.
+Diante desses desafios, o problema investigado neste trabalho pode ser
+formulado pela seguinte pergunta: com um conjunto reduzido de imagens
+anotadas, quais estratégias de treinamento aplicadas ao YOLOv8, entre
+aumento de dados, realce de micro-relevo como representação de entrada,
+cabeça de detecção adicional para objetos pequenos e resolução de
+entrada, melhoram a detecção de defeitos superficiais em cartas
+Pokémon TCG? O trabalho restringe-se à detecção de defeitos com uma
+classe única, sem atribuir a nota de graduação da carta, e à
+comparação dessas estratégias sobre um mesmo conjunto de dados e um
+mesmo protocolo de avaliação.
+
+As anotações de defeito usadas neste trabalho foram feitas por um único
+anotador, o próprio autor, com apoio nos laudos de graduação emitidos
+pela empresa que forneceu o conjunto de dados e no próprio julgamento
+sobre a imagem, inclusive para defeitos não registrados nesses laudos.
+A referência contra a qual o detector é medido é, portanto, o
+julgamento desse anotador apoiado nos laudos, e não o laudo em si; sem
+um segundo anotador, não foi possível medir a concordância entre
+avaliadores, e o desempenho que é possível medir fica limitado pela
+consistência dessa anotação. Parte das caixas delimitadoras, 892 de
+4.808 (18,6\%), foi sugerida por um modelo de detecção treinado
+previamente e validada individualmente pelo autor. Esse modelo usava
+imagens coloridas convencionais (RGB), com aumento de dados, e as
+sugestões para cada carta vieram de modelos treinados sem essa
+carta. Como esse modelo via as imagens da mesma forma que as
+configurações que usam imagens RGB, as caixas sugeridas podem favorecer
+essas configurações na comparação com o realce de micro-relevo; por
+esse motivo, os resultados apresentados no
+Capítulo~\ref{cap:desenvolvimento} foram verificados também
+desconsiderando essas caixas sugeridas.
 
 % ---------------------------------------------------------------
 \section{Objetivos e hipótese}
 \label{sec:objetivos}
 
-Este trabalho tem como foco avaliar o desempenho de estratégias de 
-treinamento aplicadas à detecção automática de defeitos em cartas 
-Pokémon TCG em um cenário com baixo volume de dados. A definição dos 
-objetivos a seguir foi guiada pela identificação das lacunas existentes 
-na literatura e pelas restrições práticas do conjunto de dados 
-disponível, buscando delimitar uma contribuição viável e 
-cientificamente fundamentada dentro do escopo de um trabalho de 
-conclusão de curso.
+Os objetivos a seguir decorrem da lacuna e da restrição apresentadas
+nas seções anteriores: há carência de estudos que avaliem
+sistematicamente estratégias de treinamento para detectar defeitos em
+cartas colecionáveis, e o conjunto de dados disponível reúne apenas 206
+cartas. Por isso, o objetivo é comparativo: em vez de propor um modelo
+novo, o trabalho avalia quais estratégias melhoram um detector já
+estabelecido, o YOLOv8, nesse cenário.
 
 \subsection{Objetivo geral}
 
@@ -420,82 +558,135 @@ Para alcançar o objetivo geral, foram definidos os seguintes objetivos específ
     \textit{defeito}.
     
     \item Implementar quatro configurações experimentais baseadas em YOLOv8 com
-    \textit{transfer learning}, incluindo uma configuração de referência com imagens
-    RGB convencionais, e variações com aumento de dados (\textit{data augmentation})
-    e imagens de realce de micro-relevo.
+    \textit{transfer learning}, cruzando o uso de aumento de dados
+    (\textit{data augmentation}) com duas representações de entrada,
+    imagens RGB convencionais e imagens de realce de micro-relevo, e
+    comparar as quatro combinações resultantes.
 
-    \item Conduzir um estudo de ablação baseado na comparação controlada entre 
-    quatro configurações experimentais, analisando o impacto individual e combinado 
-    do aumento de dados e das imagens de realce de micro-relevo no desempenho do modelo.
+    \item Avaliar, sobre a configuração de melhor desempenho nessa
+    comparação, o efeito de uma cabeça de detecção adicional voltada a
+    objetos menores (P2), pela revocação (a proporção dos defeitos
+    anotados que o modelo encontra) dos defeitos cujo menor lado da
+    caixa delimitadora é menor que 8 pixels, e o efeito da resolução de
+    entrada, comparando 1280 e 640 pixels pelo F1 por carta, com teste
+    de Wilcoxon pareado.
 
-    \item Comparar o desempenho das diferentes configurações por meio 
-    de métricas quantitativas consolidadas em detecção de objetos, 
-    incluindo precisão (\textit{Precision}), revocação (\textit{Recall}), 
-    F1-\textit{score} e \textit{mean Average Precision} (mAP@0.5).
-    
-    \item Analisar os resultados obtidos, identificando quais estratégias 
-    de treinamento apresentam melhor desempenho em cenários com conjuntos 
+    \item Comparar o desempenho das diferentes configurações por meio
+    de métricas quantitativas consolidadas em detecção de objetos,
+    incluindo precisão (\textit{Precision}), revocação (\textit{Recall}),
+    F1-\textit{score} e \textit{mean Average Precision} (mAP@0,5).
+
+    \item Avaliar, por meio de uma curva de aprendizado, se o desempenho
+    do detector aumenta com o número de cartas disponíveis para treino.
+
+    \item Analisar os resultados obtidos, identificando quais estratégias
+    de treinamento apresentam melhor desempenho em cenários com conjuntos
     de dados reais e limitados no domínio de inspeção de cartas TCG.
 \end{enumerate}
-
-% ===============================================================
-% CAPÍTULO 2 - REVISÃO BIBLIOGRÁFICA
 
 \subsection{Hipótese ou critério de validação}
 \label{subsec:hipotese}
 
-% A ESCREVER: a hipotese testada ou o criterio usado para afirmar que o
-% objetivo geral foi atingido.
+A partir da revisão da literatura, foram formuladas as hipóteses H1 a
+H3; a hipótese H4 foi formulada depois, a partir da análise do tamanho
+das anotações apresentada na Seção~\ref{sec:contextualizacao}. As
+quatro hipóteses foram formuladas antes do treinamento dos modelos
+usados para testá-las:
+
+\begin{description}
+    \item[H1] O aumento de dados (\textit{data augmentation}) melhora o desempenho do detector em relação à configuração sem aumento de dados.
+    \item[H2] O uso de imagens de realce de micro-relevo como representação de entrada melhora o desempenho do detector em relação às imagens RGB.
+    \item[H3] A combinação de aumento de dados e realce de micro-relevo (Configuração 4) produz o melhor desempenho entre as quatro configurações avaliadas.
+    \item[H4] A cabeça de detecção adicional P2 aumenta a revocação (\textit{recall}) dos defeitos cujo menor lado da caixa delimitadora é menor que 8 pixels, na resolução de entrada de 1280 pixels.
+\end{description}
+
+A métrica usada para testar H1 a H3 foi o F1 por carta, que resume em
+um único valor a precisão e a revocação das detecções de cada carta;
+seu cálculo é descrito no Capítulo~\ref{cap:desenvolvimento}. H1 foi testada pela comparação
+pareada por carta entre a Configuração 2 (RGB com aumento de dados) e a
+Configuração 1 (RGB sem aumento de dados), e entre a Configuração 4
+(realce com aumento de dados) e a Configuração 3 (realce sem aumento de
+dados). H2 foi testada pela comparação entre a Configuração 3 e a
+Configuração 1, e entre a Configuração 4 e a Configuração 2. H3 seria
+refutada se alguma das outras configurações superasse a Configuração 4,
+o que foi verificado pelas mesmas comparações da Configuração 4 com as
+Configurações 2 e 3, sem teste adicional. Todas essas comparações
+usaram o teste de Wilcoxon pareado bilateral, com nível de
+significância $\alpha = 0{,}05$, definido antes do treinamento das
+quatro configurações; a correção de Holm para o conjunto de comparações foi
+aplicada na análise dos resultados.
+
+Para H4, o critério, definido antes do treinamento da variante com a
+cabeça P2, foi a revocação dos defeitos cujo menor lado da caixa é
+menor que 8 pixels na resolução de 1280 pixels, somados todos os
+defeitos desse grupo, comparando a configuração de melhor desempenho
+com e sem a cabeça P2. Mesmo nessa resolução, parte dos defeitos
+permanece abaixo do passo do nível P3 (Seção~\ref{sec:contextualizacao}),
+o que justificou testar a P2 nessa resolução. Já se sabia, antes desse
+treinamento, que a variante com a cabeça P2 não receberia pesos
+pré-treinados na cabeça de detecção nem em parte das camadas
+intermediárias; por isso, o teste de H4 não separa o efeito da cabeça
+P2 do efeito da falta de pré-treino.
+
+A resolução de entrada e a curva de aprendizado foram análises
+exploratórias, decididas depois dos resultados do estudo fatorial e sem
+hipótese formulada previamente; seus resultados indicam direções a
+confirmar. A confirmação ou a refutação de cada hipótese é apresentada
+nos resultados e retomada na conclusão.
 
 % ---------------------------------------------------------------
 \section{Justificativa}
 \label{sec:justificativa}
 
-No âmbito científico, os estudos existentes sobre automação da 
-graduação de cartas TCG apresentam contribuições relevantes, mas com 
-lacunas que abrem espaço para a investigação proposta neste trabalho. 
-\citeonline{Nahar2025} propõem um modelo baseado em \textit{transfer 
-learning} para graduação de cantos, alcançando 83\% de acurácia sobre 
-um conjunto de 593 cartas, mas o estudo está restrito a um único 
-critério de avaliação e não analisa sistematicamente o impacto de 
-diferentes estratégias de treinamento no desempenho do modelo. 
-Embora sistemas integrados de graduação automática já demonstrem alta 
-acurácia em datasets industriais de larga escala \cite{Nahar2025b}, 
-a investigação sistemática do impacto de estratégias de treinamento 
-em cenários com conjuntos reduzidos de dados reais permanece uma 
-lacuna na literatura, que este trabalho se propõe a investigar sobre 
-um conjunto de 82 cartas fornecido por uma empresa brasileira 
-especializada em graduação.
+No âmbito científico, os estudos existentes sobre automação da
+graduação de cartas colecionáveis apresentam contribuições relevantes, mas com
+lacunas que abrem espaço para a investigação realizada neste trabalho.
+\citeonline{Nahar2025} propõem um modelo baseado em \textit{transfer
+learning} para classificar a severidade de defeitos em cantos,
+alcançando 83\% de acurácia média em um conjunto de 4.744 imagens de
+cantos obtidas de 593 cartas esportivas, mas o estudo está restrito a um único
+critério de avaliação e não analisa sistematicamente o impacto de
+diferentes estratégias de treinamento no desempenho do modelo.
+Embora o sistema integrado descrito na
+Seção~\ref{sec:contextualizacao} alcance acurácias de 81\% a 94\% na
+classificação de recortes \cite{Nahar2025b}, a investigação
+sistemática do impacto de estratégias de treinamento na detecção
+localizada de defeitos, com conjuntos reduzidos de dados reais,
+permanece uma lacuna no domínio de cartas colecionáveis, que este
+trabalho investigou sobre um conjunto de 206 cartas e 412 imagens.
 
-A relevância de investigar estratégias como 
-\textit{transfer learning} e aumento de dados em cenários 
-com amostras escassas é sustentada pela literatura de 
-inspeção visual automatizada. \citeonline{Chen2021} 
-identificam o problema de pequenas amostras 
-(\textit{small sample problem}) como um dos desafios 
-centrais da detecção de defeitos industriais com 
-aprendizado profundo, apontando \textit{transfer learning}
-e aumento de dados como as principais estratégias para
-reduzir a dependência de grandes volumes de exemplos
-rotulados sem comprometer o desempenho dos modelos.
-A eficácia empírica do \textit{transfer learning} nesse
-contexto é ilustrada por \citeonline{Wang2022}, cujos
-experimentos demonstraram que um modelo treinado com apenas
-12,5\% do volume de dados disponível, apoiado por
-\textit{transfer learning} e estratégias de aumento de dados,
-superou o detector de referência em aproximadamente 15 pontos
-de mAP, evidência direta de que a combinação dessas
-estratégias pode compensar a escassez de exemplos rotulados.
+A relevância de investigar estratégias como
+\textit{transfer learning} e aumento de dados em cenários
+com amostras escassas é sustentada pela literatura de
+inspeção visual automatizada. \citeonline{Chen2021}
+identificam o problema de pequenas amostras
+(\textit{small sample problem}) como um dos problemas
+centrais da detecção de defeitos superficiais industriais com
+aprendizado profundo, associado ao risco de sobreajuste, e
+apontam quatro linhas de solução: aumento de dados, modelos
+não supervisionados ou semissupervisionados,
+\textit{transfer learning} e otimização da estrutura da rede.
+Um exemplo quantitativo é apresentado por \citeonline{Wang2022},
+na detecção de defeitos superficiais em aço: com apenas cinco
+imagens rotuladas por categoria, pré-treinar o detector em
+outras categorias de defeito antes do ajuste fino elevou o mAP
+de 9,4\% para 24,1\%, em relação ao mesmo modelo treinado
+somente com essas imagens. Nesse mesmo experimento, o aumento de
+dados, uma das estratégias avaliadas neste trabalho, acrescentou até
+2,3 pontos percentuais ao mAP.
 
-Na prática, os resultados desta investigação podem evidenciar em que 
-medida estratégias como \textit{transfer learning}, aumento de dados 
-e o uso de imagens de realce de micro-relevo permanecem eficazes quando 
-aplicadas a um conjunto reduzido de dados reais, sem depender de 
-plataformas robóticas de captura ou de \textit{datasets} extensos. 
-Essa análise é relevante para contextos em que a anotação é cara e o 
-volume de dados é limitado \cite{Situ2023, Chen2021}, permitindo 
-avaliar em que medida essas estratégias favorecem a detecção 
-automática de defeitos como apoio à inspeção visual \cite{Nahar2025}.
+Na prática, avaliar essas estratégias (aumento de dados, realce de
+micro-relevo, a cabeça de detecção adicional P2 e a resolução de
+entrada) sobre um YOLOv8s com \textit{transfer learning} a partir do
+conjunto COCO indica quais delas merecem ser priorizadas quando o
+volume de dados de treinamento é pequeno, um cenário comum em domínios
+especializados como o de cartas colecionáveis. Um resultado negativo
+(uma estratégia que não melhora o desempenho nesse cenário) também
+constitui uma contribuição, pois evita que trabalhos futuros repitam o
+mesmo investimento sem o ganho esperado. Essa análise é relevante para
+contextos em que a anotação é cara e o volume de dados é limitado
+\cite{Situ2023, Chen2021}, e busca subsidiar a detecção automática de
+defeitos como apoio à inspeção visual \cite{Nahar2025}.
 
 % ===============================================================
 % CAPÍTULO 2 - REVISÃO BIBLIOGRÁFICA
@@ -527,7 +718,7 @@ Tabela~\ref{tab:strings_busca}. A triagem considerou título e resumo
 como critérios iniciais de relevância, com leitura completa reservada 
 aos trabalhos selecionados para inclusão.
 
-\begin{table}[htb]
+\begin{table}[H]
 \centering
 \caption{Strings de busca utilizadas na pesquisa bibliográfica}
 \label{tab:strings_busca}
@@ -575,13 +766,16 @@ aos trabalhos selecionados para inclusão.
 \textit{``filter'' AND ``surface defect detection'' AND ``deep learning''} 
     & GS, IEEE, SD, MDPI & 5 & 1 \\
 \midrule
-\textit{``small object detection'' AND ``input resolution'' OR ``image size''} 
+\textit{``small object detection'' AND ``input resolution'' OR ``image size''}
     & GS, IEEE, SD, MDPI & 9 & 3 \\
 \midrule
-Fontes não acadêmicas (contextualização de mercado e documentação técnica) 
+\textit{``highly reflective'' surface defect detection YOLO}
+    & MDPI & 9 & 1 \\
+\midrule
+Fontes não acadêmicas (contextualização de mercado e documentação técnica)
     & Diversas & — & 2 \\
 \midrule
-\textbf{Total} & & \textbf{80} & \textbf{26} \\
+\textbf{Total} & & \textbf{89} & \textbf{27} \\
 \bottomrule
 \end{tabular}
 \legend{GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.
@@ -614,6 +808,9 @@ avaliada com base em sua aderência ao problema de pesquisa, isto é, a
 detecção automatizada de defeitos visuais em cenários com baixo volume 
 de dados, com ênfase em aplicações de visão computacional em domínios 
 especializados.
+
+
+
 
 % ---------------------------------------------------------------
 \section{Fundamentos teóricos}
