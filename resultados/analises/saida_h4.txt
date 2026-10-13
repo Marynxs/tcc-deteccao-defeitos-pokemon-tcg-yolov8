@@ -1,0 +1,3 @@
+cartas com defeito <8px: 127; total defeitos 517; achados cfg2 14 P2 17
+recall medio por carta cfg2 0.021 P2 0.038; P2 melhor/pior/empate 11/10/106
+wilcoxon p = 0.3939208080374913

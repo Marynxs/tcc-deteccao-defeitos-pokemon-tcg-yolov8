@@ -1,0 +1,6 @@
+n cartas: 206
+efeito do aumento, RGB: media +0.0443 mediana +0.0327
+efeito do aumento, realce: media +0.0602 mediana +0.0451
+interacao (diferenca das diferencas): media -0.0160 mediana -0.0188; positivas 92 negativas 108 zeros 6
+Wilcoxon bilateral: W = 8875.0 p = 0.15165778796766777
+Wilcoxon (Pratt, mantem zeros): p = 0.15337050851675169

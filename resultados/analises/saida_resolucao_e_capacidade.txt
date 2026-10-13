@@ -1,0 +1,4 @@
+1280 vs 640 F1: n=45 0.399 vs 0.266 melhor/pior/empate 36/6/3 p=9.8e-07
+1280 vs 640 recall: n=45 0.378 vs 0.276 melhor/pior/empate 27/5/13 p=4.7e-05
+1280 vs yolov8m F1: n=45 0.399 vs 0.431 melhor/pior/empate 18/25/2 p=0.25
+1280 vs yolov8m recall: n=45 0.378 vs 0.411 melhor/pior/empate 14/20/11 p=0.15

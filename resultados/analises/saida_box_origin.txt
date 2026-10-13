@@ -1,0 +1,1 @@
+Counter({'orig': 2953, 'manual': 963, 'prop': 892}) total 4808 imagens divergentes 0

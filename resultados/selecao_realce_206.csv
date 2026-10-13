@@ -1,0 +1,5 @@
+variante,descricao,f1_val_interna,map50_val_interna,map50_dobra_retida,f1_dobra_retida,escolhida,criterio,margem_sobre_segunda
+e,"composto: L original, L com CLAHE, Frangi sobre o L com CLAHE",0.208,0.1066,0.1045,0.1959,1,f1_val_interna,0.0845
+a,"luminosidade, emboss 3x3, CLAHE",0.1918,0.1045,0.0839,0.1827,0,f1_val_interna,
+d,"luminosidade, CLAHE, cristas multiescala por Hessiana (Gruber 2021)",0.1605,0.0645,0.0658,0.1562,0,f1_val_interna,
+b,"luminosidade, CLAHE, emboss de 8 direcoes (Sawada 2024)",0.1506,0.0674,0.0617,0.1544,0,f1_val_interna,

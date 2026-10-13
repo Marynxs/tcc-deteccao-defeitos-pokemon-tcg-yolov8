@@ -1,0 +1,15 @@
+dobra 0: treino 133 val 34 aval 39 | T&V 0 T&A 0 V&A 0 | uniao 206 | grupos T&V 0 T&A 0 V&A 0
+dobra 1: treino 134 val 33 aval 39 | T&V 0 T&A 0 V&A 0 | uniao 206 | grupos T&V 0 T&A 0 V&A 0
+dobra 2: treino 134 val 34 aval 38 | T&V 0 T&A 0 V&A 0 | uniao 206 | grupos T&V 0 T&A 0 V&A 0
+dobra 3: treino 129 val 32 aval 45 | T&V 0 T&A 0 V&A 0 | uniao 206 | grupos T&V 0 T&A 0 V&A 0
+dobra 4: treino 129 val 32 aval 45 | T&V 0 T&A 0 V&A 0 | uniao 206 | grupos T&V 0 T&A 0 V&A 0
+cada carta avaliada 1 vez: True
+fold0 val interna: 34 cartas; dobra retida delas: Counter({4: 10, 1: 10, 3: 8, 2: 6})
+  fold1_avaliacao: 10 de 39 cartas vieram da val interna da dobra 0
+  fold2_avaliacao: 6 de 38 cartas vieram da val interna da dobra 0
+  fold3_avaliacao: 8 de 45 cartas vieram da val interna da dobra 0
+  fold4_avaliacao: 10 de 45 cartas vieram da val interna da dobra 0
+curva 25%: 32 cartas, subconjunto do treino4 True, &val 0 &aval 0, grupos partidos 0
+curva 50%: 64 cartas, subconjunto do treino4 True, &val 0 &aval 0, grupos partidos 0
+curva 75%: 97 cartas, subconjunto do treino4 True, &val 0 &aval 0, grupos partidos 0
+aninhado True

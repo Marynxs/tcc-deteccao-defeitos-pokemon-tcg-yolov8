@@ -1,0 +1,96 @@
+limiar de IoU para regiao ignorada: 0.5
+
+== recorte completo ==
+cfg1_1280      TP  1237 FP  2398 FN  3571 recall 0.257 precisao 0.340 F1 0.293 | AP50 medio dobras 0.190 (0.160 0.166 0.217 0.164 0.246) | F1 por carta medio 0.332 n=206
+cfg2_1280      TP  1369 FP  1946 FN  3439 recall 0.285 precisao 0.413 F1 0.337 | AP50 medio dobras 0.247 (0.191 0.217 0.286 0.225 0.313) | F1 por carta medio 0.376 n=206
+cfg3_1280      TP  1021 FP  2522 FN  3787 recall 0.212 precisao 0.288 F1 0.245 | AP50 medio dobras 0.150 (0.116 0.135 0.190 0.135 0.172) | F1 por carta medio 0.294 n=206
+cfg4_1280      TP  1252 FP  2206 FN  3556 recall 0.260 precisao 0.362 F1 0.303 | AP50 medio dobras 0.202 (0.172 0.190 0.232 0.180 0.234) | F1 por carta medio 0.354 n=206
+cfg2_1280_p2   TP  1359 FP  2637 FN  3449 recall 0.283 precisao 0.340 F1 0.309 | AP50 medio dobras 0.217 (0.165 0.212 0.245 0.184 0.278) | F1 por carta medio 0.339 n=206
+  F1     cfg2_1280 vs cfg1_1280: n=206 0.376 vs 0.332 melhor/pior/empate 123/75/8 p=7.4e-06 (pratt 8.7e-06) Holm 1.7e-05
+  F1     cfg2_1280 vs cfg3_1280: n=206 0.376 vs 0.294 melhor/pior/empate 154/39/13 p=5.2e-16 (pratt 1.9e-16) Holm 3.1e-15
+  F1     cfg2_1280 vs cfg4_1280: n=206 0.376 vs 0.354 melhor/pior/empate 124/73/9 p=0.0018 (pratt 0.0014) Holm 0.0018
+  F1     cfg2_1280 vs cfg2_1280_p2: n=206 0.376 vs 0.339 melhor/pior/empate 124/70/12 p=5.6e-06 (pratt 5.9e-06) Holm 1.7e-05
+  F1     cfg1_1280 vs cfg3_1280: n=206 0.332 vs 0.294 melhor/pior/empate 130/65/11 p=7.2e-07 (pratt 6.3e-07) Holm 2.9e-06
+  F1     cfg4_1280 vs cfg3_1280: n=206 0.354 vs 0.294 melhor/pior/empate 136/57/13 p=6e-10 (pratt 5.1e-10) Holm 3e-09
+  recall cfg2_1280 vs cfg1_1280: n=206 0.375 vs 0.333 melhor/pior/empate 108/48/50 p=3.3e-05 (pratt 6.1e-06) Holm 9.9e-05
+  recall cfg2_1280 vs cfg3_1280: n=206 0.375 vs 0.290 melhor/pior/empate 126/34/46 p=2.9e-12 (pratt 2.9e-13) Holm 1.7e-11
+  recall cfg2_1280 vs cfg4_1280: n=206 0.375 vs 0.353 melhor/pior/empate 97/51/58 p=0.0057 (pratt 0.001) Holm 0.011
+  recall cfg2_1280 vs cfg2_1280_p2: n=206 0.375 vs 0.373 melhor/pior/empate 80/68/58 p=0.6 (pratt 0.46) Holm 0.6
+  recall cfg1_1280 vs cfg3_1280: n=206 0.333 vs 0.290 melhor/pior/empate 115/50/41 p=1e-05 (pratt 2.1e-06) Holm 4e-05
+  recall cfg4_1280 vs cfg3_1280: n=206 0.353 vs 0.290 melhor/pior/empate 109/40/57 p=4.9e-10 (pratt 5.8e-10) Holm 2.4e-09
+
+== recorte humano ==
+cfg1_1280      TP   780 FP  2344 FN  3136 recall 0.199 precisao 0.250 F1 0.222 | AP50 medio dobras 0.129 (0.089 0.104 0.162 0.095 0.194) | F1 por carta medio 0.264 n=201
+cfg2_1280      TP   865 FP  1876 FN  3051 recall 0.221 precisao 0.316 F1 0.260 | AP50 medio dobras 0.173 (0.112 0.150 0.218 0.140 0.247) | F1 por carta medio 0.304 n=201
+cfg3_1280      TP   698 FP  2469 FN  3218 recall 0.178 precisao 0.220 F1 0.197 | AP50 medio dobras 0.110 (0.076 0.107 0.142 0.084 0.142) | F1 por carta medio 0.250 n=201
+cfg4_1280      TP   844 FP  2128 FN  3072 recall 0.216 precisao 0.284 F1 0.245 | AP50 medio dobras 0.149 (0.110 0.138 0.189 0.115 0.195) | F1 por carta medio 0.306 n=201
+cfg2_1280_p2   TP   875 FP  2462 FN  3041 recall 0.223 precisao 0.262 F1 0.241 | AP50 medio dobras 0.150 (0.093 0.143 0.180 0.109 0.227) | F1 por carta medio 0.288 n=201
+  F1     cfg2_1280 vs cfg1_1280: n=201 0.304 vs 0.264 melhor/pior/empate 122/64/15 p=6.6e-05 (pratt 4.5e-05) Holm 0.00026
+  F1     cfg2_1280 vs cfg3_1280: n=201 0.304 vs 0.250 melhor/pior/empate 133/51/17 p=4.5e-09 (pratt 2.2e-09) Holm 2.7e-08
+  F1     cfg2_1280 vs cfg4_1280: n=201 0.304 vs 0.306 melhor/pior/empate 100/83/18 p=0.59 (pratt 0.52) Holm 0.59
+  F1     cfg2_1280 vs cfg2_1280_p2: n=201 0.304 vs 0.288 melhor/pior/empate 115/72/14 p=0.011 (pratt 0.008) Holm 0.024
+  F1     cfg1_1280 vs cfg3_1280: n=201 0.264 vs 0.250 melhor/pior/empate 112/67/22 p=0.0079 (pratt 0.0046) Holm 0.024
+  F1     cfg4_1280 vs cfg3_1280: n=201 0.306 vs 0.250 melhor/pior/empate 122/57/22 p=2.2e-08 (pratt 2.5e-08) Holm 1.1e-07
+  recall cfg2_1280 vs cfg1_1280: n=201 0.322 vs 0.278 melhor/pior/empate 90/46/65 p=0.0001 (pratt 7.3e-05) Holm 0.00041
+  recall cfg2_1280 vs cfg3_1280: n=201 0.322 vs 0.265 melhor/pior/empate 103/39/59 p=2.8e-06 (pratt 2.8e-07) Holm 1.4e-05
+  recall cfg2_1280 vs cfg4_1280: n=201 0.322 vs 0.322 melhor/pior/empate 72/63/66 p=0.97 (pratt 0.73) Holm 1
+  recall cfg2_1280 vs cfg2_1280_p2: n=201 0.322 vs 0.335 melhor/pior/empate 71/65/65 p=0.75 (pratt 0.95) Holm 1
+  recall cfg1_1280 vs cfg3_1280: n=201 0.278 vs 0.265 melhor/pior/empate 84/48/69 p=0.046 (pratt 0.0088) Holm 0.14
+  recall cfg4_1280 vs cfg3_1280: n=201 0.322 vs 0.265 melhor/pior/empate 94/41/66 p=6.3e-08 (pratt 2e-07) Holm 3.8e-07
+
+== recorte proposta ==
+cfg1_1280      TP   457 FP  2322 FN   435 recall 0.512 precisao 0.164 F1 0.249 | AP50 medio dobras 0.159 (0.200 0.130 0.139 0.176 0.151) | F1 por carta medio 0.260 n=167
+cfg2_1280      TP   504 FP  1834 FN   388 recall 0.565 precisao 0.216 F1 0.312 | AP50 medio dobras 0.236 (0.244 0.185 0.223 0.256 0.273) | F1 por carta medio 0.314 n=167
+cfg3_1280      TP   323 FP  2453 FN   569 recall 0.362 precisao 0.116 F1 0.176 | AP50 medio dobras 0.100 (0.109 0.068 0.122 0.126 0.075) | F1 por carta medio 0.191 n=167
+cfg4_1280      TP   408 FP  2056 FN   484 recall 0.457 precisao 0.166 F1 0.243 | AP50 medio dobras 0.145 (0.180 0.121 0.116 0.175 0.134) | F1 por carta medio 0.237 n=167
+cfg2_1280_p2   TP   484 FP  2367 FN   408 recall 0.543 precisao 0.170 F1 0.259 | AP50 medio dobras 0.197 (0.209 0.199 0.165 0.215 0.195) | F1 por carta medio 0.248 n=167
+  F1     cfg2_1280 vs cfg1_1280: n=167 0.314 vs 0.260 melhor/pior/empate 90/53/24 p=0.002 (pratt 0.0016) Holm 0.002
+  F1     cfg2_1280 vs cfg3_1280: n=167 0.314 vs 0.191 melhor/pior/empate 110/28/29 p=2.8e-13 (pratt 1.3e-13) Holm 1.7e-12
+  F1     cfg2_1280 vs cfg4_1280: n=167 0.314 vs 0.237 melhor/pior/empate 93/44/30 p=2.4e-07 (pratt 4.9e-07) Holm 1.2e-06
+  F1     cfg2_1280 vs cfg2_1280_p2: n=167 0.314 vs 0.248 melhor/pior/empate 92/44/31 p=4.7e-06 (pratt 4.8e-06) Holm 1.4e-05
+  F1     cfg1_1280 vs cfg3_1280: n=167 0.260 vs 0.191 melhor/pior/empate 92/38/37 p=9.4e-07 (pratt 5.8e-07) Holm 3.8e-06
+  F1     cfg4_1280 vs cfg3_1280: n=167 0.237 vs 0.191 melhor/pior/empate 88/43/36 p=3e-05 (pratt 2.5e-05) Holm 6e-05
+  recall cfg2_1280 vs cfg1_1280: n=167 0.602 vs 0.532 melhor/pior/empate 61/36/70 p=0.049 (pratt 0.018) Holm 0.098
+  recall cfg2_1280 vs cfg3_1280: n=167 0.602 vs 0.397 melhor/pior/empate 81/16/70 p=2e-09 (pratt 5.9e-11) Holm 1.2e-08
+  recall cfg2_1280 vs cfg4_1280: n=167 0.602 vs 0.479 melhor/pior/empate 72/22/73 p=2e-05 (pratt 8.1e-07) Holm 8.2e-05
+  recall cfg2_1280 vs cfg2_1280_p2: n=167 0.602 vs 0.562 melhor/pior/empate 45/35/87 p=0.16 (pratt 0.21) Holm 0.16
+  recall cfg1_1280 vs cfg3_1280: n=167 0.532 vs 0.397 melhor/pior/empate 74/26/67 p=1.2e-05 (pratt 2e-06) Holm 6.1e-05
+  recall cfg4_1280 vs cfg3_1280: n=167 0.479 vs 0.397 melhor/pior/empate 58/22/87 p=0.0022 (pratt 0.00014) Holm 0.0067
+
+== recorte original ==
+cfg1_1280      TP   715 FP  2337 FN  2238 recall 0.242 precisao 0.234 F1 0.238 | AP50 medio dobras 0.139 (0.121 0.112 0.169 0.101 0.191) | F1 por carta medio 0.264 n=201
+cfg2_1280      TP   800 FP  1872 FN  2153 recall 0.271 precisao 0.299 F1 0.284 | AP50 medio dobras 0.190 (0.155 0.164 0.226 0.164 0.241) | F1 por carta medio 0.305 n=201
+cfg3_1280      TP   650 FP  2457 FN  2303 recall 0.220 precisao 0.209 F1 0.215 | AP50 medio dobras 0.122 (0.105 0.120 0.145 0.095 0.143) | F1 por carta medio 0.252 n=201
+cfg4_1280      TP   795 FP  2122 FN  2158 recall 0.269 precisao 0.273 F1 0.271 | AP50 medio dobras 0.167 (0.153 0.155 0.195 0.137 0.193) | F1 por carta medio 0.310 n=201
+cfg2_1280_p2   TP   797 FP  2443 FN  2156 recall 0.270 precisao 0.246 F1 0.257 | AP50 medio dobras 0.160 (0.120 0.157 0.181 0.115 0.224) | F1 por carta medio 0.289 n=201
+  F1     cfg2_1280 vs cfg1_1280: n=201 0.305 vs 0.264 melhor/pior/empate 122/63/16 p=5.6e-05 (pratt 3.6e-05) Holm 0.00022
+  F1     cfg2_1280 vs cfg3_1280: n=201 0.305 vs 0.252 melhor/pior/empate 131/52/18 p=9.5e-09 (pratt 4.9e-09) Holm 5.7e-08
+  F1     cfg2_1280 vs cfg4_1280: n=201 0.305 vs 0.310 melhor/pior/empate 96/86/19 p=0.91 (pratt 0.83) Holm 0.91
+  F1     cfg2_1280 vs cfg2_1280_p2: n=201 0.305 vs 0.289 melhor/pior/empate 115/72/14 p=0.01 (pratt 0.0075) Holm 0.031
+  F1     cfg1_1280 vs cfg3_1280: n=201 0.264 vs 0.252 melhor/pior/empate 110/69/22 p=0.015 (pratt 0.0097) Holm 0.031
+  F1     cfg4_1280 vs cfg3_1280: n=201 0.310 vs 0.252 melhor/pior/empate 124/54/23 p=1.3e-08 (pratt 1.1e-08) Holm 6.6e-08
+  recall cfg2_1280 vs cfg1_1280: n=201 0.330 vs 0.285 melhor/pior/empate 92/43/66 p=7.8e-05 (pratt 2.5e-05) Holm 0.00031
+  recall cfg2_1280 vs cfg3_1280: n=201 0.330 vs 0.275 melhor/pior/empate 101/40/60 p=6.5e-06 (pratt 7.9e-07) Holm 3.2e-05
+  recall cfg2_1280 vs cfg4_1280: n=201 0.330 vs 0.334 melhor/pior/empate 70/66/65 p=0.55 (pratt 0.86) Holm 0.98
+  recall cfg2_1280 vs cfg2_1280_p2: n=201 0.330 vs 0.346 melhor/pior/empate 69/65/67 p=0.49 (pratt 0.83) Holm 0.98
+  recall cfg1_1280 vs cfg3_1280: n=201 0.285 vs 0.275 melhor/pior/empate 81/52/68 p=0.098 (pratt 0.033) Holm 0.29
+  recall cfg4_1280 vs cfg3_1280: n=201 0.334 vs 0.275 melhor/pior/empate 95/39/67 p=3.7e-08 (pratt 7.6e-08) Holm 2.2e-07
+
+== recorte manual ==
+cfg1_1280      TP    65 FP  2275 FN   898 recall 0.067 precisao 0.028 F1 0.039 | AP50 medio dobras 0.010 (0.004 0.004 0.003 0.015 0.023) | F1 por carta medio 0.079 n=28
+cfg2_1280      TP    65 FP  1768 FN   898 recall 0.067 precisao 0.035 F1 0.046 | AP50 medio dobras 0.021 (0.005 0.008 0.005 0.017 0.072) | F1 por carta medio 0.120 n=28
+cfg3_1280      TP    48 FP  2412 FN   915 recall 0.050 precisao 0.020 F1 0.028 | AP50 medio dobras 0.004 (0.002 0.003 0.004 0.009 0.002) | F1 por carta medio 0.034 n=28
+cfg4_1280      TP    49 FP  1984 FN   914 recall 0.051 precisao 0.024 F1 0.033 | AP50 medio dobras 0.015 (0.004 0.003 0.005 0.011 0.051) | F1 por carta medio 0.046 n=28
+cfg2_1280_p2   TP    78 FP  2211 FN   885 recall 0.081 precisao 0.034 F1 0.048 | AP50 medio dobras 0.022 (0.010 0.005 0.009 0.021 0.062) | F1 por carta medio 0.070 n=28
+  F1     cfg2_1280 vs cfg1_1280: n=28 0.120 vs 0.079 melhor/pior/empate 12/8/8 p=0.41 (pratt 0.38) Holm 0.82
+  F1     cfg2_1280 vs cfg3_1280: n=28 0.120 vs 0.034 melhor/pior/empate 14/3/11 p=0.00085 (pratt 0.002) Holm 0.0051
+  F1     cfg2_1280 vs cfg4_1280: n=28 0.120 vs 0.046 melhor/pior/empate 13/6/9 p=0.018 (pratt 0.036) Holm 0.088
+  F1     cfg2_1280 vs cfg2_1280_p2: n=28 0.120 vs 0.070 melhor/pior/empate 11/11/6 p=0.47 (pratt 0.61) Holm 0.82
+  F1     cfg1_1280 vs cfg3_1280: n=28 0.079 vs 0.034 melhor/pior/empate 12/6/10 p=0.061 (pratt 0.088) Holm 0.24
+  F1     cfg4_1280 vs cfg3_1280: n=28 0.046 vs 0.034 melhor/pior/empate 10/5/13 p=0.16 (pratt 0.17) Holm 0.47
+  recall cfg2_1280 vs cfg1_1280: n=28 0.165 vs 0.113 melhor/pior/empate 8/6/14 p=0.45 (pratt 0.53) Holm 1
+  recall cfg2_1280 vs cfg3_1280: n=28 0.165 vs 0.051 melhor/pior/empate 11/2/15 p=0.0046 (pratt 0.0073) Holm 0.028
+  recall cfg2_1280 vs cfg4_1280: n=28 0.165 vs 0.061 melhor/pior/empate 11/3/14 p=0.0091 (pratt 0.017) Holm 0.046
+  recall cfg2_1280 vs cfg2_1280_p2: n=28 0.165 vs 0.175 melhor/pior/empate 7/11/10 p=0.68 (pratt 0.49) Holm 1
+  recall cfg1_1280 vs cfg3_1280: n=28 0.113 vs 0.051 melhor/pior/empate 10/4/14 p=0.069 (pratt 0.083) Holm 0.27
+  recall cfg4_1280 vs cfg3_1280: n=28 0.061 vs 0.051 melhor/pior/empate 6/3/19 p=0.37 (pratt 0.32) Holm 1

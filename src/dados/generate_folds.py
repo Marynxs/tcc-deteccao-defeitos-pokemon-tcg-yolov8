@@ -1,7 +1,7 @@
 """Divide o dataset em cinco folds estratificados, por carta.
 
 A unidade e a carta, nunca a imagem: frente e verso caem sempre no mesmo fold.
-Cartas de mesma ilustracao (docs/grupos_mesma_arte.json) tambem ficam juntas,
+Cartas de mesma ilustracao (src/dados/grupos_mesma_arte.json) tambem ficam juntas,
 como uma unidade indivisivel, para o modelo nao chegar a avaliacao ja tendo
 visto aquele fundo no treino. A estratificacao e pelo numero de faces com
 defeito, para as cartas sem defeito se espalharem entre os folds.
@@ -23,14 +23,16 @@ def _arg(flag, default):
     return default
 
 
-ROOT = Path("Dataset_YOLO")
+# caminhos resolvidos a partir do proprio arquivo: o script roda de qualquer pasta
+RAIZ = Path(__file__).resolve().parents[2]
+ROOT = RAIZ / "Dataset_YOLO"
 POOL_NAME = _arg("--pool", "pool")
 SUFFIX = POOL_NAME[len("pool"):]          # "" para pool/, "_206" para pool_206/
 SRC_IMAGES = ROOT / POOL_NAME / "images_final"
 SRC_LABELS = ROOT / POOL_NAME / "labels_final"
 DEST = ROOT / f"dataset{SUFFIX}"
 FOLDS = ROOT / f"folds{SUFFIX}"
-GROUPS_FILE = Path(_arg("--groups", "docs/grupos_mesma_arte.json"))
+GROUPS_FILE = Path(_arg("--groups", str(RAIZ / "src" / "dados" / "grupos_mesma_arte.json")))
 K = 5
 INTERNAL_VAL_FRACTION = 0.20
 SEED = 42

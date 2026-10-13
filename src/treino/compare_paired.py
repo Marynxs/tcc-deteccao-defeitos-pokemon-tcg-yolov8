@@ -1,6 +1,7 @@
-"""Comparacao pareada por carta entre rodadas da campanha (Wilcoxon) e recall
-por faixa de tamanho, a partir dos predictions.json das dobras retidas."""
+"""Comparacao pareada por carta entre rodadas da campanha (Wilcoxon, com correcao
+de Holm) e recall por faixa de tamanho, a partir dos predictions.json das dobras retidas."""
 import argparse
+import csv
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -126,9 +127,23 @@ def compara(a, b, ra, rb, metrica, nome):
     d = xa - xb
     n_dif = int((d != 0).sum())
     p = wilcoxon(xa, xb).pvalue if n_dif > 0 else 1.0
-    print(f"  {nome:7s} {a} vs {b}: n={len(cartas)} media {xa.mean():.3f} vs {xb.mean():.3f}, "
-          f"mediana da dif {np.median(d):+.3f}, {a} melhor em {(d > 0).sum()}, pior em {(d < 0).sum()}, "
-          f"empate {(d == 0).sum()}, Wilcoxon p={p:.4f}")
+    return {"metrica": metrica, "a": a, "b": b, "n": len(cartas),
+            "media_a": xa.mean(), "media_b": xb.mean(), "mediana_dif": float(np.median(d)),
+            "melhor": int((d > 0).sum()), "pior": int((d < 0).sum()), "empate": int((d == 0).sum()),
+            "p_bruto": float(p), "nome": nome}
+
+
+def holm(ps):
+    # Holm step-down: o i-esimo menor p e multiplicado por (m - i); o ajustado e
+    # mantido monotono para nao inverter a ordem dos p
+    m = len(ps)
+    ordem = np.argsort(ps)
+    ajust = np.empty(m)
+    acum = 0.0
+    for i, k in enumerate(ordem):
+        acum = max(acum, min(1.0, (m - i) * ps[k]))
+        ajust[k] = acum
+    return ajust
 
 
 def main():
@@ -136,7 +151,9 @@ def main():
     ap.add_argument("--runs", default="runs_206_rev")
     ap.add_argument("--pool-suf", default="_206_rev")
     ap.add_argument("--rodadas", nargs="+", default=["cfg1_1280", "cfg2_1280", "cfg3_1280", "cfg4_1280", "cfg2_1280_p2"])
-    ap.add_argument("--pares", nargs="+", default=["cfg2_1280:cfg2_1280_p2", "cfg2_1280:cfg1_1280", "cfg2_1280:cfg4_1280", "cfg2_1280:cfg3_1280", "cfg1_1280:cfg3_1280", "cfg4_1280:cfg3_1280"])
+    # familia corrigida por Holm: os pares que testam H1 a H3 (2x1, 4x3, 1x3, 2x4) e a P2 (2xP2)
+    ap.add_argument("--pares", nargs="+", default=["cfg2_1280:cfg1_1280", "cfg4_1280:cfg3_1280", "cfg1_1280:cfg3_1280", "cfg2_1280:cfg4_1280", "cfg2_1280:cfg2_1280_p2"])
+    ap.add_argument("--csv", default=str(RAIZ / "resultados" / "comparacao_pareada_206_rev.csv"))
     args = ap.parse_args()
     runs = DATASET / args.runs
     res = {}
@@ -147,11 +164,26 @@ def main():
         tp = sum(v[0] for v in pc.values()); fp = sum(v[1] for v in pc.values()); fn = sum(v[2] for v in pc.values())
         faixas = "  ".join(f"{k}: {v[0]}/{v[1]} = {v[0] / max(v[1], 1):.3f}" for k, v in pf.items())
         print(f"  {r:13s} TP {tp:5d} FP {fp:5d} FN {fn:5d} | recall {tp / (tp + fn):.3f} precisao {tp / max(tp + fp, 1):.3f} | {faixas}")
-    print("\n== comparacao pareada por carta (Wilcoxon bilateral) ==")
-    for par in args.pares:
-        a, b = par.split(":")
-        compara(a, b, f1_por_carta(res[a]), f1_por_carta(res[b]), "f1", "F1")
-        compara(a, b, recall_por_carta(res[a]), recall_por_carta(res[b]), "recall", "recall")
+    print("\n== comparacao pareada por carta (Wilcoxon bilateral, Holm sobre a familia de pares de cada metrica) ==")
+    linhas = []
+    for metrica, func, nome in [("f1", f1_por_carta, "F1"), ("recall", recall_por_carta, "recall")]:
+        bloco = []
+        for par in args.pares:
+            a, b = par.split(":")
+            bloco.append(compara(a, b, func(res[a]), func(res[b]), metrica, nome))
+        for r, ph in zip(bloco, holm(np.array([r["p_bruto"] for r in bloco]))):
+            r["p_holm"] = float(ph)
+            r["m"] = len(bloco)
+            print(f"  {nome:7s} {r['a']} vs {r['b']}: n={r['n']} media {r['media_a']:.3f} vs {r['media_b']:.3f}, "
+                  f"mediana da dif {r['mediana_dif']:+.3f}, {r['a']} melhor em {r['melhor']}, pior em {r['pior']}, "
+                  f"empate {r['empate']}, Wilcoxon p={r['p_bruto']:.4g}, Holm p={r['p_holm']:.4g}")
+        linhas += bloco
+    campos = ["metrica", "a", "b", "n", "media_a", "media_b", "mediana_dif", "melhor", "pior", "empate", "p_bruto", "p_holm", "m"]
+    with open(args.csv, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=campos, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(linhas)
+    print("CSV gravado em", args.csv)
 
 
 if __name__ == "__main__":

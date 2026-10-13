@@ -1,0 +1,22 @@
+# Versoes usadas na campanha das 206 cartas (Ubuntu 24.04, Python da .venv).
+#
+# PyTorch para AMD (RX 9060 XT, gfx1200) exige o indice ROCm 7.2; com torch 2.10+rocm7.0
+# o treino falhava com hipErrorIllegalAddress. Instalar antes do resto:
+#   pip install torch==2.14.0+rocm7.2 torchvision==0.29.0+rocm7.2 --index-url https://download.pytorch.org/whl/rocm7.2
+# Em GPU NVIDIA ou CPU, usar a mesma versao pelo indice padrao do PyTorch.
+torch==2.14.0
+torchvision==0.29.0
+
+ultralytics==8.4.138
+numpy==2.5.2
+scipy==1.18.1
+opencv-python==5.0.0.93
+pillow==12.3.0
+matplotlib==3.11.1
+PyYAML==6.0.3
+
+# so para organizar as fotos recebidas da empresa (src/dados/organize_*.py)
+openpyxl==3.1.5
+
+# NAO instalar albumentations: se o pacote existir, a Ultralytics aplica Blur/CLAHE/ToGray
+# em parte das imagens de TODAS as configuracoes, o que contamina o fator "aumento de dados".
