@@ -1540,7 +1540,7 @@ alta frequência), e o AP do YOLO-V4-tiny passou de 88,08\% para
 representação de realce de micro-relevo avaliada neste trabalho ocupa
 os três canais com informações diferentes da mesma imagem; sua
 composição e o procedimento que a escolheu entre as alternativas
-testadas são descritos na Seção~\ref{subsec:hiperparametros}. Essa
+testadas são descritos na Seção~\ref{subsec:estrategias}. Essa
 substituição tem um custo possível: as primeiras camadas da rede
 pré-treinada aprenderam padrões de imagens RGB comuns, e uma entrada
 formada por canais realçados se afasta dessa distribuição, o que pode
@@ -2407,155 +2407,211 @@ Fonte: Elaborado pelo autor (2026).}
 \section{Detalhes da implementação}
 \label{sec:implementacao}
 
+Esta seção descreve o modelo usado nos experimentos
+(Seção~\ref{subsec:modelo_base}), os hiperparâmetros de treinamento,
+inclusive os de aumento de dados de cada configuração
+(Seção~\ref{subsec:hiperparametros}), e o ambiente computacional em que
+os treinamentos foram executados (Seção~\ref{subsec:ferramentas}).
+
 \subsection{Modelo base}
 \label{subsec:modelo_base}
 
-Como modelo de detecção será utilizada a versão YOLOv8, selecionada por seu
-equilíbrio entre eficiência computacional e desempenho em tarefas de detecção
-de objetos. Considerando que o conjunto de dados disponível é reduzido e que
-a classe de interesse, denominada \textit{defeito}, não faz parte das classes
-originais do dataset COCO, todas as configurações experimentais partirão de
-pesos pré-treinados e serão ajustadas ao domínio das cartas por meio de
-\textit{fine-tuning}.
+Todas as rodadas usaram o YOLOv8s, a variante \textit{small} do YOLOv8,
+inicializado com os pesos pré-treinados no COCO disponibilizados pela
+biblioteca Ultralytics (Seção~\ref{subsec:yolo}) e submetido a ajuste
+fino sobre as imagens das cartas, com a classe única \textit{defeito} e
+sem congelamento de camadas. Os pesos iniciais foram os mesmos em todas
+as configurações: o \textit{transfer learning} não foi um fator do
+estudo, mas a base comum sobre a qual o aumento de dados e o realce de
+micro-relevo foram comparados.
 
-Neste trabalho, a configuração base (\textit{baseline}) corresponderá ao
-YOLOv8 com \textit{transfer learning} treinado sobre as imagens RGB
-convencionais, sem aumento de dados adicional e sem uso das imagens
-de realce de micro-relevo. Essa configuração servirá como referência para avaliar
-a contribuição individual e combinada do aumento de dados.
+O YOLOv8 foi mantido como detector, em vez de versões mais recentes da
+família YOLO, por três motivos. Primeiro, foi a arquitetura definida
+antes dos experimentos e usada nos testes preliminares, que verificaram
+a viabilidade do protocolo no equipamento disponível
+(Seção~\ref{subsec:visao_geral}). Segundo, é a versão usada pelos dois
+trabalhos correlatos que tratam de detecção de objetos
+(Seção~\ref{sec:trabalhos_correlatos}), o que aproxima as condições
+deste trabalho das deles. Terceiro, a biblioteca utilizada oferece para
+o YOLOv8 uma variante oficial com a cabeça de detecção P2, necessária à
+ablação, o que não ocorre com todas as versões posteriores da família
+\cite{Jocher2023}.
 
-Entre as variantes disponíveis do YOLOv8, todas pré-treinadas no 
-dataset COCO \cite{Lin2014}, este trabalho adotará a versão 
-\textit{small} (YOLOv8s), com aproximadamente 11 milhões de 
-parâmetros. Essa escolha é motivada pela relação entre capacidade de 
-representação e volume de dados disponível por fold: variantes maiores 
-possuem dezenas de milhões de parâmetros adicionais que, com cerca de 
-53 cartas de treinamento por rodada, aumentariam o risco de 
-\textit{overfitting} mesmo com \textit{transfer learning}. 
-\citeonline{Wang2022} demonstram, em contexto análogo de detecção de 
-defeitos industriais com dados escassos, que modelos com maior número 
-de parâmetros apresentam desempenho inferior a arquiteturas mais 
-simples justamente por esse motivo. \citeonline{Dobrzycki2025} 
-corroboram essa decisão ao verificar que, em cenários com dados 
-limitados, variantes menores do YOLOv8 oferecem melhor equilíbrio 
-entre desempenho e custo computacional do que variantes maiores. 
-A adequação final da variante será confirmada nos testes preliminares 
-previstos na Seção~\ref{subsec:hiperparametros}, nos quais YOLOv8n 
-será avaliado como alternativa caso YOLOv8s apresente sinais de 
-\textit{overfitting}.
+Entre os tamanhos do YOLOv8, adotou-se o \textit{small}, com cerca de
+11 milhões de parâmetros, pelo custo de memória e de tempo. Com a
+configuração de treinamento descrita na
+Seção~\ref{subsec:hiperparametros}, o YOLOv8s ocupou cerca de 7,1 GB
+dos 16 GB de memória da placa de vídeo e levou cerca de 28 segundos por
+época. O tamanho seguinte, o YOLOv8m, com cerca de 26 milhões de
+parâmetros \cite{Jocher2023}, ocupou 11,6 GB e levou 58 segundos por
+época na rodada em que foi treinado. Como o acréscimo da cabeça P2
+elevou em cerca de 6 GB a memória ocupada pelo YOLOv8s, o YOLOv8m com
+essa cabeça não caberia na placa. A possibilidade de que a capacidade
+do YOLOv8s limitasse o desempenho foi examinada pelo teste de
+capacidade (Tabela~\ref{tab:plano_experimentacao}), cujo resultado é
+apresentado na Seção~\ref{sec:resultados}.
 
-Os demais experimentos partirão dessa configuração de referência e incorporarão
-novas estratégias de forma controlada. Para garantir comparabilidade entre os
-resultados, serão mantidos fixos, entre as configurações, parâmetros como
-resolução de entrada, taxa de aprendizado, tamanho do lote, número máximo de
-épocas e critério de parada antecipada. Assim, embora o número efetivo de épocas
-possa variar entre os experimentos em função do \textit{early stopping}, todas
-as configurações serão submetidas ao mesmo limite máximo de treinamento e à
-mesma regra de interrupção. Esses valores serão definidos em testes preliminares
-antes da execução do estudo de ablação.
+Na ablação da cabeça P2, usou-se a variante P2 do YOLOv8s oferecida
+pela biblioteca (Seção~\ref{subsec:objetos_pequenos}), com os mesmos
+pesos pré-treinados, dobras e hiperparâmetros da configuração sem a
+cabeça P2. A biblioteca só transfere os pesos de uma camada quando o
+nome, que inclui a posição da camada na rede, e o formato coincidem nos
+dois modelos. O \textit{backbone} e o caminho de cima para baixo do
+\textit{neck} até o nível P3 são iguais nas duas arquiteturas e
+receberam os pesos pré-treinados. As camadas acrescentadas para levar
+as características até o nível P2 deslocaram a posição das seguintes;
+por isso, o caminho de baixo para cima do \textit{neck}, exceto poucos
+tensores que coincidiram por acaso, e toda a cabeça de detecção,
+inclusive nos níveis P3 a P5, começaram com valores aleatórios. Ao
+todo, foram transferidos 219 dos 437 tensores de pesos do modelo, isto
+é, dos conjuntos de valores aprendidos de suas camadas. Essa perda de
+pré-treino, prevista na Seção~\ref{subsec:transfer_learning},
+acompanhou todas as rodadas com a cabeça P2 e é considerada na análise
+dos resultados. Com essa cabeça, a memória ocupada ficou entre 11,2 e
+13,1 GB, e o tempo por época, entre 41 e 43 segundos.
 
 \subsection{Hiperparâmetros de treinamento}
 \label{subsec:hiperparametros}
 
-Os hiperparâmetros de treinamento compreendem as configurações
-do processo de otimização que não são aprendidas automaticamente
-pelo modelo, sendo definidas pelo pesquisador antes do início
-do treinamento \cite{Dobrzycki2025}. No presente trabalho, os
-principais hiperparâmetros considerados são: taxa de aprendizado
-(\textit{learning rate}), número de épocas, tamanho do lote
-(\textit{batch size}), resolução de entrada das imagens e
-critério de parada antecipada (\textit{early stopping}).
+Os hiperparâmetros de treinamento foram os mesmos em todas as rodadas,
+exceto o que cada experimento variou
+(Tabela~\ref{tab:plano_experimentacao}): os parâmetros de aumento de
+dados, que definem um dos fatores do estudo fatorial e são apresentados
+adiante, e a resolução de entrada, na ablação de resolução. A resolução
+de entrada foi de 1280 pixels, escolhida pela distribuição do tamanho
+dos defeitos (Tabela~\ref{tab:tamanho_defeitos}): nela, a fração das
+anotações com menor lado abaixo do passo do nível P3 cai de 57,6\%, a
+640 pixels, para 10,8\%, e, como o lado maior da maior parte das
+imagens recortadas supera 1280 pixels (Seção~\ref{subsec:dados}), o
+aumento de tamanho corresponde a detalhe presente na fotografia. O
+custo também aumenta: na Dobra 5, a rodada da configuração de melhor
+desempenho a 640 pixels ocupou 2,1 GB da memória da placa de vídeo e
+levou 7,7 segundos por época, contra 7,1 GB e 27,7 segundos a 1280
+pixels. As imagens foram processadas em lotes de 4; a biblioteca
+acumula o resultado de 16 lotes antes de cada atualização dos pesos,
+de modo que cada atualização considerou 64 imagens. Lotes de 8 imagens
+foram experimentados nos testes preliminares e travaram a placa de
+vídeo nas duas tentativas.
 
-Os valores finais desses hiperparâmetros serão estabelecidos 
-por meio de testes preliminares realizados sobre a configuração
-base antes da execução do estudo de ablação. Uma vez definidos,
-os mesmos valores serão mantidos fixos em todas as quatro configurações
-experimentais. Essa decisão é essencial para garantir que as diferenças
-de desempenho observadas entre as configurações sejam atribuíveis
-exclusivamente às estratégias avaliadas, como o tipo de imagem e
-o uso de aumento de dados, e não a variações no processo de otimização
-\cite{Dobrzycki2025}.
+O otimizador, algoritmo que calcula o ajuste dos pesos a cada
+atualização, foi escolhido pela própria biblioteca, na opção
+automática: para treinamentos com até 10 mil atualizações, como os
+deste trabalho, ela adota o AdamW, com taxa de aprendizado inicial, que
+regula o tamanho de cada ajuste, de 0,002 quando há uma única classe
+\cite{Jocher2023}. Os demais hiperparâmetros de otimização mantiveram o
+valor padrão da biblioteca. O treinamento usou semente aleatória fixa e
+o modo determinístico da biblioteca, e cada configuração foi treinada
+uma única vez em cada rodada. Duas rodadas interrompidas foram
+retomadas a partir do estado salvo ao fim da última época concluída,
+com os mesmos parâmetros.
 
-O critério de parada antecipada será configurado para monitorar o 
-mAP@0.5 em um subconjunto de validação interno (\textit{validation 
-set}), constituído por aproximadamente 20\% das cartas do bloco de 
-treinamento de cada rodada, correspondendo a cerca de 13 cartas (26 
-imagens). Esse subconjunto é distinto do fold de avaliação, que 
-permanece completamente isolado durante o treinamento e é utilizado 
-exclusivamente para reportar o desempenho final de cada configuração 
-experimental. A paciência foi estabelecida nos testes 
-preliminares. \citeonline{Prechelt1998}, ao avaliar critérios de parada 
-sobre 1296 execuções de treinamento, observa que curvas reais de erro de 
-validação quase sempre apresentam mais de um mínimo local e que critérios 
-mais lentos elevam de aproximadamente 60\% para aproximadamente 80\% a 
-probabilidade de a execução terminar com o melhor resultado que ela própria 
-alcançou, ao custo de cerca de quatro vezes mais tempo de treinamento. O 
-autor recomenda critérios rápidos, salvo quando o ganho reduzido compensa 
-o aumento expressivo de tempo.
+Cada rodada teve teto de 300 épocas e parada antecipada com paciência
+de 100 épocas: o treino foi interrompido quando a validação interna
+passou 100 épocas sem melhora, e foram mantidos os pesos da melhor
+época (Seção~\ref{subsec:validacao_cruzada}). A melhora foi medida pelo
+critério da biblioteca, que, na versão usada, é o mAP@0,5:0,95 na
+validação interna \cite{Jocher2023}, e não o mAP@0,5. A paciência de
+100 épocas, que coincide com o valor padrão da biblioteca, foi
+confirmada nos testes preliminares, nos quais, com paciência de 50
+épocas, a melhor época de um treino coincidiu com um pico isolado da
+métrica na validação interna, que tem poucas cartas e varia bastante
+entre épocas vizinhas. \citeonline{Prechelt1998} observa que critérios
+de parada mais lentos trazem pequena melhora na generalização ao custo
+de cerca de quatro vezes mais tempo de treinamento; neste trabalho,
+esse custo coube no cronograma, e uma escolha ruim do ponto de parada
+acrescentaria variação às comparações entre as configurações. Nenhuma
+rodada atingiu o teto de 300 épocas: todas foram encerradas pela
+paciência.
 
-Neste trabalho a compensação se justifica por duas razões. A primeira é de 
-custo: mesmo quadruplicado, o tempo total das execuções permanece viável no 
-cronograma. A segunda decorre do desenho experimental adotado. 
-\citeonline{Prechelt1998} analisa o treinamento de um modelo isolado, 
-situação em que a escolha subótima do ponto de parada afeta apenas aquele 
-resultado. Aqui, quatro configurações são comparadas entre si por teste 
-pareado, de modo que a incerteza na seleção do ponto de parada se converte 
-em variância dentro da própria comparação, reduzindo a capacidade do teste 
-de identificar diferenças reais entre as configurações. Adota-se, portanto, 
-paciência de 100 épocas, com teto de 300, mantida fixa em todas as quatro 
-configurações experimentais para garantir comparabilidade entre os 
-resultados.
+Os hiperparâmetros de aumento de dados foram definidos por
+configuração, conforme a Tabela~\ref{tab:augmentation}. A biblioteca
+aplica, por padrão, sete transformações de aumento de dados no
+treinamento de detectores: o mosaico (\texttt{mosaic}), a variação de
+escala (\texttt{scale}), a translação (\texttt{translate}), o
+espelhamento horizontal (\texttt{fliplr}) e as três variações no espaço
+HSV (\texttt{hsv\_h}, \texttt{hsv\_s} e \texttt{hsv\_v})
+\cite{Jocher2023}. Por isso, a ausência de aumento de dados nas
+Configurações 1 e 3 exigiu o desligamento explícito desses parâmetros:
+com os valores padrão, essas configurações receberiam mais
+transformações do que as Configurações 2 e 4, o que inverteria o
+sentido do fator investigado no estudo fatorial. Nas Configurações 2 e
+4, as transformações mantidas conservaram o valor padrão da biblioteca,
+e acrescentou-se a rotação de até 10 graus. Na Configuração 4, as
+variações no espaço HSV foram desligadas, porque o realce de
+micro-relevo já ajusta o contraste local pelo CLAHE e seus três canais
+não representam cores (Seção~\ref{subsec:fotometria}); variações
+artificiais de cor e de brilho perturbariam o sinal que ele constrói.
 
-Registra-se como limitação que o subconjunto de validação interno é 
-reduzido e que a estimativa de mAP obtida sobre ele apresenta variabilidade 
-elevada entre épocas consecutivas. \citeonline{Prechelt1998} observa que o 
-sobreajuste pode passar despercebido justamente porque o conjunto de 
-validação é finito e, portanto, não perfeitamente representativo do 
-problema. Essa variabilidade não introduz viés no desempenho reportado, uma 
-vez que o \textit{fold} de avaliação permanece isolado do treinamento e da 
-seleção do ponto de parada, mas contribui para a variância das comparações.
+Dois parâmetros foram desligados em todas as configurações, inclusive
+nas com aumento de dados. A variação de escala, no valor padrão de
+0,5, reduz a imagem por um fator sorteado de até a metade. Reduzir à
+metade uma imagem de 1280 pixels deixa os defeitos com o tamanho que
+teriam na resolução de 640 pixels, na qual 57,6\% das anotações ficam
+abaixo do passo do nível P3 (Tabela~\ref{tab:tamanho_defeitos}); a
+transformação desfaria, em parte das imagens de treino, o ganho da
+resolução de entrada adotada. O mosaico, que combina quatro imagens e
+recorta delas uma janela do tamanho da entrada
+(Seção~\ref{subsec:data_augmentation}), não reduz os objetos quando a
+variação de escala está desligada, mas o recorte pode cortar defeitos
+nas bordas de cada imagem, e a imagem resultante reúne partes de
+quatro cartas, situação que não ocorre na avaliação, feita sobre a
+carta inteira. Os demais parâmetros de aumento de dados da biblioteca
+já valem zero por padrão e foram mantidos assim em todas as
+configurações.
 
-Como ponto de partida para os testes preliminares, 
-serão adotados os valores padrão recomendados pela
-biblioteca Ultralytics para o YOLOv8 no que se refere aos
-hiperparâmetros de otimização, ajustando-os
-conforme necessário para o tamanho reduzido do 
-conjunto de dados disponível. Os hiperparâmetros de aumento
-de dados constituem exceção e não partem dos valores padrão:
-por definirem uma das variáveis independentes do estudo de
-ablação, são especificados explicitamente para cada
-configuração na Seção~\ref{sec:experimentos}. Adicionalmente,
-os testes preliminares contemplarão a validação 
-da variante do modelo, avaliando YOLOv8n como
-alternativa a YOLOv8s caso sejam observados sinais
-de \textit{overfitting}, bem como a definição dos
-parâmetros do pipeline de realce de micro-relevo.
-Esses parâmetros incluem o \textit{clipLimit} (valor de referência: 3,0)
-e o \textit{tileGridSize} ($8{\times}8$ pixels) do CLAHE, o tamanho do
-núcleo do operador de gradiente e as escalas do operador de segunda
-ordem. A escolha entre as três variantes de realce descritas na
-Seção~\ref{subsec:dados} também foi resolvida nessa etapa,
-adotando-se como critério o desempenho no \textit{fold} de avaliação de
-uma mesma dobra, sob protocolo idêntico ao das demais configurações.
-Todos os valores definidos nessa etapa serão mantidos fixos 
-entre as quatro configurações experimentais, garantindo que
-as diferenças de desempenho observadas sejam atribuíveis 
-exclusivamente às estratégias avaliadas.
+Os valores da Tabela~\ref{tab:augmentation} ficaram fixos nas cinco
+dobras de cada configuração. As transformações foram aplicadas apenas
+às imagens de treino de cada rodada, no momento em que cada imagem era
+carregada, e nunca gravadas em disco antes da divisão em dobras; assim,
+versões transformadas de uma carta não puderam aparecer no treino e na
+avaliação ao mesmo tempo. O pacote opcional Albumentations não foi
+instalado, porque, quando ele está presente, a biblioteca o usa para
+aplicar desfoque, conversão para tons de cinza e equalização de
+contraste a uma pequena parte das imagens de todas as configurações,
+inclusive das que não têm aumento de dados.
+
+\begin{table}[htb]
+\centering
+\caption{Parâmetros de aumento de dados por configuração}
+\label{tab:augmentation}
+\footnotesize
+\begin{tabular}{lcccc p{4.2cm}}
+\toprule
+ & & \multicolumn{3}{c}{\textbf{Configuração}} & \\
+\cmidrule(lr){3-5}
+\textbf{Parâmetro} & \textbf{Padrão} & \textbf{1 e 3} & \textbf{2} & \textbf{4} & \textbf{Motivo do valor adotado} \\
+\midrule
+\texttt{hsv\_h}    & 0,015 & 0,0 & 0,015 & 0,0  & Configuração 4: realce com contraste ajustado pelo CLAHE e canais que não são cores \\
+\texttt{hsv\_s}    & 0,7   & 0,0 & 0,7   & 0,0  & idem \\
+\texttt{hsv\_v}    & 0,4   & 0,0 & 0,4   & 0,0  & idem \\
+\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & rotação acrescentada \\
+\texttt{translate} & 0,1   & 0,0 & 0,1   & 0,1  & padrão mantido \\
+\texttt{fliplr}    & 0,5   & 0,0 & 0,5   & 0,5  & padrão mantido \\
+\texttt{mosaic}    & 1,0   & 0,0 & 0,0   & 0,0  & corta defeitos nas bordas e reúne partes de quatro cartas \\
+\texttt{scale}     & 0,5   & 0,0 & 0,0   & 0,0  & a redução leva defeitos para baixo do passo do nível P3 \\
+\midrule
+\multicolumn{6}{p{13.5cm}}{\footnotesize \texttt{shear}, \texttt{perspective}, \texttt{flipud}, \texttt{bgr}, \texttt{mixup}, \texttt{cutmix} e \texttt{copy\_paste} ficaram em 0,0 em todas as configurações, valor que já é o padrão da biblioteca.} \\
+\bottomrule
+\end{tabular}
+\legend{Padrão: valor padrão da biblioteca Ultralytics 8.4.138. Nas Configurações 1 e 3, sem aumento de dados, todos os parâmetros foram zerados; nas Configurações 2 e 4, os valores diferentes do padrão estão justificados na última coluna.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
 
 \subsection{Tecnologias e ferramentas}
 \label{subsec:ferramentas}
 
-A implementação será realizada em Python. Para o treinamento do 
-modelo, será utilizada a biblioteca oficial da família YOLOv8. O processamento 
-das imagens e as etapas de preparação do conjunto de dados poderão ser apoiados 
-por bibliotecas de manipulação de imagens e visão computacional, como OpenCV. 
-Para a aplicação de transformações de aumento de dados, poderão ser utilizadas 
-bibliotecas específicas de \textit{augmentation}, desde que compatíveis com o 
-pipeline definido.
-
-Os experimentos serão executados em ambiente computacional com suporte a GPU, 
-de modo a reduzir o tempo de treinamento e viabilizar a execução das diferentes 
-configurações previstas no estudo de ablação.
+A implementação foi feita em Python, versão 3.12. O treinamento e a
+avaliação dos modelos usaram a biblioteca Ultralytics, versão 8.4.138,
+sobre o PyTorch 2.14.0 com a plataforma ROCm 7.2, que permite executar
+o PyTorch em placas de vídeo AMD; versões anteriores do PyTorch
+falharam durante o treinamento nessa placa. O recorte automático da
+carta e a geração das imagens de realce de micro-relevo usaram a
+biblioteca OpenCV, versão 5.0, e os testes estatísticos, a biblioteca
+SciPy, versão 1.18. Os experimentos foram executados em um computador
+com o sistema operacional Ubuntu 24.04 e placa de vídeo AMD Radeon RX
+9060 XT, com 16 GB de memória. A lista completa de pacotes e versões
+acompanha o código do trabalho, disponível em repositório
+público\footnote{\url{https://github.com/Marynxs/tcc-deteccao-defeitos-pokemon-tcg-yolov8}}.
 
 % ---------------------------------------------------------------
 \section{Experimentos e cenário de testes}
@@ -2589,74 +2645,6 @@ do conjunto de treinamento. Para a representação RGB, serão aplicadas transfo
 geométricas (flip horizontal, rotação de até ±10°) e fotométricas (variação de brilho e saturação).
 Para a representação de realce, serão utilizadas apenas transformações geométricas, uma vez que o
 realce já incorpora normalização de contraste local por CLAHE, tornando inconsistente a aplicação de variações artificiais de brilho ou contraste.
-
-A biblioteca Ultralytics aplica, por padrão, sete transformações de
-aumento de dados no treinamento de detectores: o mosaico
-(\texttt{mosaic}), a variação de escala (\texttt{scale}), a translação
-(\texttt{translate}), o espelhamento horizontal (\texttt{fliplr}) e as
-três variações no espaço HSV (\texttt{hsv\_h}, \texttt{hsv\_s} e
-\texttt{hsv\_v}) \cite{Jocher2023}. Em decorrência disso, a ausência de
-aumento de dados nas Configurações 1 e 3 não decorre da omissão desses
-parâmetros, mas exige o seu desligamento explícito. Executadas a partir
-dos valores padrão, tais configurações receberiam transformações em
-maior número e de maior intensidade do que as descritas para as
-Configurações 2 e 4, invertendo o sentido do fator investigado no estudo
-de ablação. Os parâmetros de aumento de dados são, por conseguinte,
-especificados individualmente para cada configuração, conforme a
-Tabela~\ref{tab:augmentation}.
-
-\begin{table}[htb]
-\centering
-\caption{Parâmetros de aumento de dados por configuração experimental}
-\label{tab:augmentation}
-\footnotesize
-\begin{tabular}{lccccp{3.9cm}}
-\toprule
-\textbf{Parâmetro} & \textbf{Padrão} & \textbf{Cfg. 1 e 3} & \textbf{Cfg. 2} & \textbf{Cfg. 4} & \textbf{Motivo do desvio} \\
-\midrule
-\texttt{hsv\_h}    & 0,015 & 0,0 & 0,015 & 0,0  & Cfg. 4: realce já normalizado por CLAHE \\
-\texttt{hsv\_s}    & 0,7   & 0,0 & 0,7   & 0,0  & idem \\
-\texttt{hsv\_v}    & 0,4   & 0,0 & 0,4   & 0,0  & idem \\
-\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & rotação prevista na estratégia \\
-\texttt{translate} & 0,1   & 0,0 & 0,1   & 0,1  & padrão mantido \\
-\texttt{fliplr}    & 0,5   & 0,0 & 0,5   & 0,5  & padrão mantido \\
-\texttt{mosaic}    & 1,0   & 0,0 & 0,0   & 0,0  & reduz cada imagem à metade da dimensão linear \\
-\texttt{scale}     & 0,5   & 0,0 & 0,0   & 0,0  & admite redução de até a metade \\
-\midrule
-\multicolumn{6}{p{13.5cm}}{\footnotesize \texttt{shear}, \texttt{perspective}, \texttt{flipud}, \texttt{bgr}, \texttt{mixup}, \texttt{cutmix} e \texttt{copy\_paste} permanecem em 0,0 em todas as configurações, valor que já corresponde ao padrão da biblioteca.} \\
-\bottomrule
-\end{tabular}
-\legend{As transformações mantidas conservam o valor padrão da biblioteca; os desvios estão justificados na última coluna.
-Fonte: Elaborado pelo autor (2026).}
-\end{table}
-
-Dois parâmetros afastam-se do valor padrão em todas as configurações,
-inclusive naquelas com aumento de dados. O mosaico combina quatro
-imagens em uma única imagem de treinamento \cite{Ramos2025}, de modo que
-cada uma passa a ocupar aproximadamente metade de sua dimensão linear
-original; a variação de escala, no valor padrão de 0,5, admite reduções
-da mesma ordem. Conforme a Tabela~\ref{tab:tamanho_defeitos}, a mediana
-da dimensão menor das instâncias anotadas é de 17,29 px em
-$1280 \times 1280$ e o percentil 25 é de 11,38 px; uma redução à metade
-levaria esses valores a 8,6 px e 5,7 px, isto é, ao limiar do passo da
-camada P3 ou abaixo dele. Ambas as transformações deslocariam parte
-substancial do conjunto anotado para a faixa em que o detector não
-dispõe de suporte espacial para separar o objeto do fundo, contrariando
-a decisão de elevar a resolução de entrada justamente para retirá-lo
-dessa faixa. A exclusão é consistente com a observação de
-\citeonline{Chen2024NHD} de que o conjunto de transformações de aumento
-de dados do YOLOv8 não contempla as particularidades de objetos
-pequenos.
-
-Os demais parâmetros conservam o valor padrão da biblioteca nas
-configurações com aumento de dados, de modo que as magnitudes adotadas
-não constituem escolha arbitrária deste trabalho. Todos os valores da
-Tabela~\ref{tab:augmentation} permanecem fixos ao longo dos cinco folds
-de cada configuração. O aumento de dados é aplicado exclusivamente ao
-subconjunto de treinamento de cada rodada, no momento do carregamento
-das imagens, e nunca antes do particionamento dos folds, de modo que
-versões transformadas de uma mesma carta não possam aparecer
-simultaneamente no conjunto de treinamento e no de avaliação.
 
 Já o uso das imagens de realce de micro-relevo será avaliado como uma 
 representação alternativa de entrada, com o objetivo de verificar se 
