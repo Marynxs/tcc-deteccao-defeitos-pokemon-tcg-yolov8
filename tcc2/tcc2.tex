@@ -613,9 +613,7 @@ Configuração 1 (RGB sem aumento de dados), e entre a Configuração 4
 (realce com aumento de dados) e a Configuração 3 (realce sem aumento de
 dados). H2 foi testada pela comparação entre a Configuração 3 e a
 Configuração 1, e entre a Configuração 4 e a Configuração 2. H3 seria
-refutada se alguma das outras configurações superasse a Configuração 4,
-o que foi verificado pelas mesmas comparações da Configuração 4 com as
-Configurações 2 e 3, sem teste adicional. Todas essas comparações
+refutada se alguma das outras configurações superasse significativamente a Configuração 4, o que foi verificado pelas mesmas comparações da Configuração 4 com as Configurações 2 e 3, sem teste adicional; a regra completa de decisão das três hipóteses é apresentada no Capítulo~\ref{cap:desenvolvimento}. Todas essas comparações
 usaram o teste de Wilcoxon pareado bilateral, com nível de
 significância $\alpha = 0{,}05$, definido antes do treinamento das
 quatro configurações; a correção de Holm para o conjunto de comparações foi
@@ -2032,13 +2030,12 @@ O trabalho seguiu as etapas abaixo, na ordem em que foram executadas:
     Seção~\ref{subsec:validacao}.
 \end{enumerate}
 
-Os testes preliminares usaram as 82 cartas recebidas inicialmente, com
-164 imagens. As cartas foram divididas em cinco dobras, com a frente e
+Os testes preliminares usaram as 82 cartas recebidas inicialmente, com 164 imagens, anotadas pelo autor antes da revisão descrita na Seção~\ref{subsec:dados} e recortadas pelo mesmo procedimento automático. As cartas foram divididas em cinco dobras, com a frente e
 o verso de cada carta na mesma dobra, e, em cada rodada, cerca de 20\%
 das cartas do treinamento formaram a validação interna. As quatro
 configurações do estudo fatorial foram treinadas nas cinco dobras com
 o mesmo modelo, a mesma resolução de entrada de 1280 pixels, o mesmo
-tamanho de lote, a mesma paciência da parada antecipada e os mesmos
+tamanho de lote, a mesma paciência, isto é, o número de épocas sem melhora tolerado antes da parada antecipada, e os mesmos
 parâmetros de aumento de dados usados depois no conjunto completo
 (Seção~\ref{sec:implementacao}); rodadas isoladas serviram para
 ajustar o protocolo. Esses testes fixaram o tamanho do lote e a
@@ -2071,9 +2068,7 @@ $2560 \times 3540$ em 25, $1654 \times 2352$ em 23, $1320 \times 1811$
 em 21, $1243 \times 1719$ em 15, $902 \times 1248$ em 2 e nove
 resoluções pontuais nas nove imagens restantes. Após o recorte
 automático descrito adiante, a dimensão média das imagens é de cerca de
-$1326 \times 1827$ pixels, de modo que, na maior parte delas, o lado
-maior supera a resolução de entrada de 1280 pixels usada nos
-experimentos.
+$1326 \times 1827$ pixels, e o lado maior supera a resolução de entrada de 1280 pixels usada nos experimentos em 407 das 412 imagens.
 
 Os defeitos foram anotados pelo autor com caixas delimitadoras, com
 apoio nos laudos de graduação da empresa e no próprio julgamento sobre
@@ -2082,8 +2077,7 @@ formato de anotação do YOLOv8, um arquivo de texto por imagem, com uma
 linha por caixa. Todas as caixas pertencem à classe única
 \textit{defeito}: o modelo localiza cada defeito sem distinguir seu
 tipo, o que evita dividir um conjunto de dados já pequeno em várias
-classes com poucos exemplos cada. A anotação seguiu um critério escrito
-pelo autor e aplicado a todas as caixas:
+classes com poucos exemplos cada. O autor escreveu um critério de anotação, que foi aplicado a todas as caixas na revisão descrita adiante, inclusive às da primeira etapa:
 
 \begin{enumerate}
     \item cada marca contínua recebe uma caixa ajustada a ela, qualquer
@@ -2097,8 +2091,7 @@ pelo autor e aplicado a todas as caixas:
     adiante;
     \item padrões de impressão, como os brilhos e a textura das
     superfícies holográficas, não são defeito, e um risco sobre
-    superfície holográfica é anotado quando atravessa ou interrompe o
-    desenho.
+    superfície holográfica é anotado quando atravessa ou interrompe a ilustração.
 \end{enumerate}
 
 A anotação foi feita em duas etapas. Na primeira, o autor anotou as
@@ -2135,7 +2128,7 @@ ilustração. Duas delas estão entre as 82 iniciais: nos testes
 preliminares, ficaram em dobras diferentes, e o modelo que fez as
 indicações para cada uma tinha visto a outra. As outras seis estão
 entre as 124 restantes e têm a mesma ilustração de uma carta inicial,
-vista por quatro dos cinco modelos.
+vista por quatro dos cinco modelos. O efeito disso sobre as indicações dessas oito cartas, de 206, não foi medido.
 
 O autor examinou cada
 caixa sugerida, aceitou 892 e rejeitou 414. Na mesma revisão, aplicou o
@@ -2228,7 +2221,7 @@ abaixo de 8 pixels, o passo do nível de detecção P3; na resolução de
 de anotações para as quais atingir IoU de 0,5 exige que a caixa predita
 esteja deslocada menos de 2 pixels da anotação; aproximando a caixa por
 um quadrado deslocado em uma direção, isso ocorre quando o menor lado é
-inferior a 6 pixels. Essa distribuição confirmou a resolução de
+inferior a 6 pixels. Essa distribuição sustentou a resolução de
 entrada de 1280 pixels, já usada nos testes preliminares e adotada em
 todas as configurações do estudo fatorial
 (Seção~\ref{subsec:hiperparametros}). Nessa resolução, as anotações
@@ -2346,8 +2339,7 @@ carta. No seu cálculo, foram consideradas apenas as predições com
 confiança igual ou superior ao limiar fixado na validação interna da
 rodada (Seção~\ref{subsec:validacao_cruzada}), aplicado sem alteração
 à dobra de avaliação. Esse limiar foi o valor de confiança, entre 1.000
-valores igualmente espaçados de 0 a 1, que maximizou o F1 agregado da
-validação interna, depois de suavizada a curva do F1 em função do
+valores igualmente espaçados de 0 a 1, que maximizou o F1 agregado da validação interna, calculado pela própria biblioteca, depois de suavizada a curva do F1 em função do
 limiar, o mesmo critério que a biblioteca aplica ao conjunto que avalia
 \cite{Jocher2023}. Em cada imagem, as predições foram percorridas da
 maior para a menor confiança, e cada uma foi associada à anotação ainda
@@ -2402,12 +2394,13 @@ comparações foram feitas com as duas referências de anotação, com 206
 pares na anotação completa e 201 na anotação sem as caixas sugeridas, e
 a correção foi aplicada separadamente em cada referência. Os pares com
 diferença nula foram excluídos do cálculo do teste, e seu número é
-informado com cada resultado. A revocação por carta foi comparada nos
-mesmos cinco pares, com a correção aplicada à parte, para indicar a
+informado com cada resultado. A revocação por carta foi comparada nas mesmas cinco comparações, com a correção aplicada à parte, para indicar a
 origem das diferenças no F1. Cada configuração foi
 treinada uma única vez em cada rodada; por isso, o teste trata os
 modelos como fixos, como discutido na
 Seção~\ref{subsec:comparacao_estatistica}.
+
+A decisão sobre H1, H2 e H3 seguiu uma regra fixa, aplicada em cada referência de anotação. Como o teste é bilateral, uma diferença significativa pode ocorrer nos dois sentidos, e só uma diferença no sentido previsto pela hipótese contou a seu favor. H1 foi considerada confirmada quando as duas comparações correspondentes, a Configuração 2 contra a 1 e a Configuração 4 contra a 3, foram significativas após a correção de Holm, no sentido previsto, e refutada quando alguma delas foi significativa no sentido contrário. Nos demais casos, o resultado foi lido separadamente para cada representação de entrada, como confirmação parcial quando uma das duas comparações foi significativa no sentido previsto. A mesma regra valeu para H2, com as comparações da Configuração 3 contra a 1 e da Configuração 4 contra a 2, lidas separadamente para cada condição de aumento de dados. H3 foi considerada confirmada apenas quando a Configuração 4 superou significativamente as Configurações 2 e 3, refutada quando alguma delas superou significativamente a Configuração 4, e não confirmada nos demais casos.
 
 Como análise adicional, sem hipótese formulada, verificou-se a
 interação entre os dois fatores do estudo fatorial
@@ -2613,7 +2606,7 @@ dados, que definem um dos fatores do estudo fatorial, são apresentados
 adiante. A resolução
 de entrada foi de 1280 pixels, a mesma dos testes preliminares, e a
 distribuição do tamanho dos defeitos na anotação final
-(Tabela~\ref{tab:tamanho_defeitos}) confirmou a escolha: nela, a fração das
+(Tabela~\ref{tab:tamanho_defeitos}) sustentou a escolha: nela, a fração das
 anotações com menor lado abaixo do passo do nível P3 cai de 57,6\%, a
 640 pixels, para 10,8\%. Como o lado maior da maior parte das
 imagens recortadas supera 1280 pixels (Seção~\ref{subsec:dados}), o
@@ -2652,10 +2645,7 @@ validação interna \cite{Jocher2023}, e não o mAP@0,5. Nenhuma rodada
 atingiu o teto de 300 épocas: todas foram encerradas pela paciência.
 
 A paciência de 100 épocas, que coincide com o valor padrão da
-biblioteca, foi confirmada nos testes preliminares. Neles, com
-paciência de 50 épocas, a melhor época de um treino coincidiu com um pico isolado da
-métrica na validação interna, que tem poucas cartas e varia bastante
-entre épocas vizinhas. \citeonline{Prechelt1998} observa que critérios
+biblioteca, foi usada também nos testes preliminares. \citeonline{Prechelt1998} observa que critérios
 de parada mais lentos trazem pequena melhora na generalização ao custo
 de cerca de quatro vezes mais tempo de treinamento; neste trabalho,
 esse custo coube no cronograma, e uma escolha ruim do ponto de parada
@@ -2674,9 +2664,7 @@ com os valores padrão, essas configurações receberiam mais
 transformações do que as Configurações 2 e 4, o que inverteria o
 sentido do fator investigado no estudo fatorial. Nas Configurações 2 e
 4, as transformações mantidas conservaram o valor padrão da biblioteca,
-e acrescentou-se a rotação de até 10 graus, uma das transformações
-geométricas de aumento de dados apresentadas na
-Seção~\ref{subsec:data_augmentation}. Ao girar a imagem, a biblioteca
+e acrescentou-se a rotação de até 10 graus, uma das transformações geométricas de aumento de dados apresentadas na Seção~\ref{subsec:data_augmentation}, em valor que não foi ajustado por teste. Ao girar a imagem, a biblioteca
 substitui cada caixa pela menor caixa alinhada aos eixos que contém os
 seus quatro cantos girados, o que a alarga; o efeito é maior nas 367
 caixas em forma de faixa (Seção~\ref{subsec:dados}): no ângulo máximo,
@@ -2738,7 +2726,7 @@ inclusive das que não têm aumento de dados.
 \texttt{hsv\_h}    & 0,015 & 0,0 & 0,015 & 0,0  & Configuração 4: realce com contraste ajustado pelo CLAHE e canais que não são cores \\
 \texttt{hsv\_s}    & 0,7   & 0,0 & 0,7   & 0,0  & idem \\
 \texttt{hsv\_v}    & 0,4   & 0,0 & 0,4   & 0,0  & idem \\
-\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & transformação geométrica usual; alarga as caixas em faixa \\
+\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & transformação geométrica usual, valor não ajustado; alarga as caixas em faixa \\
 \texttt{translate} & 0,1   & 0,0 & 0,1   & 0,1  & padrão mantido \\
 \texttt{fliplr}    & 0,5   & 0,0 & 0,5   & 0,5  & padrão mantido \\
 \texttt{mosaic}    & 1,0   & 0,0 & 0,0   & 0,0  & corta defeitos nas bordas e reúne partes de quatro cartas \\
@@ -2884,9 +2872,7 @@ rodada da Dobra 1. A Configuração 3 foi treinada com cada uma das
 quatro variantes, com os demais hiperparâmetros iguais aos das outras
 rodadas. Foi adotada nas Configurações 3 e 4 a variante de maior F1
 agregado na validação interna dessa rodada, calculado com a anotação
-completa pela própria biblioteca de treinamento. A biblioteca escolhe
-o limiar pelo máximo da curva de F1 suavizada, e não pelo procedimento
-da Seção~\ref{subsec:validacao}.
+completa pela própria biblioteca de treinamento. A biblioteca escolhe o limiar no próprio conjunto em que mede o F1, aqui a validação interna, e associa predições e anotações percorrendo os pares em ordem decrescente de IoU, e não as predições em ordem decrescente de confiança. No procedimento da Seção~\ref{subsec:validacao}, o limiar escolhido na validação interna foi aplicado à dobra de avaliação, com a associação descrita naquela seção.
 
 A composição de três canais obteve F1 de 0,208; o
 \textit{emboss} seguido do CLAHE, 0,192; a medida de Frangi, 0,161; e o
