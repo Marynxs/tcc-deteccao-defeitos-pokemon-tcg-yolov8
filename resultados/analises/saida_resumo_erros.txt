@@ -1,0 +1,5 @@
+cartas avaliadas: 206; com anotacao: 206; com ao menos um defeito encontrado: 200
+sem nenhum defeito encontrado: ['carta_021', 'carta_029', 'carta_031', 'carta_106', 'carta_111', 'carta_124']
+cartas de desgaste difuso (9): ['carta_016', 'carta_047', 'carta_072', 'carta_073', 'carta_074', 'carta_075', 'carta_076', 'carta_077', 'carta_108']
+todas as cartas: TP 1369 FP 1946 FN 3439 precisao 0.413 revocacao 0.285 F1 0.337
+sem as de desgaste difuso (197 cartas): TP 1061 FP 1494 FN 2184 precisao 0.415 revocacao 0.327 F1 0.366

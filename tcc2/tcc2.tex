@@ -2977,8 +2977,542 @@ mantinha em outra dobra.
 \section{Resultados e análises}
 \label{sec:resultados}
 
-% A ESCREVER: resultados das quatro configuracoes, analise critica e
-% discussao. Depende da execucao dos experimentos.
+Esta seção apresenta os resultados dos experimentos descritos na
+Seção~\ref{sec:experimentos} e os analisa em relação às hipóteses da
+Seção~\ref{subsec:hipotese}. Primeiro, descreve-se o desempenho das quatro
+configurações do estudo fatorial e da configuração de melhor desempenho com
+a cabeça P2 (Seção~\ref{subsec:res_desempenho}). Em seguida, apresentam-se
+as comparações pareadas que decidem as hipóteses H1 a H3, junto com a
+análise da interação entre os dois fatores
+(Seção~\ref{subsec:res_hipoteses}), e a ablação da cabeça P2, que decide a
+hipótese H4 (Seção~\ref{subsec:res_p2}). Depois, vêm a ablação da resolução
+de entrada e o teste de capacidade (Seção~\ref{subsec:res_resolucao}), a
+curva de aprendizado (Seção~\ref{subsec:res_curva}) e uma análise
+descritiva dos erros da configuração de melhor desempenho
+(Seção~\ref{subsec:res_erros}). Por fim, os resultados são discutidos em
+conjunto e comparados com os dos trabalhos correlatos da
+Seção~\ref{sec:trabalhos_correlatos} (Seção~\ref{subsec:discussao}).
+
+Os resultados do estudo fatorial e da ablação da cabeça P2 foram obtidos
+com as duas referências de anotação da Seção~\ref{subsec:dados}, a anotação
+completa e a anotação sem as caixas sugeridas, e lidos pelo critério ali
+definido: uma conclusão que se mantém com as duas referências não depende
+da presença das caixas sugeridas. As demais análises usaram a anotação
+completa. As dobras são identificadas de 1 a 5, como na
+Seção~\ref{subsec:validacao}, e o mAP@0,5 foi recalculado a partir das
+predições salvas de cada rodada, da forma descrita na mesma seção. Cada
+configuração foi treinada uma única vez em cada dobra; por isso, os
+resultados descrevem os modelos treinados e não incluem a variação entre
+treinamentos repetidos.
+
+\subsection{Desempenho das configurações}
+\label{subsec:res_desempenho}
+
+A Tabela~\ref{tab:desempenho_configuracoes} apresenta, para as quatro
+configurações do estudo fatorial e para a configuração de melhor desempenho
+com a cabeça P2, o mAP@0,5 médio das cinco dobras e a precisão, a revocação
+e o F1 agregados, com as duas referências de anotação. Essas medidas
+descrevem as configurações e não foram usadas para testar as hipóteses
+(Seção~\ref{subsec:validacao}); as comparações pareadas pelo F1 por carta
+são apresentadas na Seção~\ref{subsec:res_hipoteses}.
+
+Com a anotação completa, a Configuração 2 (RGB com aumento de dados)
+obteve o maior mAP@0,5 médio, 0,247, seguida pelas Configurações 4 (0,202),
+1 (0,190) e 3 (0,150). Pelo critério da Seção~\ref{subsec:validacao}, ela
+foi a configuração de melhor desempenho, sobre a qual foram feitas a
+ablação e as análises complementares. A Configuração 2 obteve também o
+maior F1 agregado, 0,337, e o maior mAP@0,5 em cada uma das cinco dobras,
+com valores entre 0,191, na Dobra 1, e 0,313, na Dobra 5. Com a cabeça P2,
+a mesma configuração obteve mAP@0,5 médio de 0,217 e F1 agregado de 0,309.
+
+Com a anotação sem as caixas sugeridas, todas as configurações obtiveram
+valores menores. Como as duas referências contam acertos e erros sobre
+conjuntos diferentes de caixas, seus valores não são comparáveis entre si,
+e a leitura se faz dentro de cada referência. Nela, a Configuração 2 também
+obteve o maior mAP@0,5 médio, 0,173, o maior mAP@0,5 em cada dobra e o
+maior F1 agregado, 0,260. A ordem das quatro configurações do estudo
+fatorial foi a mesma nas duas referências, tanto pelo mAP@0,5 médio quanto
+pelo F1 agregado: Configuração 2, Configuração 4, Configuração 1 e
+Configuração 3.
+
+\begin{table}[htb]
+\centering
+\caption{Desempenho das configurações nas duas referências de anotação}
+\label{tab:desempenho_configuracoes}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}cccccccc}
+\toprule
+ & \multicolumn{4}{c}{\textbf{Anotação completa}} & \multicolumn{4}{c}{\textbf{Sem as caixas sugeridas}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+\textbf{Configuração} & \textbf{mAP@0,5} & \textbf{Precisão} & \textbf{Revocação} & \textbf{F1} & \textbf{mAP@0,5} & \textbf{Precisão} & \textbf{Revocação} & \textbf{F1} \\
+\midrule
+1: RGB, sem aumento de dados & 0,190 & 0,340 & 0,257 & 0,293 & 0,129 & 0,250 & 0,199 & 0,222 \\
+2: RGB, com aumento de dados & \textbf{0,247} & \textbf{0,413} & \textbf{0,285} & \textbf{0,337} & \textbf{0,173} & \textbf{0,316} & 0,221 & \textbf{0,260} \\
+3: realce, sem aumento de dados & 0,150 & 0,288 & 0,212 & 0,245 & 0,110 & 0,220 & 0,178 & 0,197 \\
+4: realce, com aumento de dados & 0,202 & 0,362 & 0,260 & 0,303 & 0,149 & 0,284 & 0,216 & 0,245 \\
+\midrule
+2 com a cabeça P2 & 0,217 & 0,340 & 0,283 & 0,309 & 0,150 & 0,262 & \textbf{0,223} & 0,241 \\
+\bottomrule
+\end{tabular}
+\legend{O mAP@0,5 é a média das cinco dobras de avaliação. A precisão, a revocação e o F1 são agregados, calculados com o limiar de confiança fixado na validação interna de cada rodada e com a soma dos verdadeiros positivos, dos falsos positivos e dos falsos negativos de todas as cartas das cinco dobras. Realce: realce de micro-relevo. Em negrito, o maior valor de cada coluna.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
+
+\subsection{Comparações pareadas e hipóteses H1 a H3}
+\label{subsec:res_hipoteses}
+
+A Tabela~\ref{tab:comparacoes_pareadas} apresenta as cinco comparações
+pareadas pelo F1 por carta definidas na Seção~\ref{subsec:validacao}, com
+as duas referências de anotação: 206 pares na anotação completa e 201 na
+anotação sem as caixas sugeridas. Para cada comparação, a tabela informa o
+F1 por carta médio das duas configurações, o número de pares com diferença
+nula, que foram excluídos do cálculo do teste, e o valor-p ajustado pela
+correção de Holm. As mesmas informações são dadas para a revocação por
+carta, com a correção aplicada à parte. A comparação entre a configuração
+de melhor desempenho com e sem a cabeça P2 é analisada na
+Seção~\ref{subsec:res_p2}.
+
+Com a anotação completa, as quatro comparações do estudo fatorial foram
+significativas. A Configuração 2 superou a 1, com F1 por carta médio de
+0,376 contra 0,332, e a Configuração 4 superou a 3, com 0,354 contra 0,294,
+as duas no sentido previsto por H1. A Configuração 1 superou a 3, com 0,332
+contra 0,294, e a Configuração 2 superou a 4, com 0,376 contra 0,354, as
+duas no sentido contrário ao previsto por H2. A revocação por carta teve
+diferenças significativas nas mesmas quatro comparações, no mesmo
+sentido.
+
+Com a anotação sem as caixas sugeridas, as duas comparações de H1
+continuaram significativas no sentido previsto, com 0,304 contra 0,264
+entre as Configurações 2 e 1 e 0,306 contra 0,250 entre as Configurações 4
+e 3. A Configuração 1 continuou superior à 3, com 0,264 contra 0,250 e
+valor-p ajustado de 0,024, mas a diferença na revocação por carta não foi
+significativa (valor-p ajustado de 0,14). A diferença entre as
+Configurações 2 e 4 deixou de ser significativa: o F1 por carta médio foi
+de 0,304 e 0,306, com valor-p ajustado de 0,59, e a revocação por carta
+média foi de 0,322 nas duas.
+
+Pela regra de decisão da Seção~\ref{subsec:validacao}, H1 foi confirmada
+com as duas referências de anotação, porque as duas comparações
+correspondentes foram significativas no sentido previsto em ambas. H2 foi
+refutada com as duas referências, porque, em cada uma, ao menos uma de suas
+comparações foi significativa no sentido contrário ao previsto: as duas,
+com a anotação completa, e apenas a da Configuração 3 com a 1, sem aumento
+de dados, com a anotação sem as caixas sugeridas. H3 foi refutada com a
+anotação completa, em que a Configuração 2 superou significativamente a 4,
+e não foi confirmada com a anotação sem as caixas sugeridas, em que a
+Configuração 4 superou a 3, mas não a 2.
+
+Pelo critério da Seção~\ref{subsec:dados}, uma conclusão que se mantém
+com as duas referências não depende das caixas sugeridas. Mantiveram-se a
+confirmação de H1 e a refutação de H2 pela comparação sem aumento de dados.
+O resultado da comparação entre as Configurações 2 e 4, com aumento de
+dados, dependeu das caixas sugeridas, e com ele a refutação de H3. A
+leitura comum às duas referências é, portanto, a de que H3 não foi
+confirmada.
+
+Esses resultados valem para as representações de entrada tal como foram
+definidas neste trabalho: como descrito na
+Seção~\ref{subsec:estrategias}, a comparação entre as imagens RGB e as de
+realce de micro-relevo envolve também a retirada da cor e, entre as
+Configurações 2 e 4, as variações no espaço HSV, aplicadas só às imagens
+RGB. O teste, além disso, trata como fixo o modelo de cada configuração em
+cada dobra, treinado uma única vez (Seção~\ref{subsec:validacao}).
+
+Na análise adicional da interação entre os dois fatores, feita com a
+anotação completa (Seção~\ref{subsec:validacao}), o efeito do aumento de
+dados sobre o F1 por carta foi, em média, de $+0{,}044$ com imagens RGB
+(mediana de $+0{,}033$) e de $+0{,}060$ com imagens de realce de
+micro-relevo (mediana de $+0{,}045$). A diferença entre os dois efeitos,
+calculada carta a carta, teve média de $-0{,}016$ e mediana de
+$-0{,}019$: o efeito foi maior com imagens RGB em 92 cartas, maior com
+imagens de realce em 108 e igual em 6, que foram excluídas do teste. Essa
+diferença não foi significativa pelo teste de Wilcoxon pareado bilateral,
+com valor-p de 0,15, e, portanto, não se observou dependência entre o
+efeito do aumento de dados e a representação de entrada. Como as
+variações no espaço HSV só fizeram parte do aumento de dados das imagens
+RGB (Seção~\ref{subsec:estrategias}), essa comparação reúne a diferença
+entre as representações e a diferença entre os dois aumentos de dados.
+
+\begin{table}[htb]
+\centering
+\caption{Comparações pareadas por carta entre as configurações}
+\label{tab:comparacoes_pareadas}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.2cm}cccccc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{F1 por carta}} & \multicolumn{3}{c}{\textbf{Revocação por carta}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+\textbf{Comparação} & \textbf{Médias} & \textbf{Nulos} & \textbf{Holm} & \textbf{Médias} & \textbf{Nulos} & \textbf{Holm} \\
+\midrule
+\multicolumn{7}{l}{\textit{Anotação completa (206 pares)}} \\
+2 com 1 (H1) & 0,376 e 0,332 & 8 & $<$ 0,001 & 0,375 e 0,333 & 50 & $<$ 0,001 \\
+4 com 3 (H1, H3) & 0,354 e 0,294 & 13 & $<$ 0,001 & 0,353 e 0,290 & 57 & $<$ 0,001 \\
+3 com 1 (H2) & 0,294 e 0,332 & 11 & $<$ 0,001 & 0,290 e 0,333 & 41 & $<$ 0,001 \\
+4 com 2 (H2, H3) & 0,354 e 0,376 & 9 & 0,002 & 0,353 e 0,375 & 58 & 0,011 \\
+2 com P2 e 2 sem P2 & 0,339 e 0,376 & 12 & $<$ 0,001 & 0,373 e 0,375 & 58 & 0,60 \\
+\midrule
+\multicolumn{7}{l}{\textit{Anotação sem as caixas sugeridas (201 pares)}} \\
+2 com 1 (H1) & 0,304 e 0,264 & 15 & $<$ 0,001 & 0,322 e 0,278 & 65 & $<$ 0,001 \\
+4 com 3 (H1, H3) & 0,306 e 0,250 & 22 & $<$ 0,001 & 0,322 e 0,265 & 66 & $<$ 0,001 \\
+3 com 1 (H2) & 0,250 e 0,264 & 22 & 0,024 & 0,265 e 0,278 & 69 & 0,14 \\
+4 com 2 (H2, H3) & 0,306 e 0,304 & 18 & 0,59 & 0,322 e 0,322 & 66 & 1 \\
+2 com P2 e 2 sem P2 & 0,288 e 0,304 & 14 & 0,024 & 0,335 e 0,322 & 65 & 1 \\
+\bottomrule
+\end{tabular}
+\legend{Os números da coluna Comparação indicam as configurações; P2: cabeça P2. Médias: F1 por carta médio, ou revocação por carta média, da primeira e da segunda configuração indicadas. Nulos: pares com diferença nula, excluídos do cálculo do teste. Holm: valor-p do teste de Wilcoxon pareado bilateral, ajustado pela correção de Holm com $m = 5$, aplicada separadamente em cada referência de anotação e, à parte, à revocação por carta. Em parênteses, as hipóteses decididas por cada comparação.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
+
+\subsection{Cabeça P2 e hipótese H4}
+\label{subsec:res_p2}
+
+Esta seção apresenta a ablação da cabeça P2 sobre a configuração de
+melhor desempenho, a Configuração 2, e a decisão sobre a hipótese H4. A
+Tabela~\ref{tab:revocacao_faixas} mostra a revocação em cada faixa de
+tamanho da Seção~\ref{subsec:dados}, definida pelo menor lado da caixa na
+resolução de 1280 pixels e somados os defeitos das cinco dobras de
+avaliação, para as quatro configurações do estudo fatorial e para a
+Configuração 2 com a cabeça P2, nas duas referências de anotação. Em cada
+rodada, a revocação foi medida com o limiar de confiança fixado na sua
+própria validação interna.
+
+Na faixa abaixo de 8 pixels, que define o critério de H4, a
+Configuração 2 encontrou 14 dos 517 defeitos sem a cabeça P2 e 17 com ela,
+com revocação de 0,027 e 0,033, na anotação completa. Na anotação sem as
+caixas sugeridas, a faixa tem 513 defeitos, e os defeitos encontrados
+foram os mesmos 14 e 17. Como o critério de H4 não fixou margem mínima nem
+teste estatístico (Seção~\ref{subsec:validacao}), ele foi atingido apenas
+numericamente, por uma diferença de três defeitos. Na análise por carta,
+feita nas 127 cartas com ao menos um defeito nessa faixa, a revocação
+média foi de 0,021 sem a cabeça P2 e de 0,038 com ela; a revocação com a
+cabeça P2 foi maior em 11 cartas, menor em 10 e igual em 106, e a
+diferença não foi significativa pelo teste de Wilcoxon pareado bilateral,
+com valor-p de 0,39. Na anotação sem as caixas sugeridas, essa análise
+reuniu 126 cartas, com 105 pares nulos e o mesmo valor-p.
+
+Como definido na Seção~\ref{subsec:validacao}, esse resultado foi lido
+junto com o F1 por carta dos dois modelos. Com a cabeça P2, o F1 por
+carta médio foi menor, de 0,339 contra 0,376 na anotação completa e de
+0,288 contra 0,304 na anotação sem as caixas sugeridas, com diferença
+significativa nas duas referências após a correção de Holm, enquanto a
+revocação por carta não diferiu de forma significativa
+(Tabela~\ref{tab:comparacoes_pareadas}). Nos valores agregados da anotação
+completa, a revocação ficou praticamente igual, 0,283 com a cabeça P2 e
+0,285 sem ela, e a precisão foi menor, 0,340 contra 0,413
+(Tabela~\ref{tab:desempenho_configuracoes}). O aumento numérico da
+revocação abaixo de 8 pixels veio, assim, acompanhado de um desempenho
+geral menor.
+
+Os limiares de confiança dos dois modelos foram fixados, cada um, na sua
+própria validação interna e, por isso, podiam diferir; um limiar mais
+baixo mantém mais predições e tende a elevar a revocação
+(Seção~\ref{subsec:validacao}). O limiar do modelo com a cabeça P2 foi
+menor que o do modelo sem ela em três das cinco dobras, maior em uma e
+igual em uma. Depois dos resultados, fez-se então uma análise descritiva
+complementar, sem teste estatístico: em cada dobra, os dois modelos foram
+avaliados com o mesmo limiar, primeiro o do modelo sem a cabeça P2 e
+depois o do modelo com ela. Com o limiar do modelo sem a cabeça P2, o
+modelo com a cabeça encontrou 12 dos 517 defeitos abaixo de 8 pixels,
+contra 14 do modelo sem ela; com o limiar do modelo com a cabeça P2,
+encontrou 17, contra 18. Nas faixas de 8 a 20 pixels e acima de 20
+pixels, o modelo com a cabeça P2 também teve revocação menor nos dois
+limiares comuns, e o mesmo ocorreu na anotação sem as caixas sugeridas.
+A vantagem numérica da cabeça P2 no critério de H4, portanto, não se
+manteve quando os dois modelos usaram o mesmo limiar. A
+Figura~\ref{fig:revocacao_faixa_p2} mostra a revocação por faixa do modelo
+sem a cabeça P2 e do modelo com ela, com o seu próprio limiar e com o
+limiar do modelo sem ela.
+
+Entre as quatro configurações do estudo fatorial, as que não usaram aumento de dados
+encontraram mais defeitos abaixo de 8 pixels, 26 dos 517, do que as que
+usaram, 14 e 15 (Tabela~\ref{tab:revocacao_faixas}).
+
+Como previsto na Seção~\ref{subsec:hipotese}, o teste de H4 não separa o
+efeito da cabeça P2 do efeito da falta de pré-treino: a variante com a
+cabeça P2 recebeu os pesos pré-treinados em 219 dos 437 tensores, e
+começaram com valores aleatórios quase todo o caminho de baixo para cima
+do \textit{neck} e toda a cabeça de detecção
+(Seção~\ref{subsec:modelo_base}).
+Os resultados desta seção referem-se, assim, à cabeça P2 acrescentada
+nessas condições de treinamento.
+
+\begin{table}[htb]
+\centering
+\caption{Revocação por faixa de tamanho dos defeitos nas duas referências de anotação}
+\label{tab:revocacao_faixas}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}cccccc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Anotação completa}} & \multicolumn{3}{c}{\textbf{Sem as caixas sugeridas}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+\textbf{Configuração} & \textbf{$<$ 8 (517)} & \textbf{8 a 20 (2.853)} & \textbf{$>$ 20 (1.438)} & \textbf{$<$ 8 (513)} & \textbf{8 a 20 (2.148)} & \textbf{$>$ 20 (1.255)} \\
+\midrule
+1: RGB, sem aumento de dados & 0,050 & 0,360 & 0,128 & 0,051 & 0,289 & 0,107 \\
+2: RGB, com aumento de dados & 0,027 & 0,377 & 0,193 & 0,027 & 0,303 & 0,159 \\
+3: realce, sem aumento de dados & 0,050 & 0,300 & 0,096 & 0,051 & 0,263 & 0,085 \\
+4: realce, com aumento de dados & 0,029 & 0,351 & 0,165 & 0,029 & 0,304 & 0,140 \\
+\midrule
+2 com a cabeça P2 & 0,033 & 0,367 & 0,204 & 0,033 & 0,302 & 0,167 \\
+\bottomrule
+\end{tabular}
+\legend{Faixas pelo menor lado da caixa, em pixels, na resolução de 1280 pixels; entre parênteses, o número de defeitos da faixa. Revocação somada nas cinco dobras de avaliação, com o limiar de confiança fixado na validação interna de cada rodada. Realce: realce de micro-relevo.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \caption{Revocação por faixa de tamanho da Configuração 2 sem e com a
+    cabeça P2, com o limiar de confiança de cada modelo e com um limiar
+    comum, na anotação completa.}
+    \label{fig:revocacao_faixa_p2}
+    \includegraphics[width=0.85\textwidth]{assets/revocacao_faixa_p2.png}
+    \legend{Faixas pelo menor lado da caixa na resolução de 1280 pixels,
+    com o número de defeitos de cada faixa entre parênteses. Sem P2:
+    Configuração 2 com o seu limiar. Com P2, limiar próprio: Configuração 2
+    com a cabeça P2 e o seu limiar. Com P2, limiar do modelo sem P2: o
+    mesmo modelo com o limiar do modelo sem a cabeça P2, em cada dobra.
+    Fonte: Elaborado pelo autor (2026).}
+\end{figure}
+
+\subsection{Resolução de entrada e capacidade do modelo}
+\label{subsec:res_resolucao}
+
+A ablação da resolução de entrada e o teste de capacidade foram feitos
+na Dobra 5, com a anotação completa. Cada rodada foi comparada com a da
+Configuração 2 treinada com o YOLOv8s a 1280 pixels na mesma dobra, pelo
+F1 por carta, em 45 pares e sem correção de Holm
+(Seção~\ref{subsec:validacao}).
+
+Com a resolução de entrada de 640 pixels, o F1 por carta médio foi de
+0,266, contra 0,399 a 1280 pixels; a rodada a 1280 pixels teve F1 maior em
+36 cartas, menor em 6 e igual em 3, e a diferença foi significativa pelo
+teste de Wilcoxon pareado bilateral, com valor-p menor que 0,001. O
+mAP@0,5 foi de 0,161 a 640 pixels e de 0,313 a 1280 pixels.
+
+Com o YOLOv8m, o F1 por carta médio foi de 0,431, contra 0,399 com o
+YOLOv8s; o YOLOv8m teve F1 maior em 25 cartas, menor em 18 e igual em 2, e
+a diferença não foi significativa, com valor-p de 0,25. O mAP@0,5 foi de
+0,308 com o YOLOv8m e de 0,313 com o YOLOv8s. Nesta dobra, portanto, não
+se detectou diferença de desempenho entre os dois tamanhos do modelo.
+
+Os dois resultados vêm de uma única rodada em uma única dobra. Como
+discutido na Seção~\ref{subsec:ablacao}, a rodada de referência da
+Dobra 5 teve o maior mAP@0,5 entre as cinco dobras e, se estiver acima do
+seu desempenho típico, a vantagem de 1280 sobre 640 pixels pode estar
+exagerada, e a comparação com o YOLOv8m, desfavorável a ele.
+
+\subsection{Curva de aprendizado}
+\label{subsec:res_curva}
+
+A Figura~\ref{fig:curva_aprendizado} mostra a curva de aprendizado da
+Configuração 2 nas Dobras 3 e 5. Com 25\%, 50\%, 75\% e 100\% das cartas do
+treino efetivo, o mAP@0,5 foi de 0,220, 0,243, 0,266 e 0,286 na Dobra 3 e
+de 0,198, 0,262, 0,267 e 0,313 na Dobra 5. A
+Tabela~\ref{tab:curva_diferencas} apresenta as diferenças entre os pontos,
+com os intervalos de confiança de 95\% por \textit{bootstrap}.
+
+Para a leitura da curva, adotou-se um critério definido depois dos
+resultados: considerou-se que o último acréscimo de cartas, de 75\% para
+100\%, teve efeito distinguível de zero quando o intervalo de confiança
+da sua diferença não continha o zero. Esse efeito foi distinguível na
+Dobra 5, com diferença de $+0{,}046$ e intervalo de
+$[+0{,}017;\ +0{,}072]$, e não na Dobra 3, com $+0{,}021$ e intervalo de
+$[-0{,}011;\ +0{,}048]$, embora nesta o mAP@0,5 tenha continuado a subir
+em ritmo semelhante ao dos acréscimos anteriores. A diferença entre
+100\% e 50\% das cartas excluiu o zero nas duas dobras.
+
+Na Dobra 5, o ponto de 100\% é a rodada de referência discutida na
+Seção~\ref{subsec:ablacao}; se ela estiver acima do seu desempenho típico,
+as diferenças que terminam nesse ponto estão exageradas nessa dobra. Os
+intervalos refletem apenas a incerteza devida às cartas avaliadas, e não a
+variação entre treinamentos repetidos, porque cada ponto da curva vem de
+uma única rodada.
+
+\begin{table}[htb]
+\centering
+\caption{Diferenças de mAP@0,5 entre os pontos da curva de aprendizado}
+\label{tab:curva_diferencas}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}cc}
+\toprule
+\textbf{Diferença} & \textbf{Dobra 3} & \textbf{Dobra 5} \\
+\midrule
+50\% menos 25\% & $+0{,}022$ $[-0{,}006;\ +0{,}054]$ & $+0{,}064$ $[+0{,}027;\ +0{,}098]$ \\
+75\% menos 50\% & $+0{,}023$ $[-0{,}007;\ +0{,}051]$ & $+0{,}005$ $[-0{,}025;\ +0{,}037]$ \\
+100\% menos 75\% & $+0{,}021$ $[-0{,}011;\ +0{,}048]$ & $+0{,}046$ $[+0{,}017;\ +0{,}072]$ \\
+\midrule
+100\% menos 50\% & $+0{,}044$ $[+0{,}012;\ +0{,}068]$ & $+0{,}051$ $[+0{,}026;\ +0{,}077]$ \\
+\bottomrule
+\end{tabular}
+\legend{Porcentagens das cartas do treino efetivo. Diferença observada entre os pontos; entre colchetes, o intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta da dobra de avaliação como unidade sorteada e a mesma amostra de cartas usada em todos os pontos de cada repetição.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \caption{Curva de aprendizado da Configuração 2 nas Dobras 3 e 5.}
+    \label{fig:curva_aprendizado}
+    \includegraphics[width=0.85\textwidth]{assets/curva_aprendizado.png}
+    \legend{mAP@0,5 na dobra de avaliação em função da fração das cartas
+    do treino efetivo; o ponto de 100\% é a rodada do estudo fatorial na
+    mesma dobra. As barras indicam o intervalo de confiança de 95\% por
+    \textit{bootstrap} percentil de cada ponto, com a carta como unidade
+    sorteada.
+    Fonte: Elaborado pelo autor (2026).}
+\end{figure}
+
+\subsection{Análise dos erros}
+\label{subsec:res_erros}
+
+Depois dos resultados, fez-se uma análise descritiva dos erros da
+Configuração 2, sem teste estatístico e não prevista na
+Seção~\ref{subsec:validacao}. Ela usou a anotação completa, o limiar de
+confiança fixado na validação interna de cada rodada e a mesma associação
+entre predições e anotações do F1 por carta, somando as cinco dobras de
+avaliação. A Figura~\ref{fig:revocacao_face} mostra a revocação separada
+pela face da carta: a revocação na frente, de 0,170, foi cerca de metade da obtida no verso, de 0,347. Como o verso reúne 3.111 dos 4.808 defeitos anotados, os
+valores agregados da Tabela~\ref{tab:desempenho_configuracoes} refletem
+principalmente o desempenho nessa face.
+
+Em 200 das 206 cartas (97,1\%), ao menos um dos defeitos anotados foi
+encontrado; nas seis restantes, nenhum foi encontrado.
+
+Nas nove cartas com desgaste difuso da Seção~\ref{subsec:dados}, os
+defeitos isolados receberam caixa, mas a região de desgaste difuso não.
+Retirando essas nove cartas da avaliação, restaram 197 cartas, e a
+revocação agregada passou de 0,285 para 0,327 e o F1 de 0,337 para
+0,366, enquanto a precisão ficou praticamente igual, de 0,413 para
+0,415: a diferença veio sobretudo de defeitos anotados nessas cartas que
+não foram encontrados.
+
+\begin{figure}[H]
+    \centering
+    \caption{Revocação da Configuração 2 na frente e no verso das cartas.}
+    \label{fig:revocacao_face}
+    \includegraphics[width=0.6\textwidth]{assets/revocacao_face.png}
+    \legend{Revocação somada nas cinco dobras de avaliação, com a anotação
+    completa e o limiar de confiança fixado na validação interna de cada
+    rodada; sobre cada barra, o número de defeitos encontrados e o total
+    de defeitos anotados na face.
+    Fonte: Elaborado pelo autor (2026).}
+\end{figure}
+
+\subsection{Discussão e comparação com os trabalhos correlatos}
+\label{subsec:discussao}
+
+A Tabela~\ref{tab:sintese_hipoteses} resume a decisão sobre as quatro
+hipóteses da Seção~\ref{subsec:hipotese}. Apenas H1 foi confirmada nas duas referências de anotação; o critério de H4 foi atingido apenas numericamente, e H2 e H3 não se confirmaram.
+
+\begin{table}[htb]
+\centering
+\caption{Síntese da decisão sobre as hipóteses}
+\label{tab:sintese_hipoteses}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{3.9cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}}
+\toprule
+\textbf{Hipótese} & \textbf{Critério} & \textbf{Anotação completa} & \textbf{Sem as caixas sugeridas} & \textbf{Leitura comum} \\
+\midrule
+H1, aumento de dados & Configuração 2 supera a 1 e Configuração 4 supera a 3 & Confirmada & Confirmada & Confirmada \\
+\midrule
+H2, realce de micro-relevo & Configuração 3 supera a 1 e Configuração 4 supera a 2 & Refutada & Refutada, só pela comparação sem aumento de dados & Refutada \\
+\midrule
+H3, combinação & Configuração 4 supera as Configurações 2 e 3 & Refutada & Não confirmada & Não confirmada \\
+\midrule
+H4, cabeça P2 & Revocação maior dos defeitos menores que 8 pixels & Atingido apenas numericamente & Atingido apenas numericamente & Atingido apenas numericamente; sem ganho com limiar comum \\
+\bottomrule
+\end{tabular}
+\legend{Critérios de H1 a H3 avaliados pelo F1 por carta, com o teste de Wilcoxon pareado bilateral e a correção de Holm (Seção~\ref{subsec:res_hipoteses}); critério de H4 sem margem nem teste (Seção~\ref{subsec:res_p2}). Leitura comum: conclusão que se mantém com as duas referências de anotação.
+Fonte: Elaborado pelo autor (2026).}
+\end{table}
+
+O ganho com o aumento de dados, observado nas duas representações de
+entrada, concorda com o uso dessa técnica como uma das soluções para
+conjuntos reduzidos, sujeitos ao sobreajuste \cite{Chen2021}, e com a
+sua interpretação, em classificação de imagens, como um multiplicador do
+valor de cada exemplo \cite{Hoiem2021}. O estudo não separou a
+contribuição de cada transformação.
+
+O realce de micro-relevo não superou as imagens RGB. Nos trabalhos que
+motivaram o seu uso, o operador não foi avaliado isoladamente: em
+\citeonline{Sawada2024}, o filtro \textit{emboss} integra um algoritmo de
+extração sem avaliação à parte, e em \citeonline{Jiang2023} o CLAHE foi
+avaliado apenas fundido a outro método de realce, conjunto que melhorou
+o detector em relação às imagens originais. Aqui, a representação de
+realce foi comparada às imagens RGB em validação cruzada, e não houve
+ganho. Duas hipóteses explicativas, não testadas, são compatíveis com o
+resultado. A primeira é a retirada da cor, já que nenhuma representação
+de controle com a luminosidade sem realce foi treinada
+(Seção~\ref{subsec:estrategias}). A segunda é o afastamento da entrada em
+relação às imagens RGB do pré-treino, que pode reduzir parte do seu
+benefício (Seção~\ref{subsec:fotometria}); ao aplicar o CLAHE a
+radiografias, \citeonline{Ahmad2025} observaram uma tendência compatível
+com essa possibilidade, sem significância estatística. Entre as variantes
+comparadas, a adotada foi a única que manteve a luminosidade original em
+um dos canais, o que também é compatível com essas hipóteses; a escolha,
+porém, foi uma seleção de hiperparâmetro, e não permite afirmar que essa
+variante seja superior às demais (Seção~\ref{subsec:estrategias}). Como a escolha da variante pode favorecer ligeiramente as Configurações 3 e 4, o
+resultado contrário a elas não se deve a essa escolha.
+
+A cabeça P2 não aumentou a revocação dos defeitos menores que 8 pixels
+quando os dois modelos usaram o mesmo limiar, e a precisão caiu. Duas
+hipóteses explicativas, não testadas, são compatíveis com esse
+resultado. Em defeitos de placas de circuito impresso, os autores apontam
+que o nível P2 traz ruído de fundo e o tratam com um módulo de atenção ao
+contexto global \cite{Xia2023}, que não foi usado aqui. A outra é a falta
+de pré-treino em parte da rede: com poucos dados, um detector treinado
+do zero sofre sobreajuste \cite{He2019}, e manter partes da rede sem
+pré-treino é uma das diferenças que podem limitar o resultado
+\cite{LiM2023}. Como o teste de H4 não separa a cabeça P2 da falta de
+pré-treino, nenhuma das duas explicações pode ser afirmada.
+
+A resolução de entrada pesou mais que o tamanho do modelo, o que é
+coerente com a análise de tamanho da Seção~\ref{sec:contextualizacao}: a
+640 pixels, a maior parte dos defeitos fica abaixo do passo do nível P3,
+e, em objetos diminutos, o IoU é altamente sensível ao desvio de
+localização \cite{Xu2022}. Na curva de aprendizado, o mAP@0,5 subiu até o último ponto nas duas
+dobras, e a diferença entre 100\% e 50\% das cartas excluiu o zero em
+ambas, o que sugere que mais dados tendem a melhorar o modelo
+\cite{Viering2023}; o último acréscimo, porém, só se distinguiu de zero
+na Dobra 5, cuja rodada de 100\% pode estar acima do típico. O número de cartas necessário não foi estimado,
+porque extrapolar a curva a partir de poucos dados produz estimativas
+pouco confiáveis \cite{Mahmood2022}.
+
+A revocação menor na frente das cartas, que em todas tem superfície
+holográfica, é compatível com a observação de que, em superfícies
+altamente refletoras, artefatos de reflexo podem mascarar as
+características visuais necessárias para identificar defeitos
+\cite{KimMG2026}. Como a frente e o verso diferem também em outros
+aspectos, como a arte impressa, essa é uma hipótese explicativa, não
+testada.
+
+Quanto aos trabalhos correlatos da Seção~\ref{sec:trabalhos_correlatos},
+os valores não são comparáveis diretamente, porque a tarefa, o conjunto
+de dados e a métrica diferem. \citeonline{Nahar2025} classificaram a
+severidade de defeitos de canto em recortes de cartas esportivas
+digitalizadas em \textit{scanner}; este trabalho localizou cada defeito
+na carta inteira, a partir de fotografias, tarefa cujo desempenho, aqui,
+dependeu da face da carta.
+\citeonline{Chen2024NHD} relataram ganhos de 1 a 2 pontos de AP com
+modificações no \textit{neck} e na cabeça do YOLOv8 e aumento de dados
+por cópia e cola seletiva de pequenos objetos, em uma única divisão
+entre treino e teste e sem teste estatístico; aqui, com validação
+cruzada e teste pareado, um aumento de dados diferente, de
+transformações geométricas e, nas imagens RGB, fotométricas, melhorou o
+detector, e a
+modificação da cabeça avaliada, a cabeça P2, não.
+\citeonline{Liu2026} concluíram que a resolução de entrada e a
+capacidade do modelo devem ser priorizadas antes de mudanças na
+arquitetura; nas medições desses autores, aumentar a resolução de entrada rendeu mais que acrescentar o nível P2 a 640 pixels, e a passagem do YOLOv8s para o YOLOv8m trouxe ganho grande.
+Os resultados deste trabalho concordam quanto à resolução e em que a
+cabeça P2 não foi a alteração mais vantajosa, agora também a 1280
+pixels, resolução em que ela não trouxe ganho. Não confirmaram, porém,
+a prioridade da capacidade: a 1280 pixels, em uma dobra, o YOLOv8m não
+se distinguiu do YOLOv8s.
 
 % ===============================================================
 % CAPÍTULO 4 - CONCLUSÃO
