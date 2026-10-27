@@ -2038,8 +2038,7 @@ o mesmo modelo, a mesma resolução de entrada de 1280 pixels, o mesmo
 tamanho de lote, a mesma paciência, isto é, o número de épocas sem melhora tolerado antes da parada antecipada, e os mesmos
 parâmetros de aumento de dados usados depois no conjunto completo
 (Seção~\ref{sec:implementacao}); rodadas isoladas serviram para
-ajustar o protocolo. Esses testes fixaram o tamanho do lote e a
-paciência (Seção~\ref{subsec:hiperparametros}), e os modelos treinados
+ajustar o protocolo. Esses testes fixaram o tamanho do lote (Seção~\ref{subsec:hiperparametros}), e os modelos treinados
 neles apoiaram a revisão da anotação do conjunto completo
 (Seção~\ref{subsec:dados}). Nas dobras desses testes, ao contrário das
 do conjunto completo, as cartas de mesma ilustração não foram mantidas
@@ -2101,9 +2100,7 @@ dobras, essa anotação foi revisada com o apoio dos cinco modelos
 treinados nos testes preliminares (Seção~\ref{subsec:visao_geral}) com
 imagens RGB e aumento de dados, um para cada dobra das 82 cartas
 iniciais. Seguiu-se a ideia, usada por \citeonline{Xu2022} na
-reanotação de um conjunto de imagens aéreas com objetos minúsculos, de
-que predições sem anotação correspondente podem indicar objetos que
-deixaram de ser anotados. Por isso, os modelos indicaram possíveis
+reanotação de um conjunto de imagens aéreas com objetos minúsculos, de que parte das predições sem anotação correspondente pode indicar objetos que deixaram de ser anotados, servindo de pista para a revisão. Por isso, os modelos indicaram possíveis
 defeitos apenas onde ainda não havia caixa.
 
 Nenhuma carta recebeu indicação de um modelo treinado com ela. Cada uma
@@ -2400,7 +2397,7 @@ treinada uma única vez em cada rodada; por isso, o teste trata os
 modelos como fixos, como discutido na
 Seção~\ref{subsec:comparacao_estatistica}.
 
-A decisão sobre H1, H2 e H3 seguiu uma regra fixa, aplicada em cada referência de anotação. Como o teste é bilateral, uma diferença significativa pode ocorrer nos dois sentidos, e só uma diferença no sentido previsto pela hipótese contou a seu favor. H1 foi considerada confirmada quando as duas comparações correspondentes, a Configuração 2 contra a 1 e a Configuração 4 contra a 3, foram significativas após a correção de Holm, no sentido previsto, e refutada quando alguma delas foi significativa no sentido contrário. Nos demais casos, o resultado foi lido separadamente para cada representação de entrada, como confirmação parcial quando uma das duas comparações foi significativa no sentido previsto. A mesma regra valeu para H2, com as comparações da Configuração 3 contra a 1 e da Configuração 4 contra a 2, lidas separadamente para cada condição de aumento de dados. H3 foi considerada confirmada apenas quando a Configuração 4 superou significativamente as Configurações 2 e 3, refutada quando alguma delas superou significativamente a Configuração 4, e não confirmada nos demais casos.
+A decisão sobre H1, H2 e H3 seguiu uma regra fixa, aplicada em cada referência de anotação. Como o teste é bilateral, uma diferença significativa pode ocorrer nos dois sentidos, e só uma diferença no sentido previsto pela hipótese contou a seu favor. H1 foi considerada confirmada quando as duas comparações correspondentes, a Configuração 2 contra a 1 e a Configuração 4 contra a 3, foram significativas após a correção de Holm, no sentido previsto, e refutada quando alguma delas foi significativa no sentido contrário. Nos demais casos, o resultado foi lido separadamente para cada representação de entrada, como confirmação parcial quando uma das duas comparações foi significativa no sentido previsto e a outra não foi significativa, e como não confirmação quando nenhuma das duas foi significativa. A mesma regra valeu para H2, com as comparações da Configuração 3 contra a 1 e da Configuração 4 contra a 2, lidas separadamente para cada condição de aumento de dados. H3 foi considerada confirmada apenas quando a Configuração 4 superou significativamente as Configurações 2 e 3, refutada quando alguma delas superou significativamente a Configuração 4, e não confirmada nos demais casos.
 
 Como análise adicional, sem hipótese formulada, verificou-se a
 interação entre os dois fatores do estudo fatorial
