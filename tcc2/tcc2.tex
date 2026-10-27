@@ -151,8 +151,8 @@ imagens RGB convencionais e imagens de realce de micro-relevo. Sobre a
 configuração de melhor desempenho, avaliou-se o efeito de uma cabeça de
 detecção adicional para objetos pequenos (P2) e da resolução de
 entrada. O conjunto de dados reuniu 206 cartas, 412 imagens e 4.808
-anotações, parte delas sugerida por um modelo preliminar e validada
-pelo autor. O desempenho foi medido pelo mAP@0,5, pela precisão, pela
+anotações, parte delas sugerida por modelos de uma etapa preliminar e
+validada pelo autor. O desempenho foi medido pelo mAP@0,5, pela precisão, pela
 revocação e pelo F1, em validação cruzada com cinco dobras. O F1 dá uma
 única nota por carta, o que permitiu comparar as configurações carta a
 carta pelo teste de Wilcoxon pareado, com correção de Holm. O aumento
@@ -161,7 +161,7 @@ aumento de dados, obteve o melhor desempenho, com F1 por carta de
 0,376, contra 0,332 da mesma configuração sem aumento de dados. O
 realce de micro-relevo foi inferior ao RGB quando não havia aumento de
 dados. Com aumento de dados, essa diferença desapareceu quando a
-avaliação desconsiderou as anotações sugeridas pelo modelo preliminar.
+avaliação desconsiderou as anotações sugeridas por esses modelos.
 A cabeça P2 apresentou desempenho inferior à configuração vencedora,
 com a mesma revocação e menor precisão. Essa variante não partiu de
 pesos pré-treinados na cabeça de detecção nem em parte das camadas
@@ -210,7 +210,8 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
    the effect of an additional detection head for small objects (P2)
    and of the input resolution was also evaluated. The dataset
    comprised 206 cards, 412 images, and 4,808 annotations, part of
-   them suggested by a preliminary model and validated by the author.
+   them suggested by models from a preliminary stage and validated by
+   the author.
    Performance was measured by mAP@0.5, precision, recall and F1, in
    five-fold cross-validation. F1 gives a single score per card, which
    allowed the configurations to be compared card by card using a
@@ -220,8 +221,8 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
    0.332 for the same configuration without data augmentation.
    Micro-relief enhancement was inferior to RGB when there was no data
    augmentation. With data augmentation, this difference disappeared
-   when the evaluation disregarded the annotations suggested by the
-   preliminary model. The P2 head presented lower performance than the
+   when the evaluation disregarded the annotations suggested by these
+   models. The P2 head presented lower performance than the
    winning configuration, with the same recall and lower precision.
    This variant did not start from pre-trained weights in the detection
    head or in part of the intermediate layers, so the isolated effect
@@ -278,6 +279,7 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
 \textbf{Abreviatura/Sigla} & \textbf{Significado} \\
 \midrule
 ACE    & \textit{Automatic Color Equalization} (Equalização Automática de Cor) \\
+AMD    & \textit{Advanced Micro Devices} (fabricante da placa de vídeo usada nos experimentos) \\
 AP     & \textit{Average Precision} (Precisão Média) \\
 AVI    & \textit{Automated Visual Inspection} (Inspeção Visual Automatizada) \\
 C2f    & \textit{Cross Stage Partial Bottleneck with two Convolutions} (módulo convolucional do YOLOv8) \\
@@ -297,6 +299,7 @@ PANet  & \textit{Path Aggregation Network} \\
 PSA    & \textit{Professional Sports Authenticator} \\
 R-CNN  & \textit{Region-based Convolutional Neural Network} (Rede Neural Convolucional Baseada em Regiões) \\
 RGB    & \textit{Red, Green, Blue} \\
+ROCm   & \textit{Radeon Open Compute} (plataforma da AMD para executar computação em placas de vídeo) \\
 SENAC  & Serviço Nacional de Aprendizagem Comercial \\
 TCC    & Trabalho de Conclusão de Curso \\
 TCG    & \textit{Trading Card Game} (Jogo de Cartas Colecionáveis) \\
@@ -522,11 +525,12 @@ julgamento desse anotador apoiado nos laudos, e não o laudo em si; sem
 um segundo anotador, não foi possível medir a concordância entre
 avaliadores, e o desempenho que é possível medir fica limitado pela
 consistência dessa anotação. Parte das caixas delimitadoras, 892 de
-4.808 (18,6\%), foi sugerida por um modelo de detecção treinado
-previamente e validada individualmente pelo autor. Esse modelo usava
-imagens coloridas convencionais (RGB), com aumento de dados, e as
-sugestões para cada carta vieram de modelos treinados sem essa
-carta. Como esse modelo via as imagens da mesma forma que as
+4.808 (18,6\%), foi sugerida por modelos de detecção treinados em uma
+etapa preliminar do trabalho e validada individualmente pelo autor, em
+uma revisão da anotação descrita na Seção~\ref{subsec:dados}. Esses
+modelos usavam imagens coloridas convencionais (RGB), com aumento de
+dados, e nenhum deles havia sido treinado com a carta para a qual
+sugeriu caixas. Como esses modelos viam as imagens da mesma forma que as
 configurações que usam imagens RGB, as caixas sugeridas podem favorecer
 essas configurações na comparação com o realce de micro-relevo; por
 esse motivo, os resultados apresentados no
@@ -1129,7 +1133,10 @@ efeito inverso. O F1 pode ser calculado sobre todas as caixas de um
 conjunto de avaliação, o F1 agregado, ou separadamente para cada
 carta, com as predições e as anotações das suas duas faces, o F1 por
 carta. Como todas as cartas do conjunto de dados têm ao menos uma
-anotação, o F1 por carta está definido para todas elas. A forma como o limiar foi escolhido neste trabalho é descrita
+anotação, o F1 por carta está definido para todas elas, exceto nas
+verificações feitas sem as caixas sugeridas, em que cinco cartas ficam
+sem nenhuma anotação e saem das comparações por carta
+(Seção~\ref{subsec:dados}). A forma como o limiar foi escolhido neste trabalho é descrita
 na Seção~\ref{subsec:validacao_cruzada}, e o uso do F1 por carta como
 nota das comparações pareadas, na
 Seção~\ref{subsec:comparacao_estatistica}.
@@ -1686,7 +1693,8 @@ representação de entrada (RGB ou realce de micro-relevo), o que
 resultou em um estudo fatorial $2 \times 2$, com quatro
 configurações. Esse desenho contém as comparações de uma
 ablação, pois cada estratégia aparece desligada e ligada
-enquanto a outra é mantida fixa, e por isso também pode ser
+enquanto a outra é mantida fixa (com uma ressalva sobre o aumento de
+dados, descrita na Seção~\ref{subsec:estrategias}), e por isso também pode ser
 descrito como uma ablação. Além dessas comparações, ele permite
 verificar se o efeito de um fator depende da opção adotada no
 outro, o que alterar um componente por vez não mostra. Essa
@@ -1990,12 +1998,14 @@ O trabalho seguiu as etapas abaixo, na ordem em que foram executadas:
     completo de 206 cartas, e apenas esses resultados foram usados para
     testar as hipóteses.
 
-    \item Preparação do conjunto de dados: recorte automático da região
-    da carta em cada imagem, anotação dos defeitos e divisão das cartas
-    em cinco dobras para a validação cruzada, com a frente e o verso de
-    cada carta sempre na mesma dobra (Seção~\ref{subsec:dados}).
+    \item Preparação do conjunto de dados: anotação dos defeitos nas
+    fotografias recebidas, recorte automático da região da carta em cada
+    imagem, divisão das cartas em cinco dobras para a validação cruzada,
+    com a frente e o verso de cada carta sempre na mesma dobra, e revisão
+    da anotação com o apoio dos modelos dos testes preliminares
+    (Seção~\ref{subsec:dados}).
 
-    \item Escolha do operador de realce de micro-relevo: quatro
+    \item Escolha da variante de realce de micro-relevo: quatro
     variantes foram comparadas em uma das dobras, e a escolha foi feita
     na validação interna (Seção~\ref{subsec:estrategias}).
 
@@ -2006,7 +2016,8 @@ O trabalho seguiu as etapas abaixo, na ordem em que foram executadas:
     treinamentos.
 
     \item Ablação sobre a configuração de melhor desempenho no estudo
-    fatorial: o acréscimo da cabeça de detecção P2, avaliado nas cinco
+    fatorial, escolhida pelo critério da Seção~\ref{subsec:validacao}:
+    o acréscimo da cabeça de detecção P2, avaliado nas cinco
     dobras, e a comparação da resolução de entrada de 1280 pixels com a
     de 640 pixels, avaliada em uma dobra.
 
@@ -2021,13 +2032,32 @@ O trabalho seguiu as etapas abaixo, na ordem em que foram executadas:
     Seção~\ref{subsec:validacao}.
 \end{enumerate}
 
+Os testes preliminares usaram as 82 cartas recebidas inicialmente, com
+164 imagens. As cartas foram divididas em cinco dobras, com a frente e
+o verso de cada carta na mesma dobra, e, em cada rodada, cerca de 20\%
+das cartas do treinamento formaram a validação interna. As quatro
+configurações do estudo fatorial foram treinadas nas cinco dobras com
+o mesmo modelo, a mesma resolução de entrada de 1280 pixels, o mesmo
+tamanho de lote, a mesma paciência da parada antecipada e os mesmos
+parâmetros de aumento de dados usados depois no conjunto completo
+(Seção~\ref{sec:implementacao}); rodadas isoladas serviram para
+ajustar o protocolo. Esses testes fixaram o tamanho do lote e a
+paciência (Seção~\ref{subsec:hiperparametros}), e os modelos treinados
+neles apoiaram a revisão da anotação do conjunto completo
+(Seção~\ref{subsec:dados}). Nas dobras desses testes, ao contrário das
+do conjunto completo, as cartas de mesma ilustração não foram mantidas
+juntas; a consequência disso para a revisão da anotação é apresentada
+na Seção~\ref{subsec:dados}.
+
 \subsection{Organização e preparação do conjunto de dados}
 \label{subsec:dados}
 
-A preparação do conjunto de dados compreendeu a aquisição das imagens,
-a anotação dos defeitos, o recorte automático da carta em cada imagem e
-a divisão das cartas em cinco dobras para a validação cruzada, descritos
-a seguir.
+A preparação do conjunto de dados compreendeu, nesta ordem, a aquisição
+das imagens, a anotação inicial dos defeitos, o recorte automático da
+carta em cada imagem, a divisão das cartas em cinco dobras para a
+validação cruzada e a revisão da anotação. A descrição a seguir agrupa
+as etapas por assunto: primeiro as imagens e a anotação, inclusive a
+revisão, e depois o recorte e a divisão em dobras.
 
 As imagens foram fornecidas pela empresa de graduação: uma fotografia
 colorida (RGB) da frente e uma do verso de cada carta, capturadas pela
@@ -2071,27 +2101,78 @@ pelo autor e aplicado a todas as caixas:
     desenho.
 \end{enumerate}
 
-Das 4.808 caixas do conjunto, 892 (18,6\%) foram sugeridas por um
-modelo de detecção e aceitas pelo autor após inspeção individual
-(Seção~\ref{sec:formulacao}). As outras 3.916 foram traçadas pelo
-próprio autor. O modelo que sugeriu as caixas trabalhava com imagens
-RGB. Por isso, as caixas sugeridas tendem a marcar defeitos que um
-detector com imagens RGB já encontra com facilidade, o que pode
-favorecer as configurações que usam imagens RGB na comparação com as
-que usam realce de micro-relevo. Para controlar esse risco, as métricas
-e as comparações pareadas do estudo fatorial e da cabeça P2 foram
-calculadas duas vezes: com a anotação completa, de 4.808 caixas, e com
-a anotação sem as caixas sugeridas, de 3.916 caixas. Na segunda, quando
-o detector avaliado fez uma predição em um lugar onde só havia uma
-caixa sugerida, isto é, com IoU de pelo menos 0,5 com ela e sem
-correspondência com nenhuma caixa traçada pelo autor, essa predição foi
-ignorada: não contou como acerto nem como erro, porque decidir se ela
-estava certa exigiria justamente a caixa sugerida que foi retirada.
-Cinco cartas têm apenas caixas sugeridas. Na anotação sem as caixas
+A anotação foi feita em duas etapas. Na primeira, o autor anotou as
+fotografias recebidas, antes do recorte descrito adiante, e obteve
+3.109 caixas. Na segunda, feita depois do recorte e da divisão em
+dobras, essa anotação foi revisada com o apoio dos cinco modelos
+treinados nos testes preliminares (Seção~\ref{subsec:visao_geral}) com
+imagens RGB e aumento de dados, um para cada dobra das 82 cartas
+iniciais. Seguiu-se a ideia, usada por \citeonline{Xu2022} na
+reanotação de um conjunto de imagens aéreas com objetos minúsculos, de
+que predições sem anotação correspondente podem indicar objetos que
+deixaram de ser anotados. Por isso, os modelos indicaram possíveis
+defeitos apenas onde ainda não havia caixa.
+
+Nenhuma carta recebeu indicação de um modelo treinado com ela. Cada uma
+das 82 cartas iniciais recebeu as indicações do modelo em cuja dobra de
+avaliação ela estava. Cada modelo fez predições com confiança mínima de
+0,05, com a opção da biblioteca que aplica aumento de dados também no
+momento da predição. Nessas 82 cartas, foram mantidas as predições com
+confiança de pelo menos 0,10. Cada uma das 124 cartas restantes, que
+nenhum dos cinco modelos havia visto, recebeu indicações formadas a
+partir das predições dos cinco modelos. As predições com IoU de pelo
+menos 0,4 com a de maior confiança foram reunidas em um grupo, e cada
+grupo com pelo menos duas predições gerou uma indicação, na posição
+média dessas predições ponderada pela confiança, mantida quando a soma
+das confianças dividida por cinco era de pelo menos 0,10. Em todas as
+cartas, foi descartada a indicação que se sobrepunha a uma caixa
+existente, isto é, com IoU de pelo menos 0,1 com ela ou com o centro de
+uma dentro da outra. A garantia de que nenhum modelo sugeriu caixas em
+uma carta usada no seu treinamento vale por carta, e não por
+ilustração. Oito cartas receberam indicações de modelos que tinham
+visto, no treinamento ou na validação interna, outra carta de mesma
+ilustração. Duas delas estão entre as 82 iniciais: nos testes
+preliminares, ficaram em dobras diferentes, e o modelo que fez as
+indicações para cada uma tinha visto a outra. As outras seis estão
+entre as 124 restantes e têm a mesma ilustração de uma carta inicial,
+vista por quatro dos cinco modelos.
+
+O autor examinou cada
+caixa sugerida, aceitou 892 e rejeitou 414. Na mesma revisão, aplicou o
+critério acima também às caixas da primeira etapa, das quais removeu
+156 e ajustou 3, e traçou 963 caixas novas. A anotação final reúne,
+assim, 4.808 caixas: 892 (18,6\%) sugeridas pelos modelos e aceitas
+pelo autor e 3.916 traçadas pelo próprio autor
+(Seção~\ref{sec:formulacao}).
+
+Os modelos que sugeriram as caixas trabalhavam com imagens RGB. Por
+isso, as caixas sugeridas tendem a marcar defeitos que um detector com
+imagens RGB já encontra com facilidade. Isso pode favorecer as
+configurações que usam imagens RGB na comparação com as que usam
+realce de micro-relevo.
+
+Para controlar esse risco, as métricas e as comparações pareadas do
+estudo fatorial e da cabeça P2 foram calculadas duas vezes: com a
+anotação completa, de 4.808 caixas, e com a anotação sem as caixas
+sugeridas, de 3.916 caixas. Na segunda referência, foram ignoradas as
+predições que tinham IoU de pelo menos 0,5 com uma caixa sugerida e
+nenhuma correspondência com caixa traçada pelo autor. Essas predições
+não contaram como acerto nem como erro, porque decidir se estavam
+certas exigiria justamente a caixa sugerida que foi retirada. Cinco
+cartas têm apenas caixas sugeridas. Na anotação sem as caixas
 sugeridas, elas ficaram sem nenhuma caixa e saíram das comparações por
-carta feitas com essa referência, que reuniram 201 cartas. A leitura
-dos resultados seguiu um critério simples: uma conclusão que se mantém
-com as duas referências não foi alterada pelas caixas sugeridas.
+carta feitas com essa referência, que reuniram 201 cartas.
+
+A leitura dos resultados seguiu um critério simples: uma conclusão que
+se mantém com as duas referências não depende da presença das caixas
+sugeridas na referência de avaliação. Esse controle, porém, alcança
+apenas a avaliação. Os modelos foram treinados com a anotação
+completa, que inclui as 892 caixas sugeridas, e toda a revisão, em que
+o autor também traçou 963 caixas novas, removeu 156 caixas da primeira
+etapa e rejeitou 414 sugestões, foi feita com as sugestões à vista.
+Uma eventual influência das sugestões sobre o treinamento ou sobre as
+decisões da revisão está presente nas duas referências e não foi
+medida.
 
 O desgaste difuso, formado por muitos micro-riscos ou micro-pontos sem
 início nem fim definidos (Seção~\ref{subsec:defeitos_visuais}), não
@@ -2111,29 +2192,31 @@ a 29 imagens (7,0\%) sem caixa. A distribuição é concentrada: a mediana
 de 6 anotações por imagem contrasta com o máximo de 174, atingido nas
 cartas com desgaste mais extenso. Quanto à forma, apenas 367 anotações
 (7,6\%) têm o lado maior mais de cinco vezes maior que o menor, de modo
-que a maior parte dos defeitos anotados não tem forma alongada.
+que a maior parte das caixas não tem forma de faixa.
 
 Como a imagem é reduzida até que seu lado maior meça a resolução de
 entrada (Seção~\ref{sec:contextualizacao}), o fundo da fotografia ocupa
 pixels que poderiam representar a carta. Por isso, antes do
 treinamento, cada imagem foi recortada na região da carta por um
 procedimento automático, sem aprendizado, desenvolvido neste trabalho.
-O procedimento estima a cor do fundo a partir das bordas da fotografia,
-marca como carta os pixels que diferem desse fundo em cor ou em
-textura, determina os limites da carta pela contagem dessas marcações
-ao longo das linhas e das colunas da imagem e confere o resultado pela
-proporção física da carta, de 63 por 88 milímetros. O recorte mantém
-uma margem de 25 pixels em torno da carta, porque parte do
-\textit{whitening} de canto foi anotada ultrapassando ligeiramente a
-borda detectada. As caixas delimitadoras foram convertidas para o novo
-enquadramento, e duas regras impediram a perda de anotações: quando a
-carta não era detectada, ou quando o recorte excluiria uma anotação, a
-imagem era mantida inteira; quando o recorte cortaria parte de uma
-anotação, ele era ampliado até contê-la, com 5 pixels de folga. As 412
-imagens foram processadas sem que nenhuma anotação fosse descartada ou
-cortada, e as oito que já chegaram recortadas foram mantidas inteiras.
-No conjunto final, todas as 4.808 anotações estão contidas nas imagens
-recortadas.
+O procedimento estima a cor do fundo a partir das bordas da fotografia
+e marca como carta os pixels que diferem desse fundo em cor ou em
+textura. Em seguida, determina os limites da carta pela contagem dessas
+marcações ao longo das linhas e das colunas da imagem e confere o
+resultado pela proporção física da carta, de 63 por 88 milímetros.
+
+O recorte mantém uma margem de 25 pixels em torno da carta, porque
+parte do \textit{whitening} de canto foi anotada ultrapassando
+ligeiramente a borda detectada. As caixas delimitadoras foram
+convertidas para o novo enquadramento, e duas regras impediram a perda
+de anotações. Quando a carta não era detectada, ou quando o recorte
+excluiria uma anotação, a imagem era mantida inteira. Quando o recorte
+cortaria parte de uma anotação, ele era ampliado até contê-la, com 5 pixels de folga. As 412
+imagens foram processadas sem que nenhuma das 3.109 anotações da
+primeira etapa fosse descartada ou cortada, e as oito que já chegaram
+recortadas foram mantidas inteiras. As caixas da revisão foram traçadas
+já sobre as imagens recortadas, e, no conjunto final, todas as 4.808
+anotações estão contidas nelas.
 
 A Tabela~\ref{tab:tamanho_defeitos} descreve o tamanho dos defeitos
 anotados pelo menor lado da caixa delimitadora, medido depois do
@@ -2145,8 +2228,9 @@ abaixo de 8 pixels, o passo do nível de detecção P3; na resolução de
 de anotações para as quais atingir IoU de 0,5 exige que a caixa predita
 esteja deslocada menos de 2 pixels da anotação; aproximando a caixa por
 um quadrado deslocado em uma direção, isso ocorre quando o menor lado é
-inferior a 6 pixels. Essa distribuição motivou a resolução de entrada
-de 1280 pixels, adotada em todas as configurações do estudo fatorial
+inferior a 6 pixels. Essa distribuição confirmou a resolução de
+entrada de 1280 pixels, já usada nos testes preliminares e adotada em
+todas as configurações do estudo fatorial
 (Seção~\ref{subsec:hiperparametros}). Nessa resolução, as anotações
 foram divididas em três faixas pelo menor lado, usadas na análise por
 tamanho: 517 abaixo de 8 pixels, 2.853 entre 8 e 20 pixels e 1.438
@@ -2176,10 +2260,6 @@ acima de 20 pixels.
 Fonte: Elaborado pelo autor (2026).}
 \end{table}
 
-As imagens de realce de micro-relevo usadas nas Configurações 3 e 4
-foram geradas a partir dessas imagens recortadas, pelo procedimento
-descrito na Seção~\ref{subsec:estrategias}.
-
 A divisão das cartas em dobras foi feita por carta: a frente e o verso
 de uma carta ficaram sempre na mesma dobra, porque são o mesmo
 exemplar físico, e separá-los permitiria ao modelo encontrar na
@@ -2195,7 +2275,9 @@ treinado com menos cartas do que o conjunto inteiro, a estimativa
 absoluta tende a ser pessimista \cite{Kohavi1995}. Como todas as
 configurações foram avaliadas nas mesmas dobras, supõe-se, como
 \citeonline{Kohavi1995}, que esse viés as afete de modo semelhante, o
-que preserva a comparação entre elas. A escolha de 5 em vez de 10
+que preserva a comparação entre elas; a comparação vale, assim, para o
+volume de treino efetivamente usado em cada rodada, de 129 a 134
+cartas, e não necessariamente para um treino com as 206 cartas. A escolha de 5 em vez de 10
 dobras decorreu do custo de treinamento, e o valor absoluto das
 métricas deve ser lido como estimativa conservadora. A
 Figura~\ref{fig:kfold_cross_validation} ilustra o esquema.
@@ -2203,11 +2285,19 @@ Figura~\ref{fig:kfold_cross_validation} ilustra o esquema.
 A divisão foi estratificada pelo número de faces com defeito anotado
 em cada carta (nenhuma, uma ou duas), para distribuir entre as dobras
 as cartas com faces sem anotação. A estratificação usou a anotação
-disponível quando a divisão foi feita, e a mesma divisão foi mantida
-depois que a anotação foi concluída. As dobras ficaram com 39, 39, 38,
-45 e 45 cartas, diferença causada pelos grupos de mesma ilustração, e
-com 1.416, 747, 645, 1.217 e 783 anotações; o desequilíbrio no número
-de anotações decorre das cartas com desgaste mais extenso, que têm até
+inicial, anterior à revisão, na qual 5 cartas não tinham anotação em
+nenhuma face, 39 tinham uma face sem anotação e 162 tinham anotação nas
+duas; a mesma divisão foi mantida depois da revisão. Cada grupo de
+mesma ilustração entrou na estratificação como uma unidade, no estrato
+do menor número de faces com defeito entre as suas cartas, para que um
+grupo com uma carta sem anotação fosse distribuído com o mesmo cuidado
+que essa carta teria sozinha. As unidades de cada estrato foram
+embaralhadas, com semente fixa, e distribuídas em rodízio entre as
+cinco dobras.
+
+As dobras ficaram com 39, 39, 38, 45 e 45 cartas, diferença causada
+pelos grupos de mesma ilustração, e com 1.416, 747, 645, 1.217 e 783
+anotações. O desequilíbrio no número de anotações decorre das cartas com desgaste mais extenso, que têm até
 174 anotações em uma face e ficaram em duas das dobras. A divisão foi
 feita uma única vez e mantida fixa em todas as configurações e
 análises, de modo que cada carta foi avaliada exatamente uma vez em
@@ -2215,13 +2305,18 @@ cada configuração, o que permite a comparação pareada por carta
 (Seção~\ref{subsec:comparacao_estatistica}).
 
 Em cada rodada, cerca de 20\% das cartas do bloco de treinamento, de 32
-a 34 cartas, formaram a validação interna, sorteadas sem separar os
-grupos de mesma ilustração, e o treino efetivo ficou com 129 a 134
-cartas. A validação interna foi usada nas escolhas descritas na
+a 34 cartas, formaram a validação interna, sorteadas mantendo juntas
+as cartas de mesma ilustração, e o treino efetivo ficou com 129 a 134
+cartas. Essas listas, de treino efetivo, de validação interna e de
+avaliação, foram definidas uma única vez para cada rodada e usadas sem
+alteração em todas as configurações; só a curva de aprendizado reduziu
+o treino efetivo (Seção~\ref{subsec:ablacao}).
+
+A validação interna foi usada nas escolhas descritas na
 Seção~\ref{subsec:validacao_cruzada}: a parada antecipada, o limiar de
-confiança do F1 e o operador de realce de micro-relevo. A dobra de
+confiança do F1 e a variante de realce de micro-relevo. A dobra de
 avaliação de cada rodada não participou da parada antecipada nem da
-escolha do limiar dessa rodada; a ressalva sobre a escolha do operador
+escolha do limiar dessa rodada; a ressalva sobre a escolha da variante
 de realce é apresentada na Seção~\ref{subsec:estrategias}.
 
 \begin{figure}[H]
@@ -2233,12 +2328,6 @@ de realce é apresentada na Seção~\ref{subsec:estrategias}.
     frente e o verso de cada carta, assim como as cartas de mesma
     ilustração, ficam sempre na mesma dobra.}
     \label{fig:kfold_cross_validation}
-    % TODO figura (autor): refazer assets/kfold.png. Mostrar 5 rodadas x
-    % 5 dobras (rótulos "Dobra 1" a "Dobra 5", "Avaliação", "Treino" e
-    % "Validação interna" dentro do bloco de treino), com 39, 39, 38, 45 e
-    % 45 cartas por dobra, validação interna de 32 a 34 cartas e treino
-    % efetivo de 129 a 134 cartas. Título sem travessão, tudo no passado,
-    % sem a frase sobre média e desvio padrão.
     \includegraphics[width=1.00\textwidth]{assets/kfold.png}
 
     
@@ -2256,7 +2345,11 @@ configurações foi feita carta a carta
 carta. No seu cálculo, foram consideradas apenas as predições com
 confiança igual ou superior ao limiar fixado na validação interna da
 rodada (Seção~\ref{subsec:validacao_cruzada}), aplicado sem alteração
-à dobra de avaliação. Em cada imagem, as predições foram percorridas da
+à dobra de avaliação. Esse limiar foi o valor de confiança, entre 1.000
+valores igualmente espaçados de 0 a 1, que maximizou o F1 agregado da
+validação interna, depois de suavizada a curva do F1 em função do
+limiar, o mesmo critério que a biblioteca aplica ao conjunto que avalia
+\cite{Jocher2023}. Em cada imagem, as predições foram percorridas da
 maior para a menor confiança, e cada uma foi associada à anotação ainda
 não associada com a qual tinha a maior IoU, desde que essa IoU fosse de
 pelo menos 0,5, o mesmo limiar do mAP@0,5; cada associação contou como
@@ -2276,14 +2369,19 @@ Além do F1 por carta, foram reportados, para descrever cada
 configuração, o mAP@0,5 de cada dobra e a média das cinco dobras, e a
 precisão, a revocação e o F1 agregados, obtidos com o mesmo limiar e a
 mesma associação, somando os verdadeiros positivos, os falsos positivos
-e os falsos negativos de todas as cartas das cinco dobras. O mAP@0,5
-foi recalculado a partir das predições salvas, da mesma forma nas duas
-referências de anotação, e não foi usado para testar hipóteses, porque
-não fornece uma nota por carta. A precisão e a revocação informadas
+e os falsos negativos de todas as cartas das cinco dobras. As predições
+de cada imagem da dobra de avaliação foram salvas com os valores padrão
+de avaliação da biblioteca: confiança mínima de 0,001, até 300
+predições por imagem e supressão de não máximos, que elimina cada
+predição cuja IoU com outra de maior confiança supera 0,7. O mAP@0,5
+foi recalculado a partir dessas predições, da mesma forma nas duas
+referências de anotação, com a precisão interpolada em 101 valores de
+revocação igualmente espaçados, como na biblioteca. Ele não foi usado
+para testar hipóteses, porque não fornece uma nota por carta. A precisão e a revocação informadas
 pela biblioteca de treinamento não foram usadas, porque correspondem ao
 limiar que maximiza o F1 na própria dobra de avaliação. A média e o
-desvio padrão entre as cinco dobras não foram usados para comparar as
-configurações (Seção~\ref{subsec:comparacao_estatistica}).
+desvio padrão entre as cinco dobras não foram usados nos testes das
+hipóteses (Seção~\ref{subsec:comparacao_estatistica}).
 
 Cada comparação usou o teste de Wilcoxon pareado bilateral
 (Seção~\ref{subsec:comparacao_estatistica}) sobre o F1 por carta, com
@@ -2292,10 +2390,12 @@ H3 são as quatro definidas na Seção~\ref{subsec:hipotese}: a
 Configuração 2 contra a 1 e a Configuração 4 contra a 3, para H1, e a
 Configuração 3 contra a 1 e a Configuração 4 contra a 2, para H2; as
 duas que envolvem a Configuração 4 decidem também H3. A elas somou-se
-uma quinta, entre a configuração de melhor desempenho com e sem a
-cabeça P2, que verifica se o acréscimo da cabeça alterou o desempenho
-geral do detector, além da revocação dos defeitos pequenos examinada em
-H4. A correção de Holm foi aplicada a essas cinco comparações, isto é,
+uma quinta, entre a configuração de melhor desempenho, definida
+adiante nesta seção, com e sem a cabeça P2. Ela verifica se o acréscimo
+da cabeça alterou o desempenho geral do detector, além da revocação
+dos defeitos pequenos examinada em H4.
+
+A correção de Holm foi aplicada a essas cinco comparações, isto é,
 com $m = 5$, e uma diferença foi considerada significativa quando o
 valor-p ajustado ficou abaixo de $\alpha = 0{,}05$. As cinco
 comparações foram feitas com as duas referências de anotação, com 206
@@ -2303,8 +2403,8 @@ pares na anotação completa e 201 na anotação sem as caixas sugeridas, e
 a correção foi aplicada separadamente em cada referência. Os pares com
 diferença nula foram excluídos do cálculo do teste, e seu número é
 informado com cada resultado. A revocação por carta foi comparada nos
-mesmos cinco pares, com a correção aplicada à parte, como informação
-complementar sobre a origem das diferenças no F1. Cada configuração foi
+mesmos cinco pares, com a correção aplicada à parte, para indicar a
+origem das diferenças no F1. Cada configuração foi
 treinada uma única vez em cada rodada; por isso, o teste trata os
 modelos como fixos, como discutido na
 Seção~\ref{subsec:comparacao_estatistica}.
@@ -2315,17 +2415,23 @@ interação entre os dois fatores do estudo fatorial
 efeito do aumento de dados com imagens RGB, isto é, o F1 por carta da
 Configuração 2 menos o da Configuração 1, e o efeito do aumento de
 dados com imagens de realce, o da Configuração 4 menos o da
-Configuração 3. Os dois efeitos foram comparados carta a carta pelo
+Configuração 3. Como as variações no espaço HSV só fizeram parte do
+aumento de dados das imagens RGB (Seção~\ref{subsec:estrategias}), a
+diferença entre esses efeitos inclui também a diferença entre os dois
+aumentos de dados. Os dois efeitos foram comparados carta a carta pelo
 teste de Wilcoxon pareado bilateral, com a anotação completa: se o
 efeito do aumento de dados não depende da representação de entrada, as
 diferenças entre eles se distribuem em torno de zero. Essa análise
 ficou fora da correção de Holm, por não testar nenhuma das hipóteses.
 
-A configuração de melhor desempenho no estudo fatorial, sobre a qual
-foram feitas a ablação e as análises complementares, foi a de maior
-mAP@0,5 médio nas cinco dobras de avaliação, com a anotação completa,
-que também obteve o maior F1 agregado, escolhida ao fim do estudo
-fatorial. Essa escolha usou as próprias dobras de avaliação, e não a
+A ablação e as análises complementares foram feitas sobre a
+configuração de melhor desempenho no estudo fatorial. Essa
+configuração foi escolhida ao fim do estudo fatorial, como a de maior
+mAP@0,5 médio nas cinco dobras de avaliação, com a anotação completa;
+ela também obteve o maior F1 agregado. O mAP@0,5 médio foi usado nessa
+escolha por ser a métrica de referência dos detectores
+(Seção~\ref{subsec:metricas}) e por estar disponível ao fim de cada rodada, sem depender do limiar de confiança.
+Essa escolha usou as próprias dobras de avaliação, e não a
 validação interna. Como a configuração escolhida serve de referência
 nas comparações seguintes, a escolha pode favorecê-la ligeiramente
 nelas; as comparações do estudo fatorial não são afetadas, porque seus
@@ -2334,43 +2440,63 @@ pares foram definidos antes, nas hipóteses.
 Para H4, cada defeito foi atribuído a uma das três faixas de tamanho da
 Seção~\ref{subsec:dados}, pelo menor lado da sua caixa na resolução de
 1280 pixels. A associação entre predições e anotações foi a mesma do F1
-por carta, feita com todas as anotações da imagem, e a revocação de
-cada faixa foi obtida dividindo o número de defeitos da faixa
-associados a uma predição, somado nas cinco dobras de avaliação, pelo
-total de defeitos da faixa. O critério de H4, definido na
-Seção~\ref{subsec:hipotese}, foi a revocação da faixa abaixo de 8
-pixels, com 517 defeitos, comparada entre a configuração de melhor
-desempenho com e sem a cabeça P2; esse critério não fixou margem mínima
-de diferença nem teste estatístico. Como análise adicional, feita
-depois dos resultados, a revocação dessa faixa foi calculada carta a
-carta nas 127 cartas que têm ao menos um defeito nela, e as duas
-variantes foram comparadas pelo teste de Wilcoxon pareado bilateral. A
-revocação das três faixas foi calculada também para as quatro
-configurações do estudo fatorial, como descrição. Essas medidas foram
+por carta, feita com todas as anotações da imagem. A revocação de cada
+faixa foi o número de defeitos da faixa associados a uma predição,
+somado nas cinco dobras de avaliação, dividido pelo total de defeitos
+da faixa. A revocação das três faixas foi calculada também para as
+quatro configurações do estudo fatorial, como descrição.
+
+O critério de H4, definido na Seção~\ref{subsec:hipotese}, foi a
+revocação da faixa abaixo de 8 pixels, com 517 defeitos, comparada
+entre a configuração de melhor desempenho com e sem a cabeça P2. Esse
+critério não fixou margem mínima de diferença nem teste estatístico.
+Como a associação usa o limiar de confiança fixado na validação interna
+de cada rodada, os modelos com e sem a cabeça P2 tiveram a revocação
+medida em limiares que podem diferir, e um modelo com limiar mais baixo
+mantém mais predições e ganha revocação à custa de precisão. Por isso,
+o resultado de H4 é lido junto com a comparação do F1 por carta entre
+os dois modelos, uma das cinco comparações com correção de Holm, que
+leva em conta também a precisão.
+
+Como análise adicional, feita depois dos resultados, a revocação da
+faixa abaixo de 8 pixels foi calculada carta a carta nas 127 cartas que
+têm ao menos um defeito nela, e os dois modelos foram comparados pelo
+teste de Wilcoxon pareado bilateral. Essa análise foi usada apenas para
+indicar se a diferença na revocação somada se distingue de uma variação
+casual, sem substituir o critério da Seção~\ref{subsec:hipotese}. Todas
+essas medidas, inclusive a descrição das quatro configurações, foram
 calculadas com as duas referências de anotação; na anotação sem as
 caixas sugeridas, a faixa abaixo de 8 pixels tem 513 defeitos, e a
 análise por carta reuniu 126 cartas.
 
-As análises feitas sem hipótese formulada
-(Seção~\ref{subsec:hipotese}), isto é, a comparação de resoluções, o
-teste de capacidade e a curva de aprendizado, usaram a configuração de
-melhor desempenho, a anotação completa e dobras isoladas, identificadas
-de 1 a 5 na ordem em que foram apresentadas na
-Seção~\ref{subsec:dados}. A resolução de entrada de 640 pixels e a
-variante YOLOv8m foram avaliadas na Dobra 5, de 45 cartas, e cada uma
-foi comparada com a rodada da configuração de melhor desempenho nessa
-dobra, treinada com o YOLOv8s a 1280 pixels, pelo F1 por carta e pelo
-teste de Wilcoxon pareado bilateral, com 45 pares e sem correção de
-Holm. A curva de aprendizado foi avaliada nas Dobras 3 e 5: em cada
-dobra, os modelos treinados com 25\%, 50\% e 75\% das cartas de treino
-e a rodada com todas elas foram avaliados nas mesmas cartas da dobra de
-avaliação, pelo mAP@0,5. A incerteza das diferenças entre os pontos da
-curva foi estimada pelo intervalo de confiança por \textit{bootstrap}
-descrito na Seção~\ref{subsec:comparacao_estatistica}, com a carta como
-unidade sorteada: em cada repetição, a mesma amostra de cartas foi
-usada para recalcular o mAP@0,5 de todos os pontos, e o intervalo foi
-obtido para a diferença entre pontos consecutivos e entre 50\% e 100\%
-das cartas de treino.
+A ablação da resolução de entrada e as análises complementares, isto
+é, o teste de capacidade e a curva de aprendizado, foram feitas sem
+hipótese formulada. Elas usaram a configuração de melhor desempenho, a
+anotação completa e dobras isoladas, identificadas de 1 a 5 na ordem
+em que foram apresentadas na Seção~\ref{subsec:dados}.
+
+A resolução de entrada de 640 pixels e o YOLOv8m foram avaliados na
+Dobra 5, de 45 cartas. Cada um foi comparado com a rodada da
+configuração de melhor desempenho nessa dobra, treinada com o YOLOv8s a
+1280 pixels, pelo F1 por carta e pelo teste de Wilcoxon pareado
+bilateral, com 45 pares e sem correção de Holm.
+
+A curva de aprendizado foi avaliada nas Dobras 3 e 5. Em cada dobra, os
+modelos treinados com 25\%, 50\% e 75\% das cartas do treino efetivo e
+a rodada com todas elas foram avaliados nas mesmas cartas da dobra de
+avaliação, pelo mAP@0,5. A curva usou o mAP@0,5, e não o F1 por carta,
+porque o mAP@0,5 não depende do limiar de confiança. Com o F1, cada
+ponto da curva teria um limiar próprio, escolhido na validação interna
+por um modelo treinado com menos cartas, e a variação dessa escolha
+entre os pontos se somaria à variação causada pelo número de cartas de
+treino, que é o que a curva mede. A incerteza das diferenças entre os
+pontos da curva foi estimada pelo intervalo de confiança por
+\textit{bootstrap} descrito na
+Seção~\ref{subsec:comparacao_estatistica}, com a carta como unidade
+sorteada. Em cada repetição, a mesma amostra de cartas foi usada para
+recalcular o mAP@0,5 de todos os pontos. O intervalo foi obtido para a
+diferença entre pontos consecutivos e entre 50\% e 100\% das cartas do
+treino efetivo.
 
 A Tabela~\ref{tab:plano_experimentacao} resume os experimentos, com o
 que variou e o que ficou fixo em cada um, as dobras usadas e a métrica
@@ -2386,17 +2512,17 @@ e o teste de cada comparação.
 \toprule
 \textbf{Experimento} & \textbf{Objetivo} & \textbf{O que varia} & \textbf{O que fica fixo} & \textbf{Dobras} & \textbf{Métrica e teste} \\
 \midrule
-Escolha do operador de realce & Escolher o operador das Configurações 3 e 4, sem hipótese & Operador de realce de micro-relevo (quatro variantes) & Configuração 3, YOLOv8s, 1280 pixels & Dobra 1 & F1 agregado na validação interna; escolhida a variante de maior valor, sem teste \\
+Escolha da variante de realce & Escolher a variante das Configurações 3 e 4; sem hipótese & Variante de realce de micro-relevo (quatro) & Configuração 3, YOLOv8s, 1280 pixels & Dobra 1 & F1 agregado na validação interna, calculado pela biblioteca; escolhida a variante de maior valor, sem teste \\
 \midrule
 Estudo fatorial $2 \times 2$ & H1, H2 e H3 & Aumento de dados (sem ou com) e representação de entrada (RGB ou realce) & YOLOv8s com pesos pré-treinados, 1280 pixels, demais hiperparâmetros e dobras & 1 a 5 & F1 por carta; Wilcoxon pareado bilateral (206 e 201 pares), com correção de Holm; interação como análise adicional \\
 \midrule
 Ablação da cabeça P2 & H4 & Cabeça P2 (sem ou com) & Configuração de melhor desempenho e demais condições do estudo fatorial & 1 a 5 & H4: revocação somada dos defeitos menores que 8 pixels, sem teste; F1 por carta com Wilcoxon e Holm; revocação por carta nessa faixa com Wilcoxon, como análise adicional \\
 \midrule
-Ablação da resolução de entrada & Exploratória, sem hipótese & 640 ou 1280 pixels & Configuração de melhor desempenho, YOLOv8s & Dobra 5 & F1 por carta; Wilcoxon pareado bilateral (45 pares), sem Holm \\
+Ablação da resolução de entrada & Sem hipótese & 640 ou 1280 pixels & Configuração de melhor desempenho, YOLOv8s & Dobra 5 & F1 por carta; Wilcoxon pareado bilateral (45 pares), sem Holm \\
 \midrule
-Curva de aprendizado & Exploratória, sem hipótese & Fração das cartas de treino (25\%, 50\%, 75\% e 100\%) & Configuração de melhor desempenho, YOLOv8s, 1280 pixels & Dobras 3 e 5 & mAP@0,5; intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta como unidade \\
+Curva de aprendizado & Análise complementar, sem hipótese & Fração das cartas do treino efetivo (25\%, 50\%, 75\% e 100\%) & Configuração de melhor desempenho, YOLOv8s, 1280 pixels & Dobras 3 e 5 & mAP@0,5, que não depende do limiar de confiança; intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta como unidade \\
 \midrule
-Teste de capacidade & Complementar, sem hipótese & YOLOv8s ou YOLOv8m & Configuração de melhor desempenho, 1280 pixels & Dobra 5 & F1 por carta; Wilcoxon pareado bilateral (45 pares), sem Holm \\
+Teste de capacidade & Análise complementar, sem hipótese & YOLOv8s ou YOLOv8m & Configuração de melhor desempenho, 1280 pixels & Dobra 5 & F1 por carta; Wilcoxon pareado bilateral (45 pares), sem Holm \\
 \bottomrule
 \end{tabular}
 \legend{Dobras numeradas de 1 a 5 na ordem da Seção~\ref{subsec:dados}. Em todos os experimentos, o limiar de confiança foi fixado na validação interna de cada rodada, a associação entre predição e anotação exigiu IoU de pelo menos 0,5, e o mAP@0,5, a precisão, a revocação e o F1 agregados foram reportados como descrição.
@@ -2416,11 +2542,16 @@ os treinamentos foram executados (Seção~\ref{subsec:ferramentas}).
 \subsection{Modelo base}
 \label{subsec:modelo_base}
 
-Todas as rodadas usaram o YOLOv8s, a variante \textit{small} do YOLOv8,
+As rodadas usaram o YOLOv8s, a variante \textit{small} do YOLOv8,
 inicializado com os pesos pré-treinados no COCO disponibilizados pela
 biblioteca Ultralytics (Seção~\ref{subsec:yolo}) e submetido a ajuste
-fino sobre as imagens das cartas, com a classe única \textit{defeito} e
-sem congelamento de camadas. Os pesos iniciais foram os mesmos em todas
+fino sobre as imagens das cartas, com a classe única \textit{defeito}.
+Nenhuma camada foi congelada: todos os pesos foram ajustados durante o
+treinamento. Houve duas exceções ao uso do YOLOv8s com todos os pesos
+pré-treinados, descritas adiante nesta seção: o teste de capacidade
+usou o YOLOv8m, e a ablação da cabeça P2 usou uma versão do YOLOv8s
+que recebeu os pesos pré-treinados em
+apenas parte das camadas. Os pesos iniciais foram os mesmos em todas
 as configurações: o \textit{transfer learning} não foi um fator do
 estudo, mas a base comum sobre a qual o aumento de dados e o realce de
 micro-relevo foram comparados.
@@ -2434,8 +2565,8 @@ trabalhos correlatos que tratam de detecção de objetos
 (Seção~\ref{sec:trabalhos_correlatos}), o que aproxima as condições
 deste trabalho das deles. Terceiro, a biblioteca utilizada oferece para
 o YOLOv8 uma variante oficial com a cabeça de detecção P2, necessária à
-ablação, o que não ocorre com todas as versões posteriores da família
-\cite{Jocher2023}.
+ablação, o que permitiu fazê-la sem modificar a arquitetura por conta
+própria \cite{Jocher2023}.
 
 Entre os tamanhos do YOLOv8, adotou-se o \textit{small}, com cerca de
 11 milhões de parâmetros, pelo custo de memória e de tempo. Com a
@@ -2444,9 +2575,11 @@ Seção~\ref{subsec:hiperparametros}, o YOLOv8s ocupou cerca de 7,1 GB
 dos 16 GB de memória da placa de vídeo e levou cerca de 28 segundos por
 época. O tamanho seguinte, o YOLOv8m, com cerca de 26 milhões de
 parâmetros \cite{Jocher2023}, ocupou 11,6 GB e levou 58 segundos por
-época na rodada em que foi treinado. Como o acréscimo da cabeça P2
-elevou em cerca de 6 GB a memória ocupada pelo YOLOv8s, o YOLOv8m com
-essa cabeça não caberia na placa. A possibilidade de que a capacidade
+época na rodada em que foi treinado. O acréscimo da cabeça P2 elevou
+a memória ocupada pelo YOLOv8s em cerca de 4 a 6 GB, conforme a dobra;
+somado aos 11,6 GB do YOLOv8m, um acréscimo dessa ordem deixaria a
+ocupação no limite dos 16 GB da placa ou acima deles, e a combinação do
+YOLOv8m com a cabeça P2 não foi treinada. A possibilidade de que a capacidade
 do YOLOv8s limitasse o desempenho foi examinada pelo teste de
 capacidade (Tabela~\ref{tab:plano_experimentacao}), cujo resultado é
 apresentado na Seção~\ref{sec:resultados}.
@@ -2461,7 +2594,7 @@ dois modelos. O \textit{backbone} e o caminho de cima para baixo do
 receberam os pesos pré-treinados. As camadas acrescentadas para levar
 as características até o nível P2 deslocaram a posição das seguintes;
 por isso, o caminho de baixo para cima do \textit{neck}, exceto poucos
-tensores que coincidiram por acaso, e toda a cabeça de detecção,
+conjuntos de pesos que coincidiram por acaso, e toda a cabeça de detecção,
 inclusive nos níveis P3 a P5, começaram com valores aleatórios. Ao
 todo, foram transferidos 219 dos 437 tensores de pesos do modelo, isto
 é, dos conjuntos de valores aprendidos de suas camadas. Essa perda de
@@ -2474,24 +2607,29 @@ dos resultados. Com essa cabeça, a memória ocupada ficou entre 11,2 e
 \label{subsec:hiperparametros}
 
 Os hiperparâmetros de treinamento foram os mesmos em todas as rodadas,
-exceto o que cada experimento variou
-(Tabela~\ref{tab:plano_experimentacao}): os parâmetros de aumento de
-dados, que definem um dos fatores do estudo fatorial e são apresentados
-adiante, e a resolução de entrada, na ablação de resolução. A resolução
-de entrada foi de 1280 pixels, escolhida pela distribuição do tamanho
-dos defeitos (Tabela~\ref{tab:tamanho_defeitos}): nela, a fração das
+exceto o elemento que cada experimento variou
+(Tabela~\ref{tab:plano_experimentacao}); os parâmetros de aumento de
+dados, que definem um dos fatores do estudo fatorial, são apresentados
+adiante. A resolução
+de entrada foi de 1280 pixels, a mesma dos testes preliminares, e a
+distribuição do tamanho dos defeitos na anotação final
+(Tabela~\ref{tab:tamanho_defeitos}) confirmou a escolha: nela, a fração das
 anotações com menor lado abaixo do passo do nível P3 cai de 57,6\%, a
-640 pixels, para 10,8\%, e, como o lado maior da maior parte das
+640 pixels, para 10,8\%. Como o lado maior da maior parte das
 imagens recortadas supera 1280 pixels (Seção~\ref{subsec:dados}), o
 aumento de tamanho corresponde a detalhe presente na fotografia. O
 custo também aumenta: na Dobra 5, a rodada da configuração de melhor
 desempenho a 640 pixels ocupou 2,1 GB da memória da placa de vídeo e
 levou 7,7 segundos por época, contra 7,1 GB e 27,7 segundos a 1280
-pixels. As imagens foram processadas em lotes de 4; a biblioteca
+pixels.
+
+As imagens foram processadas em lotes de 4. A biblioteca
 acumula o resultado de 16 lotes antes de cada atualização dos pesos,
 de modo que cada atualização considerou 64 imagens. Lotes de 8 imagens
 foram experimentados nos testes preliminares e travaram a placa de
-vídeo nas duas tentativas.
+vídeo nas duas tentativas, por falha da biblioteca da AMD que executa as
+convoluções, e não por falta de memória, já que a ocupação estimada, de
+cerca de 12,5 GB, caberia nos 16 GB da placa.
 
 O otimizador, algoritmo que calcula o ajuste dos pesos a cada
 atualização, foi escolhido pela própria biblioteca, na opção
@@ -2510,18 +2648,18 @@ de 100 épocas: o treino foi interrompido quando a validação interna
 passou 100 épocas sem melhora, e foram mantidos os pesos da melhor
 época (Seção~\ref{subsec:validacao_cruzada}). A melhora foi medida pelo
 critério da biblioteca, que, na versão usada, é o mAP@0,5:0,95 na
-validação interna \cite{Jocher2023}, e não o mAP@0,5. A paciência de
-100 épocas, que coincide com o valor padrão da biblioteca, foi
-confirmada nos testes preliminares, nos quais, com paciência de 50
-épocas, a melhor época de um treino coincidiu com um pico isolado da
+validação interna \cite{Jocher2023}, e não o mAP@0,5. Nenhuma rodada
+atingiu o teto de 300 épocas: todas foram encerradas pela paciência.
+
+A paciência de 100 épocas, que coincide com o valor padrão da
+biblioteca, foi confirmada nos testes preliminares. Neles, com
+paciência de 50 épocas, a melhor época de um treino coincidiu com um pico isolado da
 métrica na validação interna, que tem poucas cartas e varia bastante
 entre épocas vizinhas. \citeonline{Prechelt1998} observa que critérios
 de parada mais lentos trazem pequena melhora na generalização ao custo
 de cerca de quatro vezes mais tempo de treinamento; neste trabalho,
 esse custo coube no cronograma, e uma escolha ruim do ponto de parada
-acrescentaria variação às comparações entre as configurações. Nenhuma
-rodada atingiu o teto de 300 épocas: todas foram encerradas pela
-paciência.
+acrescentaria variação às comparações entre as configurações.
 
 Os hiperparâmetros de aumento de dados foram definidos por
 configuração, conforme a Tabela~\ref{tab:augmentation}. A biblioteca
@@ -2536,27 +2674,43 @@ com os valores padrão, essas configurações receberiam mais
 transformações do que as Configurações 2 e 4, o que inverteria o
 sentido do fator investigado no estudo fatorial. Nas Configurações 2 e
 4, as transformações mantidas conservaram o valor padrão da biblioteca,
-e acrescentou-se a rotação de até 10 graus. Na Configuração 4, as
+e acrescentou-se a rotação de até 10 graus, uma das transformações
+geométricas de aumento de dados apresentadas na
+Seção~\ref{subsec:data_augmentation}. Ao girar a imagem, a biblioteca
+substitui cada caixa pela menor caixa alinhada aos eixos que contém os
+seus quatro cantos girados, o que a alarga; o efeito é maior nas 367
+caixas em forma de faixa (Seção~\ref{subsec:dados}): no ângulo máximo,
+uma faixa de 100 por 5 pixels passa a ser representada por uma caixa de
+cerca de 99 por 22 pixels. Na Configuração 4, as
 variações no espaço HSV foram desligadas, porque o realce de
 micro-relevo já ajusta o contraste local pelo CLAHE e seus três canais
 não representam cores (Seção~\ref{subsec:fotometria}); variações
 artificiais de cor e de brilho perturbariam o sinal que ele constrói.
 
 Dois parâmetros foram desligados em todas as configurações, inclusive
-nas com aumento de dados. A variação de escala, no valor padrão de
-0,5, reduz a imagem por um fator sorteado de até a metade. Reduzir à
-metade uma imagem de 1280 pixels deixa os defeitos com o tamanho que
+nas com aumento de dados. O primeiro é a variação de escala. No valor
+padrão de 0,5, ela multiplica o tamanho da imagem por um fator sorteado
+entre 0,5 e 1,5, isto é, pode reduzi-la até a metade ou ampliá-la em
+até 50\%. Reduzir à metade uma imagem de 1280 pixels deixa os defeitos com o tamanho que
 teriam na resolução de 640 pixels, na qual 57,6\% das anotações ficam
 abaixo do passo do nível P3 (Tabela~\ref{tab:tamanho_defeitos}); a
 transformação desfaria, em parte das imagens de treino, o ganho da
-resolução de entrada adotada. O mosaico, que combina quatro imagens e
-recorta delas uma janela do tamanho da entrada
-(Seção~\ref{subsec:data_augmentation}), não reduz os objetos quando a
-variação de escala está desligada, mas o recorte pode cortar defeitos
-nas bordas de cada imagem, e a imagem resultante reúne partes de
+resolução de entrada adotada. A biblioteca permite restringir o sorteio
+a fatores de ampliação, mas essa opção, que também levaria parte da
+carta para fora da imagem, não foi avaliada.
+
+O segundo é o mosaico, que combina quatro imagens e recorta delas uma
+janela do tamanho da entrada (Seção~\ref{subsec:data_augmentation}).
+Com a variação de escala desligada, ele não reduz os objetos. O
+recorte, porém, pode cortar defeitos nas bordas de cada imagem, e a imagem resultante reúne partes de
 quatro cartas, situação que não ocorre na avaliação, feita sobre a
-carta inteira. Os demais parâmetros de aumento de dados da biblioteca
-já valem zero por padrão e foram mantidos assim em todas as
+carta inteira. A translação, mantida nas Configurações 2 e 4, também
+pode levar para fora da imagem uma faixa da carta de até 10\% da
+altura, e com ela parte do desgaste da borda superior ou inferior; a biblioteca corta as
+caixas no limite da imagem e descarta as que perdem mais de 90\% da
+área. A perda é menor que no mosaico, do qual cada imagem participa
+apenas com a parte que cai na janela recortada. Os demais parâmetros de aumento de dados que a
+biblioteca aplica ao treinamento de detectores já valem zero por padrão e foram mantidos assim em todas as
 configurações.
 
 Os valores da Tabela~\ref{tab:augmentation} ficaram fixos nas cinco
@@ -2584,7 +2738,7 @@ inclusive das que não têm aumento de dados.
 \texttt{hsv\_h}    & 0,015 & 0,0 & 0,015 & 0,0  & Configuração 4: realce com contraste ajustado pelo CLAHE e canais que não são cores \\
 \texttt{hsv\_s}    & 0,7   & 0,0 & 0,7   & 0,0  & idem \\
 \texttt{hsv\_v}    & 0,4   & 0,0 & 0,4   & 0,0  & idem \\
-\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & rotação acrescentada \\
+\texttt{degrees}   & 0,0   & 0,0 & 10,0  & 10,0 & transformação geométrica usual; alarga as caixas em faixa \\
 \texttt{translate} & 0,1   & 0,0 & 0,1   & 0,1  & padrão mantido \\
 \texttt{fliplr}    & 0,5   & 0,0 & 0,5   & 0,5  & padrão mantido \\
 \texttt{mosaic}    & 1,0   & 0,0 & 0,0   & 0,0  & corta defeitos nas bordas e reúne partes de quatro cartas \\
@@ -2602,12 +2756,18 @@ Fonte: Elaborado pelo autor (2026).}
 
 A implementação foi feita em Python, versão 3.12. O treinamento e a
 avaliação dos modelos usaram a biblioteca Ultralytics, versão 8.4.138,
-sobre o PyTorch 2.14.0 com a plataforma ROCm 7.2, que permite executar
-o PyTorch em placas de vídeo AMD; versões anteriores do PyTorch
-falharam durante o treinamento nessa placa. O recorte automático da
+que mantém a implementação de referência do YOLOv8 e oferece a variante
+com a cabeça P2 \cite{Jocher2023}, sobre o PyTorch 2.14.0 com a
+plataforma ROCm 7.2, que permite executar o PyTorch em placas de vídeo
+AMD, como a do equipamento disponível; a versão anterior testada, o PyTorch
+2.10.0 com a plataforma ROCm 7.0, falhou durante o treinamento nessa
+placa. O recorte automático da
 carta e a geração das imagens de realce de micro-relevo usaram a
-biblioteca OpenCV, versão 5.0, e os testes estatísticos, a biblioteca
-SciPy, versão 1.18. Os experimentos foram executados em um computador
+biblioteca OpenCV, versão 5.0, que oferece a conversão entre espaços de
+cor, os filtros e o CLAHE empregados, e a biblioteca NumPy, versão 2.5,
+nas operações sobre matrizes, como o cálculo da medida de Frangi; os
+testes estatísticos usaram a biblioteca SciPy, versão 1.18, que
+implementa o teste de Wilcoxon pareado. Os experimentos foram executados em um computador
 com o sistema operacional Ubuntu 24.04 e placa de vídeo AMD Radeon RX
 9060 XT, com 16 GB de memória. A lista completa de pacotes e versões
 acompanha o código do trabalho, disponível em repositório
@@ -2617,142 +2777,218 @@ público\footnote{\url{https://github.com/Marynxs/tcc-deteccao-defeitos-pokemon-
 \section{Experimentos e cenário de testes}
 \label{sec:experimentos}
 
+Esta seção define as quatro configurações comparadas no estudo
+fatorial e descreve como as imagens de realce de micro-relevo foram
+geradas e como a variante adotada foi escolhida
+(Seção~\ref{subsec:estrategias}); em seguida, descreve as rodadas de
+treinamento do estudo fatorial, da ablação e das análises
+complementares (Seção~\ref{subsec:ablacao}).
+
 \subsection{Estratégias de treinamento avaliadas}
 \label{subsec:estrategias}
 
-O trabalho comparará quatro configurações experimentais baseadas
-em YOLOv8 com \textit{transfer learning}, variando de forma
-controlada duas estratégias: o uso de aumento de dados
-(\textit{data augmentation}) e o tipo de representação visual
-da entrada, que pode ser a imagem RGB convencional ou a imagem
-de realce de micro-relevo gerada. Esse
-desenho permite avaliar a contribuição individual e combinada
-de cada estratégia no desempenho do detector em um cenário
-com baixo volume de dados.
+O estudo fatorial (Seção~\ref{subsec:ablacao_conceito}) cruzou dois
+fatores: o aumento de dados, sem ou com, e a representação de entrada,
+imagens RGB ou imagens de realce de micro-relevo. As quatro
+combinações formaram as configurações comparadas:
 
-O \textit{transfer learning} será empregado em todas as configurações por meio 
-do ajuste fino (\textit{fine-tuning}) de pesos pré-treinados, buscando aproveitar 
-representações visuais previamente aprendidas em bases de larga escala. Essa 
-decisão é justificada pelo baixo volume de dados disponível e pela necessidade 
-de adaptar o detector à classe de interesse \textit{defeito}, inexistente nas 
-classes originais do COCO. Dessa forma, o \textit{transfer learning} não será 
-tratado como uma variável comparativa isolada no estudo de ablação, mas como 
-a base comum de treinamento sobre a qual serão avaliados o aumento de dados 
-e o uso de imagens de realce de micro-relevo.
+\begin{description}
+    \item[Configuração 1] imagens RGB, sem aumento de dados;
+    \item[Configuração 2] imagens RGB, com aumento de dados;
+    \item[Configuração 3] imagens de realce de micro-relevo, sem aumento
+    de dados;
+    \item[Configuração 4] imagens de realce de micro-relevo, com aumento
+    de dados.
+\end{description}
 
-O aumento de dados será utilizado para ampliar artificialmente a variabilidade 
-do conjunto de treinamento. Para a representação RGB, serão aplicadas transformações
-geométricas (flip horizontal, rotação de até ±10°) e fotométricas (variação de brilho e saturação).
-Para a representação de realce, serão utilizadas apenas transformações geométricas, uma vez que o
-realce já incorpora normalização de contraste local por CLAHE, tornando inconsistente a aplicação de variações artificiais de brilho ou contraste.
+As quatro configurações usaram o mesmo modelo, os mesmos pesos
+pré-treinados e os mesmos hiperparâmetros de treinamento, exceto os de
+aumento de dados (Seção~\ref{sec:implementacao}); a Configuração 1
+corresponde, assim, ao ajuste fino sem nenhuma das duas estratégias. As
+hipóteses H1 e H2 (Seção~\ref{subsec:hipotese}) tratam do efeito de
+cada fator, e H3, da combinação dos dois na Configuração 4; as
+comparações que testaram cada uma estão na
+Seção~\ref{subsec:validacao}.
 
-Já o uso das imagens de realce de micro-relevo será avaliado como uma 
-representação alternativa de entrada, com o objetivo de verificar se 
-o realce de textura, relevo e irregularidades superficiais contribui 
-para a detecção de defeitos visuais. Essas imagens são geradas a partir 
-do canal de luminância das imagens originais, utilizando a biblioteca 
-OpenCV. O operador de realce foi definido entre três variantes 
-comparadas em teste preliminar, conforme a Seção~\ref{subsec:dados}. 
-O CLAHE, comum às três variantes, é configurado com 
-\textit{clipLimit} de 3,0 e \textit{tileGridSize} de 
-$8{\times}8$ pixels, valores de referência adotados como ponto de 
-partida nos testes preliminares previstos na 
-Seção~\ref{subsec:hiperparametros}, nos quais serão avaliados 
-empiricamente e mantidos fixos entre todas as configurações
-experimentais após definição.
+Nas Configurações 2 e 4, o aumento de dados aplicou às imagens de
+treino a translação, o espelhamento horizontal e a rotação; na
+Configuração 2, aplicou também as variações de matiz, saturação e valor
+no espaço HSV, que ficaram desligadas na Configuração 4 pelo motivo
+exposto na Seção~\ref{subsec:hiperparametros}. Os valores de cada
+parâmetro estão na Tabela~\ref{tab:augmentation}, e a consequência
+dessa diferença para a comparação entre as representações de entrada
+é discutida adiante, nesta seção.
 
-% Parágrafos e figura movidos sem alteração da subsec:dados (proposta 3B9,
-% 26/10/2026); serão reescritos no bloco 3E.
-Além das imagens RGB convencionais, que preservam a aparência visual original
-das cartas, também será construída uma representação de realce de micro-relevo a
-partir dessas imagens. Essa representação é gerada a partir do canal de
-luminância das imagens RGB originais, com o objetivo de realçar
-variações locais de textura, relevo e possíveis irregularidades
-superficiais \cite{Chen2021}. Três variantes do operador de realce
-foram comparadas em teste preliminar: gradiente direcional seguido de
-equalização adaptativa de histograma; equalização adaptativa seguida de
-gradiente direcional de oito direções, na formulação de
-\citeonline{Sawada2024}; e resposta multiescala aos autovalores da
-matriz Hessiana, na formulação de \citeonline{Gruber2021}. O
-procedimento de seleção e os valores adotados constam da
-Seção~\ref{subsec:hiperparametros}.
+As imagens de realce de micro-relevo das Configurações 3 e 4 foram
+geradas a partir das imagens recortadas (Seção~\ref{subsec:dados}),
+sempre a partir do canal de luminosidade (L$^*$) do espaço CIELAB, com
+os operadores apresentados na Seção~\ref{subsec:fotometria}, aplicados
+na resolução da imagem recortada, antes da redução à resolução de
+entrada. Quatro variantes foram comparadas:
 
-A Figura~\ref{fig:rgb_fotometrica} apresenta um exemplo das duas representações
-disponíveis no conjunto de dados. A imagem RGB convencional será utilizada como
-representação de referência, enquanto a imagem de realce de micro-relevo será avaliada
-em uma das configurações do estudo de ablação, permitindo investigar se esse tipo
-de realce contribui para o desempenho do detector.
+\begin{description}
+    \item[\textit{Emboss} e CLAHE] o filtro \textit{emboss}, com núcleo
+    de $3 \times 3$ pixels cujas linhas são $(-2, -1, 0)$, $(-1, 0, 1)$
+    e $(0, 1, 2)$, que responde à variação de luminosidade na direção
+    diagonal; a resposta, somada a 128 e limitada à faixa de 0 a 255,
+    foi seguida do CLAHE;
+    \item[CLAHE e \textit{emboss} em oito direções] o CLAHE seguido do
+    filtro \textit{emboss} aplicado em oito direções, como no trabalho
+    sobre superfícies pintadas discutido na
+    Seção~\ref{subsec:fotometria}, mantendo-se em cada pixel a maior
+    resposta em valor absoluto; as oito direções foram obtidas girando
+    os coeficientes da borda do mesmo núcleo uma posição por vez, em
+    passos de 45 graus, e, como direções opostas dão o mesmo valor
+    absoluto, correspondem a quatro eixos distintos;
+    \item[Frangi] o CLAHE seguido da medida de Frangi, calculada com
+    núcleos gaussianos de desvio padrão de 1,5, 3 e 5 pixels,
+    mantendo-se em cada pixel a maior resposta entre essas escalas;
+    \item[Composição de três canais] a variante descrita na
+    Seção~\ref{subsec:fotometria}, em que os três canais de entrada
+    recebem a luminosidade original, a luminosidade com CLAHE e a medida
+    de Frangi da variante anterior.
+\end{description}
+
+Nas três primeiras variantes, a imagem resultante, de um único canal,
+foi repetida nos três canais de entrada da rede; na última, cada canal
+recebeu uma informação diferente. Em todas, o CLAHE usou uma grade de
+$8 \times 8$ ladrilhos, valor padrão da biblioteca OpenCV, e limite de
+corte de 3,0, mais baixo que o padrão da biblioteca, de 40, o que torna
+o realce mais suave. Esses valores não foram ajustados por teste, e a
+medida de Frangi usou os parâmetros indicados por seus autores
+(Seção~\ref{subsec:fotometria}).
+
+As respostas do \textit{emboss} em oito
+direções e da medida de Frangi foram convertidas para a faixa de
+intensidades de 0 a 255, por uma escala linear que leva o percentil 1
+ao valor 0 e o percentil 99,5 ao valor 255, percentis calculados em
+cada imagem; os valores fora desse intervalo foram fixados nesses
+limites. A medida de Frangi foi implementada pelo autor. Em cada
+escala, a imagem foi suavizada pelo núcleo gaussiano, e as derivadas
+de segunda ordem foram aproximadas por diferenças em uma vizinhança de
+$3 \times 3$ pixels e multiplicadas pelo quadrado do desvio padrão,
+para tornar comparáveis as respostas das escalas. A medida foi
+calculada a partir dos autovalores da Hessiana assim obtida, sem
+distinguir estruturas mais claras ou mais escuras que a vizinhança, já
+que a carta tem defeitos dos dois tipos.
+
+As escalas da medida de Frangi e o núcleo do \textit{emboss} foram
+definidos em pixels da imagem recortada, e não em proporção da carta.
+Como a resolução das fotografias varia, a mesma escala corresponde a estruturas de tamanhos
+diferentes na carta. A variação é limitada, porque 317 das 412 imagens
+foram recebidas na mesma resolução, de $1280 \times 1771$ pixels
+(Seção~\ref{subsec:dados}).
+
+A variante foi escolhida uma única vez, antes do estudo fatorial, na
+rodada da Dobra 1. A Configuração 3 foi treinada com cada uma das
+quatro variantes, com os demais hiperparâmetros iguais aos das outras
+rodadas. Foi adotada nas Configurações 3 e 4 a variante de maior F1
+agregado na validação interna dessa rodada, calculado com a anotação
+completa pela própria biblioteca de treinamento. A biblioteca escolhe
+o limiar pelo máximo da curva de F1 suavizada, e não pelo procedimento
+da Seção~\ref{subsec:validacao}.
+
+A composição de três canais obteve F1 de 0,208; o
+\textit{emboss} seguido do CLAHE, 0,192; a medida de Frangi, 0,161; e o
+CLAHE seguido do \textit{emboss} em oito direções, 0,151. A vantagem da
+variante adotada sobre a segunda foi de 8\% do valor desta e, no
+mAP@0,5 da mesma validação interna, também calculado pela biblioteca,
+de 2\%. Como cada variante foi
+treinada uma única vez, em uma única dobra, essa diferença não foi
+testada e não permite afirmar que a composição de três canais seja
+superior às demais: a escolha foi uma seleção de hiperparâmetro, e não
+um resultado do trabalho.
+
+A escolha também não ficou isolada das rodadas seguintes. As 34 cartas
+da validação interna da Dobra 1 pertencem às outras quatro dobras e
+foram, portanto, avaliadas nas rodadas correspondentes. Como a variante
+adotada foi a de maior F1 justamente nessas cartas, a escolha pode
+favorecer ligeiramente as Configurações 3 e 4 nas comparações com as
+Configurações 1 e 2 (Seção~\ref{subsec:validacao_cruzada}).
+
+A comparação entre as duas representações de entrada não isola apenas
+o realce de micro-relevo, por dois motivos. Primeiro, o aumento de
+dados não foi idêntico nas duas: as variações no espaço HSV só foram
+aplicadas às imagens RGB, de modo que a comparação entre as
+Configurações 2 e 4 difere também na presença dessas variações, e o
+efeito do aumento de dados medido com imagens RGB inclui
+transformações que não foram aplicadas às imagens de realce. Segundo,
+as quatro variantes partem apenas da luminosidade (L$^*$) e descartam
+os dois canais de cor do espaço CIELAB. Assim, as comparações entre as
+Configurações 3 e 1 e entre as Configurações 4 e 2 opõem também
+imagens com cor a imagens sem cor. Uma representação de controle, com
+a luminosidade sem realce repetida nos três canais, não foi treinada;
+por isso, uma diferença entre as imagens RGB e as de realce pode
+decorrer tanto do realce quanto da retirada da cor.
+
+A Figura~\ref{fig:rgb_fotometrica} mostra uma carta do conjunto de
+dados em RGB e na composição de três canais adotada.
 
 \begin{figure}[H]
     \centering
-    \caption{Exemplo de carta do conjunto de dados nas duas representações disponíveis: imagem RGB convencional e imagem de realce de micro-relevo.}
+    \caption{Carta do conjunto de dados em RGB e na variante de realce de micro-relevo adotada nas Configurações 3 e 4}
     \label{fig:rgb_fotometrica}
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.90\textwidth]{assets/carta_rgb.png}
+        \includegraphics[width=0.90\textwidth]{assets/realce_carta070_rgb.png}
 
         \vspace{0.2cm}
-        {\small (a) Imagem RGB convencional}
+        {\small (a) Imagem RGB}
     \end{minipage}
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.90\textwidth]{assets/carta_fotometrica.png}
+        \includegraphics[width=0.90\textwidth]{assets/realce_carta070_composicao.png}
 
         \vspace{0.2cm}
-        {\small (b) Imagem de realce de micro-relevo}
+        {\small (b) Composição de três canais}
     \end{minipage}
 
-
-
-    \legend{Fonte: Imagem RGB fornecida por empresa parceira; imagem de realce elaborada pelo autor a partir da imagem original (2026).}
+    \legend{Na imagem (b), exibida como imagem colorida, os canais azul, verde e vermelho contêm, respectivamente, a luminosidade, a luminosidade com CLAHE e a medida de Frangi; as cores não têm significado para a rede.
+Fonte: Imagem RGB fornecida pela empresa de graduação; imagem de realce elaborada pelo autor a partir dela (2026).}
 \end{figure}
 
-\subsection{Estudo de ablação}
+\subsection{Estudo fatorial, ablação e análises complementares}
 \label{subsec:ablacao}
 
-A comparação entre as estratégias será realizada por meio de um
-estudo de ablação com desenho fatorial. Nesse tipo de desenho,
-duas variáveis independentes, o uso de aumento de dados e o
-tipo de representação visual da entrada são combinadas de
-forma controlada, permitindo avaliar a contribuição individual
-e conjunta de cada estratégia no desempenho do detector.
+O estudo fatorial, a ablação e as análises complementares seguiram as
+etapas da Seção~\ref{subsec:visao_geral} e o plano da
+Tabela~\ref{tab:plano_experimentacao}. As 20 rodadas do estudo
+fatorial, das quatro configurações nas cinco dobras, usaram o YOLOv8s a
+1280 pixels e as mesmas dobras. A ablação e as análises complementares
+partiram da configuração de melhor desempenho e alteraram um único
+elemento por vez, mantendo os demais iguais aos da rodada do estudo
+fatorial na mesma dobra. Os elementos alterados foram a cabeça P2, nas
+cinco dobras, que trouxe junto a perda dos pesos pré-treinados em parte
+das camadas (Seção~\ref{subsec:modelo_base}); a resolução de entrada de
+640 pixels e o YOLOv8m, cada um em uma rodada na Dobra 5; e a fração
+das cartas do treino efetivo, na curva de aprendizado. Ao todo,
+contadas as quatro rodadas da escolha da variante de realce, foram 37
+rodadas de treinamento.
 
-Serão consideradas quatro configurações experimentais:
+Na curva de aprendizado, a configuração de melhor desempenho foi
+treinada com 25\%, 50\% e 75\% das cartas do treino efetivo, nas
+Dobras 3 e 5, com a validação interna e a dobra de avaliação
+inalteradas; o ponto de 100\% é a rodada do estudo fatorial na mesma
+dobra. As cartas foram sorteadas uma única vez, com semente fixa, de
+modo que cada fração contivesse a anterior e que as cartas de mesma
+ilustração ficassem juntas.
 
-\begin{enumerate}
-    \item YOLOv8 com \textit{transfer learning} em imagens RGB;
-    \item YOLOv8 com \textit{transfer learning} e aumento de dados 
-    em imagens RGB;
-    \item YOLOv8 com \textit{transfer learning} em imagens 
-    de realce de micro-relevo;
-    \item YOLOv8 com \textit{transfer learning} e aumento de dados 
-    em imagens de realce de micro-relevo.
-\end{enumerate}
-
-A configuração 1 serve como referência do estudo de ablação,
-correspondendo ao cenário mais simples: fine-tuning com imagens
-RGB sem aumento de dados. As demais configurações introduzem
-variações controladas sobre essa referência, mantendo fixos
-os hiperparâmetros de treinamento em todas as configurações
-para garantir que as diferenças de desempenho observadas sejam
-atribuíveis exclusivamente às estratégias avaliadas.
-
-Os folds serão definidos uma única vez sobre as 82 cartas e mantidos
-fixos entre todas as configurações, de modo que cada configuração seja
-avaliada exatamente sobre as mesmas partições. Essa propriedade viabiliza
-a comparação pareada: cada carta é avaliada uma única vez em cada
-configuração, o que produz 82 pares por comparação. A comparação entre as
-quatro estratégias será feita por teste de Wilcoxon pareado sobre o escore
-por carta \cite{Demsar2006}, permanecendo o mAP@0.5 médio e o desvio padrão
-sobre as cinco rodadas como caracterização descritiva dos resultados
-\cite{Kohavi1995}.
-
-Esse desenho foi escolhido por ser compatível com o escopo do TCC1 e por 
-permitir uma análise clara da influência de cada estratégia em um contexto 
-de baixo volume de dados. Em vez de comparar múltiplas arquiteturas, a proposta 
-fixa o modelo YOLOv8 e concentra a investigação naquilo que constitui a 
-contribuição principal do trabalho: a comparação entre estratégias de treinamento.
+As dobras da ablação da resolução e das análises complementares foram escolhidas depois do estudo fatorial. A
+Dobra 5 foi escolhida por ter, na avaliação, o número de anotações mais
+próximo do típico entre as cinco dobras (783, a mediana) e por não
+conter as cartas de desgaste mais extenso, que ficaram nas Dobras 1 e
+4; nela, a configuração de melhor desempenho teve o maior mAP@0,5 entre
+as cinco dobras. Se parte desse valor se deve à variação da própria
+rodada, e não apenas a uma dobra mais fácil, a rodada de referência
+está acima do seu desempenho típico, e as diferenças medidas contra ela
+tendem a favorecê-la: a vantagem de 1280 sobre 640 pixels pode estar
+exagerada, e a comparação com o YOLOv8m pode estar desfavorável a ele.
+A resolução de 640 pixels e o YOLOv8m foram avaliados na mesma dobra, o
+que permitiu compará-los com a mesma rodada de referência da curva. A
+curva de aprendizado foi repetida na Dobra 3, que, como a 5, não contém
+as cartas de desgaste mais extenso, para verificar se sua forma se
+mantinha em outra dobra.
 
 % ---------------------------------------------------------------
 \section{Resultados e análises}

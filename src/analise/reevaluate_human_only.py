@@ -111,10 +111,12 @@ for m in MODOS:
             p=wilcoxon(xa,xb).pvalue if (d!=0).any() else 1.0
             pp=wilcoxon(xa,xb,zero_method='pratt').pvalue if (d!=0).any() else 1.0
             ps.append(p); rows.append((a,b,len(cs),xa.mean(),xb.mean(),(d>0).sum(),(d<0).sum(),(d==0).sum(),p,pp))
-        # Holm
-        o=np.argsort(ps); holm=np.empty(len(ps)); run=0
+        # Holm so na familia das hipoteses (os 5 pares de compare_paired.py); o par
+        # cfg2 x cfg3 nao testa hipotese e fica fora, sem valor ajustado
+        fam=[i for i,(a,b) in enumerate(pares) if (a,b)!=('cfg2_1280','cfg3_1280')]
+        o=sorted(fam,key=lambda i:ps[i]); holm=np.full(len(ps),np.nan); run=0
         for rank,i in enumerate(o):
-            run=max(run,min(1,(len(ps)-rank)*ps[i])); holm[i]=run
+            run=max(run,min(1,(len(fam)-rank)*ps[i])); holm[i]=run
         for (a,b,n,ma,mb,w,l,t,p,pp),h in zip(rows,holm):
-            print(f'  {met:6s} {a} vs {b}: n={n} {ma:.3f} vs {mb:.3f} melhor/pior/empate {w}/{l}/{t} p={p:.2g} (pratt {pp:.2g}) Holm {h:.2g}')
+            print(f'  {met:6s} {a} vs {b}: n={n} {ma:.3f} vs {mb:.3f} melhor/pior/empate {w}/{l}/{t} p={p:.2g} (pratt {pp:.2g}) Holm {h:.2g} (m=5)' if h==h else f'  {met:6s} {a} vs {b}: n={n} {ma:.3f} vs {mb:.3f} melhor/pior/empate {w}/{l}/{t} p={p:.2g} (pratt {pp:.2g}) fora da familia de Holm')
 json.dump({r:{m:{'ap':res[r][m]['ap'],'carta':dict(res[r][m]['carta'])} for m in MODOS} for r in ROT},open(SAIDA/f'reavaliacao_so_humano_{IGN_THR}.json','w'))
