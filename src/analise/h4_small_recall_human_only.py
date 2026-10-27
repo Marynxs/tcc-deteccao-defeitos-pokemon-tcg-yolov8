@@ -59,13 +59,15 @@ def casa(pred, g):
     return casado
 
 
-def rodada(rot, so_humano):
+def rodada(rot, so_humano, rot_limiar=None):
+    # rot_limiar: rodada cujo limiar e aplicado a esta (limiar comum aos dois modelos)
     cfg, resto = rot.split('_', 1)
     faixa = {f[0]: [0, 0] for f in FAIXAS}
     carta = defaultdict(lambda: [0, 0])  # estrato < 8 px por carta
     for k in range(5):
         nome = f'{cfg}_fold{k}_{resto}'
-        lim = json.load(open(RUNS / nome / 'resumo.json'))['conf_do_f1']
+        nome_lim = nome if rot_limiar is None else rot_limiar.replace('_', f'_fold{k}_', 1)
+        lim = json.load(open(RUNS / nome_lim / 'resumo.json'))['conf_do_f1']
         preds = defaultdict(list)
         for p in json.load(open(RUNS / f'{nome}_avaliacao' / 'predictions.json')):
             if p['score'] >= lim:
@@ -102,3 +104,20 @@ for so_humano, nome_ref in ((False, 'anotacao completa'), (True, 'anotacao sem a
 txt = '\n'.join(linhas)
 print(txt)
 (SAIDA / 'saida_h4_dois_gabaritos.txt').write_text(txt + '\n')
+
+# Descritivo: revocacao por faixa com limiar comum aos dois modelos, para separar o efeito
+# da P2 do efeito de um limiar mais baixo (o limiar de cada rodada vem da propria validacao interna)
+linhas = []
+for so_humano, nome_ref in ((False, 'anotacao completa'), (True, 'anotacao sem as caixas sugeridas')):
+    linhas.append(f'== {nome_ref} ==')
+    for base in ('cfg2_1280', 'cfg2_1280_p2'):
+        linhas.append(f'  limiar de cada dobra tirado de {base}:')
+        for r in ('cfg2_1280', 'cfg2_1280_p2'):
+            fx, _ = rodada(r, so_humano, base)
+            linhas.append(f'    {r:14s} ' + '  '.join(f'{k}: {a}/{b} = {a / max(b, 1):.3f}' for k, (a, b) in fx.items()))
+lims = [(json.load(open(RUNS / f'cfg2_fold{k}_1280' / 'resumo.json'))['conf_do_f1'],
+         json.load(open(RUNS / f'cfg2_fold{k}_1280_p2' / 'resumo.json'))['conf_do_f1']) for k in range(5)]
+linhas.append('limiares por dobra (sem P2, com P2): ' + '; '.join(f'Dobra {k + 1} {a:.4f} {b:.4f}' for k, (a, b) in enumerate(lims)))
+txt = '\n'.join(linhas)
+print(txt)
+(SAIDA / 'saida_h4_limiar_comum.txt').write_text(txt + '\n')

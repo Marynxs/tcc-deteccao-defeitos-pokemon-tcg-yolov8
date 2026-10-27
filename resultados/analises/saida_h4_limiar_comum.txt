@@ -1,0 +1,15 @@
+== anotacao completa ==
+  limiar de cada dobra tirado de cfg2_1280:
+    cfg2_1280      <8 px: 14/517 = 0.027  8 a 20 px: 1077/2853 = 0.377  >20 px: 278/1438 = 0.193
+    cfg2_1280_p2   <8 px: 12/517 = 0.023  8 a 20 px: 952/2853 = 0.334  >20 px: 249/1438 = 0.173
+  limiar de cada dobra tirado de cfg2_1280_p2:
+    cfg2_1280      <8 px: 18/517 = 0.035  8 a 20 px: 1138/2853 = 0.399  >20 px: 309/1438 = 0.215
+    cfg2_1280_p2   <8 px: 17/517 = 0.033  8 a 20 px: 1048/2853 = 0.367  >20 px: 294/1438 = 0.204
+== anotacao sem as caixas sugeridas ==
+  limiar de cada dobra tirado de cfg2_1280:
+    cfg2_1280      <8 px: 14/513 = 0.027  8 a 20 px: 651/2148 = 0.303  >20 px: 200/1255 = 0.159
+    cfg2_1280_p2   <8 px: 12/513 = 0.023  8 a 20 px: 591/2148 = 0.275  >20 px: 174/1255 = 0.139
+  limiar de cada dobra tirado de cfg2_1280_p2:
+    cfg2_1280      <8 px: 18/513 = 0.035  8 a 20 px: 687/2148 = 0.320  >20 px: 220/1255 = 0.175
+    cfg2_1280_p2   <8 px: 17/513 = 0.033  8 a 20 px: 649/2148 = 0.302  >20 px: 209/1255 = 0.167
+limiares por dobra (sem P2, com P2): Dobra 1 0.2693 0.2322; Dobra 2 0.1792 0.1872; Dobra 3 0.1932 0.1932; Dobra 4 0.2272 0.1562; Dobra 5 0.2172 0.1902
