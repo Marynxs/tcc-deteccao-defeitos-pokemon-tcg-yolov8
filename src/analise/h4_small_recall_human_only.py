@@ -115,6 +115,12 @@ for so_humano, nome_ref in ((False, 'anotacao completa'), (True, 'anotacao sem a
         for r in ('cfg2_1280', 'cfg2_1280_p2'):
             fx, _ = rodada(r, so_humano, base)
             linhas.append(f'    {r:14s} ' + '  '.join(f'{k}: {a}/{b} = {a / max(b, 1):.3f}' for k, (a, b) in fx.items()))
+    # mesmo controle para o aumento de dados: config. 1 (sem) contra config. 2 (com)
+    for base in ('cfg1_1280', 'cfg2_1280'):
+        linhas.append(f'  aumento de dados, limiar de cada dobra tirado de {base}:')
+        for r in ('cfg1_1280', 'cfg2_1280'):
+            fx, _ = rodada(r, so_humano, base)
+            linhas.append(f'    {r:14s} ' + '  '.join(f'{k}: {a}/{b} = {a / max(b, 1):.3f}' for k, (a, b) in fx.items()))
 lims = [(json.load(open(RUNS / f'cfg2_fold{k}_1280' / 'resumo.json'))['conf_do_f1'],
          json.load(open(RUNS / f'cfg2_fold{k}_1280_p2' / 'resumo.json'))['conf_do_f1']) for k in range(5)]
 linhas.append('limiares por dobra (sem P2, com P2): ' + '; '.join(f'Dobra {k + 1} {a:.4f} {b:.4f}' for k, (a, b) in enumerate(lims)))
