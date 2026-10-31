@@ -132,51 +132,43 @@
 % RESUMO
 % ---------------------------------------------------------------
 \begin{resumo}
-Este trabalho avaliou o impacto de diferentes estratégias de
-treinamento aplicadas ao YOLOv8 na detecção de defeitos superficiais em
-cartas Pokémon TCG (\textit{Trading Card Game}). O objetivo foi
-identificar quais combinações apresentam melhor desempenho com um
-conjunto limitado de imagens. A escolha do tema baseou-se na escassez
-de estudos que avaliam sistematicamente essas estratégias no domínio de
-cartas colecionáveis. Nesse domínio, a graduação avalia a condição
-física de cada exemplar, mas a inspeção manual é lenta e sujeita à
-subjetividade do avaliador. Essas limitações motivam a sua automação
-por visão computacional. A anotação de defeitos, porém, é cara, e a
-busca bibliográfica realizada não identificou conjuntos de dados
-públicos de cartas Pokémon TCG com defeitos localizados. Nos
-experimentos, o modelo partiu de um YOLOv8s com \textit{transfer
-learning} a partir de pesos pré-treinados no conjunto público de imagens COCO. Quatro configurações cruzaram o
-uso ou não de aumento de dados com duas representações de entrada:
-imagens RGB convencionais e imagens de realce de micro-relevo. Sobre a
-configuração de melhor desempenho, avaliou-se o efeito de uma cabeça de
-detecção adicional para objetos pequenos (P2) e da resolução de
-entrada. O conjunto de dados reuniu 206 cartas, 412 imagens e 4.808
-anotações, parte delas sugerida por modelos de uma etapa preliminar e
-validada pelo autor. O desempenho foi medido pelo mAP@0,5, pela precisão, pela
-revocação e pelo F1, em validação cruzada com cinco dobras. O F1 dá uma
-única nota por carta, o que permitiu comparar as configurações carta a
-carta pelo teste de Wilcoxon pareado, com correção de Holm. O aumento
-de dados melhorou o detector: a Configuração 2, com imagens RGB e
-aumento de dados, obteve o melhor desempenho, com F1 por carta de
-0,376, contra 0,332 da mesma configuração sem aumento de dados. O
-realce de micro-relevo foi inferior ao RGB quando não havia aumento de
-dados. Com aumento de dados, essa diferença desapareceu quando a
-avaliação desconsiderou as anotações sugeridas por esses modelos.
-A cabeça P2 apresentou desempenho inferior à configuração vencedora,
-com a mesma revocação e menor precisão. Essa variante não partiu de
-pesos pré-treinados na cabeça de detecção nem em parte das camadas
-intermediárias, e por isso o efeito isolado da cabeça P2 não pôde ser
-separado da ausência de pré-treino. Em uma dobra avaliada (45 cartas),
-aumentar a resolução de entrada de 640 para 1280 pixels elevou o
-mAP@0,5 de 0,156 para 0,309 e o F1 por carta de 0,266 para 0,399;
-esta última diferença foi confirmada pelo teste de Wilcoxon pareado.
-Uma curva de aprendizado com intervalo de confiança por
-\textit{bootstrap}, em duas dobras, mostrou que o desempenho ainda não havia estabilizado com o volume de dados
-disponível. A evidência do aumento de dados vem de cinco dobras, e a da
-resolução de entrada, de uma só. Por isso, com poucos dados, o aumento
-de dados melhorou o detector nas duas representações de entrada, e a
-maior resolução de entrada também o melhorou, mas com evidência mais
-limitada. O realce de micro-relevo não trouxe ganho.
+Este trabalho apresenta um estudo experimental sobre estratégias de
+treinamento do detector de objetos YOLOv8 para localizar defeitos
+superficiais em cartas Pokémon TCG (\textit{Trading Card Game}). Na
+graduação dessas cartas, isto é, na atribuição de uma nota ao seu
+estado de conservação, a inspeção é manual, lenta e sujeita à
+subjetividade do avaliador. Automatizá-la por visão computacional
+enfrenta duas dificuldades: a maior parte dos defeitos é pequena em
+relação à imagem, e há poucos dados anotados. O objetivo foi
+identificar quais estratégias melhoram a detecção desses
+defeitos nesse cenário. O conjunto de dados reuniu 206 cartas, cujas
+fotografias foram cedidas por uma empresa de graduação, com os defeitos
+marcados por caixas delimitadoras. Partindo de um YOLOv8s pré-treinado,
+foram comparadas as quatro combinações entre o uso ou não de aumento de
+dados e duas representações de entrada: as imagens coloridas (RGB) e
+imagens de realce de micro-relevo, que reúnem a luminosidade original, a
+luminosidade com contraste local ampliado e uma medida que destaca
+estruturas alongadas, como riscos. As combinações foram avaliadas em
+validação cruzada com cinco dobras e comparadas estatisticamente carta
+a carta. Sobre a melhor delas, avaliaram-se também uma cabeça de
+detecção adicional para objetos pequenos (P2) e a resolução de entrada.
+O aumento de dados melhorou o detector nas duas representações: com
+imagens RGB, a métrica de detecção mAP@0,5 passou de 0,190 para 0,247. O
+realce de micro-relevo não superou as imagens RGB; como essa
+representação também retirou a cor, o efeito do realce não foi isolado.
+A cabeça P2 não trouxe ganho, nem mesmo nos defeitos
+menores, quando os dois modelos usaram o mesmo limiar de confiança. Em uma
+única dobra, a resolução de entrada de 1280 pixels rendeu quase o dobro
+do mAP@0,5 obtido a 640 pixels. Mesmo a melhor combinação encontrou
+cerca de 29\% dos defeitos anotados (revocação de 0,285), e os defeitos
+menores continuaram os mais difíceis. Os resultados indicam que, com
+poucos dados, o aumento de dados e, com evidência ainda preliminar, a
+resolução de entrada pesaram mais do que mudanças na representação de
+entrada ou na arquitetura do detector. O detector ainda não é suficiente
+para a graduação automática, mas pode vir a servir de apoio à inspeção
+feita pelo avaliador, o que não foi avaliado aqui, e de base para
+trabalhos que ampliem o conjunto de dados e tratem os defeitos menores.
+O código e os resultados estão disponíveis em repositório público.
 
 \vspace{\onelineskip}
 
@@ -190,53 +182,44 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
 % ---------------------------------------------------------------
 \begin{resumo}[Abstract]
  \begin{otherlanguage*}{english}
-   This work evaluated the impact of different training strategies
-   applied to YOLOv8 on the detection of surface defects in Pokémon TCG
-   (\textit{Trading Card Game}) cards. The objective was to identify
-   which combinations perform best with a limited set of images. The
-   choice of topic was based on the scarcity of studies that
-   systematically evaluate these strategies in the domain of
-   collectible cards. In this domain, grading assesses the physical
-   condition of each item, but manual inspection is slow and subject
-   to the evaluator's subjectivity. These limitations motivate its
-   automation through computer vision. Defect annotation, however, is
-   expensive, and the bibliographic search carried out did not
-   identify public datasets of Pokémon TCG cards with localized
-   defects. In the experiments, the model started from a YOLOv8s with \textit{transfer learning} from
-   weights pre-trained on the public COCO image dataset. Four
-   configurations crossed the use or not of data augmentation with two
-   input representations: conventional RGB images and micro-relief
-   enhancement images. On top of the best-performing configuration,
-   the effect of an additional detection head for small objects (P2)
-   and of the input resolution was also evaluated. The dataset
-   comprised 206 cards, 412 images, and 4,808 annotations, part of
-   them suggested by models from a preliminary stage and validated by
-   the author.
-   Performance was measured by mAP@0.5, precision, recall and F1, in
-   five-fold cross-validation. F1 gives a single score per card, which
-   allowed the configurations to be compared card by card using a
-   paired Wilcoxon test with Holm correction. Data augmentation improved
-   the detector: Configuration 2, with RGB images and data augmentation,
-   achieved the best performance, with a per-card F1 of 0.376, against
-   0.332 for the same configuration without data augmentation.
-   Micro-relief enhancement was inferior to RGB when there was no data
-   augmentation. With data augmentation, this difference disappeared
-   when the evaluation disregarded the annotations suggested by these
-   models. The P2 head presented lower performance than the
-   winning configuration, with the same recall and lower precision.
-   This variant did not start from pre-trained weights in the detection
-   head or in part of the intermediate layers, so the isolated effect
-   of the P2 head could not be separated from the lack of pre-training.
-   In one evaluated fold (45 cards), increasing the input resolution
-   from 640 to 1280 pixels raised mAP@0.5 from 0.156 to 0.309 and the
-   per-card F1 from 0.266 to 0.399; the latter difference was confirmed
-   by the paired Wilcoxon test. A learning curve with a bootstrap confidence interval, over two folds,
-   showed that performance had not yet stabilized with the available
-   data volume. The evidence for data augmentation comes from five
-   folds, and that for input resolution from only one. Therefore, with
-   limited data, data augmentation improved the detector in both input
-   representations, and higher input resolution also improved it, but with more limited
-   evidence. Micro-relief enhancement brought no gain.
+   This work presents an experimental study of training strategies for
+   the YOLOv8 object detector to locate surface defects on Pokémon TCG
+   (\textit{Trading Card Game}) cards. In the grading of these cards,
+   that is, the assignment of a score to their state of preservation,
+   inspection is manual, slow and subject to the evaluator's
+   subjectivity. Automating it through computer vision faces two
+   difficulties: most defects are small relative to the image, and
+   little annotated data is available. The objective was to identify
+   which strategies improve the detection of these defects in
+   this scenario. The dataset comprised 206 cards, whose photographs were
+   provided by a grading company, with the defects
+   marked by bounding boxes. Starting from a pre-trained YOLOv8s, the four combinations of
+   using or not using data augmentation with two input representations
+   were compared: color (RGB) images and micro-relief enhancement
+   images, which combine the original luminance, the luminance with
+   amplified local contrast, and a measure that highlights elongated
+   structures, such as scratches. The combinations were evaluated in
+   five-fold cross-validation and compared statistically card by card.
+   On the best of them, an additional detection head for small objects
+   (P2) and the input resolution were also evaluated. Data augmentation
+   improved the detector in both representations: with RGB images, the
+   mAP@0.5 detection metric rose from 0.190 to 0.247. Micro-relief
+   enhancement did not outperform RGB images; since this representation
+   also removed color, the effect of enhancement was not isolated. The
+   P2 head brought no gain, not even for the smallest defects,
+   when both models used the same confidence threshold. In a
+   single fold, the 1280-pixel input resolution yielded almost twice the
+   mAP@0.5 obtained at 640 pixels. Even the best combination found about
+   29\% of the annotated defects (recall of 0.285), and the smallest
+   defects remained the most difficult. The results indicate that, with
+   limited data, data augmentation and, with still preliminary evidence,
+   input resolution mattered more than changes to the input
+   representation or to the detector architecture. The detector is not
+   yet sufficient for automatic grading, but it may come to support the
+   inspection carried out by the grader, which was not evaluated here,
+   and serve as a basis for work that expands the dataset and addresses
+   the smallest defects. The code and results are available in a public
+   repository.
 
    \vspace{\onelineskip}
 
@@ -523,7 +506,7 @@ sobre a imagem, inclusive para defeitos não registrados nesses laudos.
 A referência contra a qual o detector é medido é, portanto, o
 julgamento desse anotador apoiado nos laudos, e não o laudo em si; sem
 um segundo anotador, não foi possível medir a concordância entre
-avaliadores, e o desempenho que é possível medir fica limitado pela
+anotadores, e o desempenho que é possível medir fica limitado pela
 consistência dessa anotação. Parte das caixas delimitadoras, 892 de
 4.808 (18,6\%), foi sugerida por modelos de detecção treinados em uma
 etapa preliminar do trabalho e validada individualmente pelo autor, em
@@ -532,10 +515,13 @@ modelos usavam imagens coloridas convencionais (RGB), com aumento de
 dados, e nenhum deles havia sido treinado com a carta para a qual
 sugeriu caixas. Como esses modelos viam as imagens da mesma forma que as
 configurações que usam imagens RGB, as caixas sugeridas podem favorecer
-essas configurações na comparação com o realce de micro-relevo; por
-esse motivo, os resultados apresentados no
-Capítulo~\ref{cap:desenvolvimento} foram verificados também
-desconsiderando essas caixas sugeridas.
+essas configurações na comparação com o realce de micro-relevo. Pelo
+mesmo raciocínio, como esses modelos foram treinados com aumento de
+dados, as caixas sugeridas podem favorecer também as configurações com
+aumento de dados na comparação com as que não o usam. Por esse motivo,
+os resultados do estudo fatorial e da avaliação da cabeça P2,
+apresentados no Capítulo~\ref{cap:desenvolvimento}, foram verificados
+também desconsiderando essas caixas sugeridas.
 
 % ---------------------------------------------------------------
 \section{Objetivos e hipótese}
@@ -612,27 +598,34 @@ pareada por carta entre a Configuração 2 (RGB com aumento de dados) e a
 Configuração 1 (RGB sem aumento de dados), e entre a Configuração 4
 (realce com aumento de dados) e a Configuração 3 (realce sem aumento de
 dados). H2 foi testada pela comparação entre a Configuração 3 e a
-Configuração 1, e entre a Configuração 4 e a Configuração 2. H3 seria
-refutada se alguma das outras configurações superasse significativamente a Configuração 4, o que foi verificado pelas mesmas comparações da Configuração 4 com as Configurações 2 e 3, sem teste adicional; a regra completa de decisão das três hipóteses é apresentada no Capítulo~\ref{cap:desenvolvimento}. Todas essas comparações
+Configuração 1, e entre a Configuração 4 e a Configuração 2. H3 foi
+testada pelas mesmas comparações da Configuração 4 com as
+Configurações 2 e 3, sem teste adicional: seria confirmada se a
+Configuração 4 superasse significativamente as duas, refutada se alguma
+delas superasse significativamente a Configuração 4, e não confirmada
+nos demais casos; a regra completa de decisão das três hipóteses é apresentada no Capítulo~\ref{cap:desenvolvimento}. Todas essas comparações
 usaram o teste de Wilcoxon pareado bilateral, com nível de
 significância $\alpha = 0{,}05$, definido antes do treinamento das
 quatro configurações; a correção de Holm para o conjunto de comparações foi
 aplicada na análise dos resultados.
 
-Para H4, o critério, definido antes do treinamento da variante com a
+Para H4, o critério, definido antes do treinamento do modelo com a
 cabeça P2, foi a revocação dos defeitos cujo menor lado da caixa é
 menor que 8 pixels na resolução de 1280 pixels, somados todos os
 defeitos desse grupo, comparando a configuração de melhor desempenho
-com e sem a cabeça P2. Mesmo nessa resolução, parte dos defeitos
+com e sem a cabeça P2. Esse critério não fixou margem mínima de
+diferença, teste estatístico nem limiar de confiança comum aos dois
+modelos, isto é, um mesmo valor mínimo de confiança para que uma
+predição fosse contada. Mesmo nessa resolução, parte dos defeitos
 permanece abaixo do passo do nível P3 (Seção~\ref{sec:contextualizacao}),
 o que justificou testar a P2 nessa resolução. Já se sabia, antes desse
-treinamento, que a variante com a cabeça P2 não receberia pesos
+treinamento, que o modelo com a cabeça P2 não receberia pesos
 pré-treinados na cabeça de detecção nem em parte das camadas
 intermediárias; por isso, o teste de H4 não separa o efeito da cabeça
 P2 do efeito da falta de pré-treino.
 
-A resolução de entrada e a curva de aprendizado foram análises
-exploratórias, decididas depois dos resultados do estudo fatorial e sem
+A resolução de entrada, a comparação com um modelo maior, o YOLOv8m, e
+a curva de aprendizado foram análises decididas depois dos resultados do estudo fatorial e sem
 hipótese formulada previamente; seus resultados indicam direções a
 confirmar. A confirmação ou a refutação de cada hipótese é apresentada
 nos resultados e retomada na conclusão.
@@ -694,12 +687,12 @@ defeitos como apoio à inspeção visual \cite{Nahar2025}.
 % ===============================================================
 % CAPÍTULO 2 - REVISÃO BIBLIOGRÁFICA
 % ===============================================================
-\chapter{Revisão Bibliográfica / Trabalhos Relacionados}
+\chapter{Revisão Bibliográfica / Trabalhos Correlatos}
 \label{cap:revisao}
 
 Este capítulo apresenta a pesquisa bibliográfica que fundamenta o
 trabalho, os conceitos teóricos necessários para compreender os
-experimentos e os trabalhos relacionados. A
+experimentos e os trabalhos correlatos. A
 Seção~\ref{sec:metodologia_pesquisa_bib} descreve como a literatura foi
 buscada e selecionada. A Seção~\ref{sec:fundamentos} apresenta os
 fundamentos, do geral para o específico. Começa pela base: aprendizado
@@ -811,7 +804,7 @@ Tabela~\ref{tab:strings_busca} é mais específica que as demais.
     & GS, IEEE, SD, MDPI & 20 & 3 \\
 \midrule
 \textit{``small object detection'' AND ``input resolution'' OR ``image size''}
-    & GS, IEEE, SD, MDPI & 9 & 3 \\
+    & GS, IEEE, SD, MDPI & 11 & 4 \\
 \midrule
 \textit{``highly reflective'' surface defect detection YOLO}
     & MDPI & 9 & 1 \\
@@ -819,7 +812,7 @@ Tabela~\ref{tab:strings_busca} é mais específica que as demais.
 Fontes não acadêmicas (contextualização de mercado e documentação técnica)
     & Diversas & n/a & 3 \\
 \midrule
-\textbf{Total} & & \textbf{176} & \textbf{42} \\
+\textbf{Total} & & \textbf{178} & \textbf{43} \\
 \end{longtable}
 \endgroup
 \legend{GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.
@@ -1866,7 +1859,7 @@ avaliação, e não a variação que surgiria ao repetir o treinamento.
 \label{sec:trabalhos_correlatos}
 \label{sec:trabalhos_relacionados}
 
-Os trabalhos relacionados selecionados nesta seção foram escolhidos com base no critério de proximidade com o problema investigado, isto é, a detecção de defeitos visuais com apoio de visão computacional em cenários de dados limitados, com aplicação à graduação de cartas colecionáveis. Embora nem todos estejam inseridos no mesmo domínio, todos enfrentam desafios práticos ou metodológicos próximos aos deste trabalho, seja no contexto direto de cartas colecionáveis, seja na comparação de estratégias de treinamento para detectores baseados em YOLO. Para cada trabalho, são apresentados o problema tratado, o método, os resultados, as limitações e a diferença em relação a este trabalho.
+Os trabalhos correlatos selecionados nesta seção foram escolhidos com base no critério de proximidade com o problema investigado, isto é, a detecção de defeitos visuais com apoio de visão computacional em cenários de dados limitados, com aplicação à graduação de cartas colecionáveis. Embora nem todos estejam inseridos no mesmo domínio, todos enfrentam desafios práticos ou metodológicos próximos aos deste trabalho, seja no contexto direto de cartas colecionáveis, seja na comparação de estratégias de treinamento para detectores baseados em YOLO. Para cada trabalho, são apresentados o problema tratado, o método, os resultados, as limitações e a diferença em relação a este trabalho.
 
 \subsection{Trabalho 1: \textit{Automated corner grading of trading cards: Defect identification and confidence calibration through deep learning}}
 
@@ -1911,7 +1904,7 @@ A Tabela~\ref{tab:trabalhos_relacionados} sintetiza as diferenças entre os trab
 
 \begin{table}[htb]
     \centering
-    \caption{Comparação entre os trabalhos relacionados e este trabalho}
+    \caption{Comparação entre os trabalhos correlatos e este trabalho}
     \label{tab:trabalhos_relacionados}
     \scriptsize
     \begin{tabular}{p{2.0cm}|p{2.9cm}|p{3.0cm}|p{2.8cm}|p{3.0cm}}
@@ -2139,9 +2132,11 @@ Os modelos que sugeriram as caixas trabalhavam com imagens RGB. Por
 isso, as caixas sugeridas tendem a marcar defeitos que um detector com
 imagens RGB já encontra com facilidade. Isso pode favorecer as
 configurações que usam imagens RGB na comparação com as que usam
-realce de micro-relevo.
+realce de micro-relevo. Como esses modelos também foram treinados com
+aumento de dados, o mesmo pode valer para as configurações com aumento
+de dados.
 
-Para controlar esse risco, as métricas e as comparações pareadas do
+Para controlar esses riscos, as métricas e as comparações pareadas do
 estudo fatorial e da cabeça P2 foram calculadas duas vezes: com a
 anotação completa, de 4.808 caixas, e com a anotação sem as caixas
 sugeridas, de 3.916 caixas. Na segunda referência, foram ignoradas as
@@ -3552,14 +3547,193 @@ carta e o mAP@0,5 apontando em sentidos opostos.
 \chapter{Conclusão}
 \label{cap:conclusao}
 
+Este capítulo retoma a pergunta de pesquisa formulada na
+Seção~\ref{sec:formulacao}: com um conjunto reduzido de imagens
+anotadas, quais estratégias de treinamento aplicadas ao YOLOv8 melhoram
+a detecção de defeitos superficiais em cartas Pokémon TCG. A
+Seção~\ref{sec:retomada} responde a essa pergunta, com o atendimento
+dos objetivos e a decisão sobre as hipóteses; a
+Seção~\ref{sec:contribuicoes} apresenta as contribuições do trabalho; e
+a Seção~\ref{sec:limitacoes}, as limitações e os trabalhos futuros que
+delas decorrem.
+
 \section{Retomada do problema e dos objetivos}
-% A ESCREVER
+\label{sec:retomada}
+Este trabalho tratou da detecção de defeitos superficiais em cartas
+Pokémon TCG em um cenário com duas dificuldades: a maior parte dos
+defeitos é pequena em relação à imagem, e o conjunto de dados anotado é
+reduzido. O objetivo geral foi avaliar estratégias de treinamento
+aplicadas ao YOLOv8 nesse cenário, sobre um mesmo conjunto de dados e um
+mesmo protocolo de avaliação.
+
+Os objetivos específicos foram atendidos. A preparação dos dados
+resultou em um conjunto de 206 cartas com 4.808 anotações da classe
+única \textit{defeito} (Seção~\ref{subsec:dados}). As quatro
+configurações do estudo fatorial foram implementadas e comparadas pela
+precisão, pela revocação, pelo F1, pelo mAP@0,5 e pelo F1 por carta, e a
+Configuração 2 (RGB com aumento de dados) teve o melhor desempenho.
+Sobre ela, a avaliação da cabeça P2 mediu a revocação dos defeitos
+menores que 8 pixels, e a da resolução de entrada comparou 1280 e 640
+pixels pelo F1 por carta. A curva de aprendizado, obtida em duas dobras,
+verificou se o desempenho ainda crescia com o número de cartas. A
+análise conjunta desses resultados, na Seção~\ref{subsec:discussao},
+levou à decisão sobre as hipóteses, resumida a seguir.
+
+A Tabela~\ref{tab:sintese_hipoteses} resume a decisão sobre as
+hipóteses. H1 foi confirmada: o aumento de dados elevou o F1 por carta
+tanto com imagens RGB quanto com imagens de realce de micro-relevo, nas
+duas referências de anotação. H2 foi refutada: o realce de micro-relevo
+não superou as imagens RGB e, sem aumento de dados, teve desempenho
+inferior a elas nas duas referências. H3 não foi confirmada, porque a
+Configuração 4 superou a Configuração 3, mas não a Configuração 2. Com a
+anotação completa, a Configuração 2 superou a 4, e H3 chegou a ser
+refutada; como esse resultado dependeu das caixas sugeridas, adotou-se
+a conclusão válida com as duas referências de anotação. H4
+foi confirmada pelo critério, por uma diferença de três defeitos abaixo
+de 8 pixels, mas não se manteve com limiar comum: com o mesmo limiar de
+confiança, o modelo com a cabeça P2 não encontrou mais desses defeitos
+do que o modelo sem ela.
+
+Quanto à pergunta de pesquisa, a estratégia que melhorou a detecção,
+com avaliação nas cinco dobras, foi o aumento de dados. O realce de
+micro-relevo e a cabeça P2 não trouxeram ganho. A resolução de entrada
+de 1280 pixels superou a de 640 pixels em uma única dobra, o que indica
+uma direção a confirmar, e não uma conclusão. Na curva de aprendizado,
+o mAP@0,5 com todas as cartas do treino superou o obtido com metade
+delas nas duas dobras, e o intervalo de confiança dessa diferença não
+incluiu o zero em nenhuma delas (Tabela~\ref{tab:curva_diferencas}).
+Isso sugere que mais cartas tendem a melhorar o modelo. O último
+acréscimo, de 75\% para 100\% das cartas, só se distinguiu de zero na
+Dobra 5, cuja rodada com todas as cartas pode estar acima do seu
+desempenho típico. Quanto à capacidade, a comparação entre o YOLOv8m e o
+YOLOv8s foi inconclusiva.
+
+Os valores absolutos, porém, continuaram baixos. Com a anotação
+completa, a revocação agregada da Configuração 2 foi de 0,285, e a sua
+precisão, de 0,413 (Tabela~\ref{tab:desempenho_configuracoes}). Abaixo
+de 8 pixels, na resolução de 1280 pixels, nenhum dos modelos avaliados
+nas cinco dobras encontrou mais de 26 dos 517 defeitos dessa faixa
+(revocação de 0,050) com a anotação completa
+(Tabela~\ref{tab:revocacao_faixas}), e, nessa faixa, a revocação foi
+menor com aumento de dados. Os defeitos dessa faixa continuaram, assim,
+quase sem detecção, e o detector ainda não é suficiente para a
+graduação automática, embora possa vir a servir de apoio à inspeção
+feita pelo avaliador, uso que não foi avaliado neste trabalho.
 
 \section{Contribuições para a Computação}
-% A ESCREVER
+\label{sec:contribuicoes}
+As contribuições deste trabalho para a Computação são empíricas e
+metodológicas, e valem para o conjunto de dados e as condições de
+treinamento descritos.
+
+A primeira é a avaliação de estratégias de treinamento por um estudo
+fatorial na detecção de defeitos em cartas colecionáveis, tarefa com
+carência de estudos sistemáticos e com poucos dados. As configurações
+foram comparadas carta a carta, com o teste de Wilcoxon pareado e a
+correção de Holm, e as conclusões do estudo fatorial e da cabeça P2
+foram verificadas com as duas referências de anotação.
+
+A segunda é a evidência de que o realce de micro-relevo, usado como
+representação de entrada de um detector pré-treinado, não superou as
+imagens RGB e, sem aumento de dados, piorou o desempenho. Esse resultado negativo vale para
+a representação definida aqui, que também retirou a cor das imagens.
+
+A terceira é a evidência, obtida nas cinco dobras, de que a cabeça P2,
+acrescentada sem pré-treino em parte da rede, não trouxe ganho: com
+ela, o F1 por carta foi menor, e a revocação dos defeitos menores que 8
+pixels não aumentou quando os dois modelos usaram o mesmo limiar de
+confiança. Para a resolução de entrada, o trabalho deixa apenas um
+indício, obtido em uma única dobra, de que 1280 pixels superam 640
+pixels, direção a confirmar nas demais dobras.
+
+A quarta é a disponibilização do código e dos resultados em repositório
+público (Apêndice~\ref{ap:repositorio}), com os scripts de preparação
+dos dados, de treinamento, de avaliação e de análise estatística, e as
+saídas de onde vêm os números da Seção~\ref{sec:resultados}. As
+fotografias e as anotações não fazem parte do repositório, porque as
+fotografias foram cedidas pela empresa apenas para este trabalho.
 
 \section{Limitações e trabalhos futuros}
-% A ESCREVER
+\label{sec:limitacoes}
+Os resultados deste trabalho devem ser lidos com as limitações a seguir.
+Quanto aos dados e à anotação, todas as caixas foram traçadas ou
+validadas por um único anotador, e a concordância entre anotadores não
+foi medida; o desempenho medido fica limitado pela consistência dessa
+anotação. Os modelos foram treinados com a anotação completa, que inclui
+as caixas sugeridas, e o controle com as duas referências alcança apenas
+a avaliação; uma eventual influência dessas caixas sobre o treinamento
+não foi medida. O desgaste difuso não recebeu caixa, e as predições sobre ele
+foram contadas como erro.
+
+Quanto ao desenho experimental, cada configuração foi treinada uma única
+vez em cada dobra, e o teste de Wilcoxon tratou esses modelos como
+fixos; a variação entre treinamentos repetidos não foi medida, e as
+conclusões valem para os modelos treinados. A comparação entre as
+imagens RGB e as de realce de micro-relevo não isolou o realce: as
+imagens de realce também perderam a cor, e as variações no espaço HSV só
+foram aplicadas às imagens RGB. Uma diferença entre as duas
+representações pode, assim, decorrer tanto do realce quanto dessas
+diferenças. A variante de realce foi escolhida em uma única dobra, a Dobra 1, e o resultado de H2 vale para ela. O teste de H4 não separou o
+efeito da cabeça P2 do efeito da falta de pré-treino em parte da rede.
+Além disso, o critério de H4 não fixou margem mínima de diferença,
+teste estatístico nem limiar de confiança comum aos dois modelos; foi
+isso que permitiu confirmá-la por uma diferença de três defeitos, que
+não se manteve com limiar comum.
+
+Quanto à medição, a parada antecipada usou o mAP@0,5:0,95 na validação
+interna, que inclui limiares de IoU mais altos que o de 0,5 usado
+nas hipóteses; a época mantida pode não ter sido a melhor
+para o F1 por carta. O critério foi o mesmo em todas as
+configurações, e seu efeito não foi medido. A análise dos erros tratou
+apenas dos defeitos não encontrados, e os falsos positivos não foram
+caracterizados.
+
+Quanto ao alcance, a resolução de entrada e a capacidade do modelo foram
+comparadas em uma única dobra, a Dobra 5, cuja rodada de referência pode
+estar acima do seu desempenho típico. A curva de aprendizado foi obtida
+em duas dobras, com um critério de leitura definido depois dos
+resultados, e o seu ponto com todas as cartas, na Dobra 5, é essa mesma
+rodada. A única dobra em que o último acréscimo de cartas se distinguiu
+de zero é, portanto, a que pode estar acima do típico. Por fim, os
+resultados valem para um único detector, o YOLOv8, e para imagens
+fornecidas por uma única empresa de graduação.
+
+Os trabalhos futuros decorrem dessas limitações e dos resultados. Para
+os defeitos pequenos, pode-se avaliar a inferência e o ajuste fino por
+recortes sobrepostos da imagem, propostos por \citeonline{Akyon2022}
+para objetos pequenos e avaliados em imagens aéreas, de drone e de
+satélite: cada recorte dá aos objetos
+pequenos uma área relativa maior, sem mudar a arquitetura do detector. A
+cabeça P2 pode ser testada partindo de pesos pré-treinados também nas
+camadas que aqui começaram com valores aleatórios, o que separaria o seu
+efeito do da falta de pré-treino, ou com um módulo de atenção ao
+contexto global, como o usado por \citeonline{Xia2023} para tratar o
+ruído de fundo do nível P2.
+
+Para o realce de micro-relevo, uma representação de controle, com a
+luminosidade sem realce repetida nos três canais, separaria o efeito do
+realce do efeito da retirada da cor. Como a curva de aprendizado sugere
+ganho com mais cartas, ampliar o conjunto de dados e obter a curva nas
+demais dobras são passos diretos. O aumento de dados por cópia e cola seletiva
+de pequenos objetos, usado por \citeonline{Chen2024NHD}, poderia ampliar os
+exemplos de defeitos sem novas cartas.
+
+A repetição de cada configuração com várias sementes aleatórias mediria
+a variação entre treinamentos. Uma segunda anotação, feita por outro
+anotador sem acesso às caixas existentes, mediria a concordância entre
+anotadores. Por fim, uma captura com controle de reflexo permitiria
+verificar se o reflexo da superfície holográfica explica a revocação
+menor na frente das cartas.
+
+Em síntese, com 206 cartas, o aumento de dados foi a única estratégia
+que melhorou o YOLOv8 com avaliação nas cinco dobras, enquanto o realce
+de micro-relevo, tal como definido aqui, e a cabeça P2 não trouxeram
+ganho. A resolução de entrada e o número de cartas apontaram ganho, mas
+em análises que ainda precisam ser confirmadas. Os defeitos menores que
+8 pixels, na resolução de 1280 pixels, continuaram quase sem detecção,
+e o detector ainda não é suficiente para a graduação automática, embora
+possa vir a servir de apoio à inspeção. Esses resultados valem para o
+conjunto de dados e as condições de treinamento descritos.
 
 % ---------------------------------------------------------------
 % ELEMENTOS PÓS-TEXTUAIS
