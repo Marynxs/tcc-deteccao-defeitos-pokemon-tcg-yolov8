@@ -28,5 +28,6 @@ $PY src/treino/train_fold.py --config 2 --fold 4 --pool pool_206_rev --cache ram
     --model yolov8m.pt --name "$nome" $extra
 
 echo "== $(date '+%F %T') noite: concluida; backup"
-bash src/ferramentas/backup_drive.sh
+# backup opcional: o script nao e versionado, e a falha nao interrompe a noite
+[ -f src/ferramentas/backup_drive.sh ] && { bash src/ferramentas/backup_drive.sh || echo "== $(date '+%F %T') noite: backup falhou, seguindo mesmo assim"; }
 echo "== $(date '+%F %T') FIM DA NOITE"

@@ -22,6 +22,8 @@ ABA = "Mapeamento"
 ENTRADA = Path("grading_reports_photos")
 SAIDA = Path("Dataset_YOLO/upload_roboflow")
 SAIDA_FORA = SAIDA / "_fora_do_escopo"
+# Opcional: registro local dos links quebrados, nao versionado. Sem ele,
+# links_quebrados() devolve vazio e nenhuma carta e marcada por link.
 LINKS = Path("docs/links_registro.json")
 
 BASE_URL = "https://sites.google.com/view/gradingcapy/"

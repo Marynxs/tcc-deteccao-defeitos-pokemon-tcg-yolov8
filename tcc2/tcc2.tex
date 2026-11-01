@@ -153,18 +153,21 @@ validação cruzada com cinco dobras e comparadas estatisticamente carta
 a carta. Sobre a melhor delas, avaliaram-se também uma cabeça de
 detecção adicional para objetos pequenos (P2) e a resolução de entrada.
 O aumento de dados melhorou o detector nas duas representações: com
-imagens RGB, a métrica de detecção mAP@0,5 passou de 0,190 para 0,247. O
+imagens RGB, o F1 médio por carta, que combina precisão e revocação,
+passou de 0,332 para 0,376. O
 realce de micro-relevo não superou as imagens RGB; como essa
 representação também retirou a cor, o efeito do realce não foi isolado.
 A cabeça P2 não trouxe ganho, nem mesmo nos defeitos
 menores, quando os dois modelos usaram o mesmo limiar de confiança. Em uma
-única dobra, a resolução de entrada de 1280 pixels rendeu quase o dobro
-do mAP@0,5 obtido a 640 pixels. Mesmo a melhor combinação encontrou
+única dobra, a resolução de entrada de 1280 pixels rendeu um F1 médio
+por carta cerca de 50\% maior que o obtido a 640 pixels. A melhor
+combinação encontrou
 cerca de 29\% dos defeitos anotados (revocação de 0,285), e os defeitos
-menores continuaram os mais difíceis. Os resultados indicam que, com
+menores continuaram os mais difíceis; neles, o aumento de dados reduziu
+a revocação. Os resultados indicam que, com
 poucos dados, o aumento de dados e, com evidência ainda preliminar, a
-resolução de entrada pesaram mais do que mudanças na representação de
-entrada ou na arquitetura do detector. O detector ainda não é suficiente
+resolução de entrada pesaram mais do que o realce de micro-relevo adotado ou o acréscimo da
+cabeça P2. O detector ainda não é suficiente
 para a graduação automática, mas pode vir a servir de apoio à inspeção
 feita pelo avaliador, o que não foi avaliado aqui, e de base para
 trabalhos que ampliem o conjunto de dados e tratem os defeitos menores.
@@ -184,9 +187,9 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
  \begin{otherlanguage*}{english}
    This work presents an experimental study of training strategies for
    the YOLOv8 object detector to locate surface defects on Pokémon TCG
-   (\textit{Trading Card Game}) cards. In the grading of these cards,
-   that is, the assignment of a score to their state of preservation,
-   inspection is manual, slow and subject to the evaluator's
+   (Trading Card Game) cards. In the grading of these cards,
+   that is, the assignment of a score to their condition,
+   inspection is manual, slow and subject to the grader's
    subjectivity. Automating it through computer vision faces two
    difficulties: most defects are small relative to the image, and
    little annotated data is available. The objective was to identify
@@ -203,18 +206,21 @@ Pokémon TCG. Conjuntos de Dados Reduzidos. YOLOv8. Realce de Micro-Relevo.
    On the best of them, an additional detection head for small objects
    (P2) and the input resolution were also evaluated. Data augmentation
    improved the detector in both representations: with RGB images, the
-   mAP@0.5 detection metric rose from 0.190 to 0.247. Micro-relief
+   mean per-card F1, which combines precision and recall, rose from
+   0.332 to 0.376. Micro-relief
    enhancement did not outperform RGB images; since this representation
    also removed color, the effect of enhancement was not isolated. The
    P2 head brought no gain, not even for the smallest defects,
    when both models used the same confidence threshold. In a
-   single fold, the 1280-pixel input resolution yielded almost twice the
-   mAP@0.5 obtained at 640 pixels. Even the best combination found about
+   single fold, the 1280-pixel input resolution yielded a mean per-card F1
+   about 50\% higher than that obtained at 640 pixels. The best
+   combination found about
    29\% of the annotated defects (recall of 0.285), and the smallest
-   defects remained the most difficult. The results indicate that, with
+   defects remained the most difficult; for them, data augmentation
+   reduced recall. The results indicate that, with
    limited data, data augmentation and, with still preliminary evidence,
-   input resolution mattered more than changes to the input
-   representation or to the detector architecture. The detector is not
+   input resolution mattered more than the adopted micro-relief enhancement or the
+   addition of the P2 head. The detector is not
    yet sufficient for automatic grading, but it may come to support the
    inspection carried out by the grader, which was not evaluated here,
    and serve as a basis for work that expands the dataset and addresses
@@ -3595,7 +3601,8 @@ confiança, o modelo com a cabeça P2 não encontrou mais desses defeitos
 do que o modelo sem ela.
 
 Quanto à pergunta de pesquisa, a estratégia que melhorou a detecção,
-com avaliação nas cinco dobras, foi o aumento de dados. O realce de
+com avaliação nas cinco dobras, foi o aumento de dados, exceto na faixa
+abaixo de 8 pixels, em que reduziu a revocação. O realce de
 micro-relevo e a cabeça P2 não trouxeram ganho. A resolução de entrada
 de 1280 pixels superou a de 640 pixels em uma única dobra, o que indica
 uma direção a confirmar, e não uma conclusão. Na curva de aprendizado,
@@ -3631,7 +3638,7 @@ fatorial na detecção de defeitos em cartas colecionáveis, tarefa com
 carência de estudos sistemáticos e com poucos dados. As configurações
 foram comparadas carta a carta, com o teste de Wilcoxon pareado e a
 correção de Holm, e as conclusões do estudo fatorial e da cabeça P2
-foram verificadas com as duas referências de anotação.
+foram conferidas com as duas referências de anotação.
 
 A segunda é a evidência de que o realce de micro-relevo, usado como
 representação de entrada de um detector pré-treinado, não superou as
@@ -3703,7 +3710,10 @@ os defeitos pequenos, pode-se avaliar a inferência e o ajuste fino por
 recortes sobrepostos da imagem, propostos por \citeonline{Akyon2022}
 para objetos pequenos e avaliados em imagens aéreas, de drone e de
 satélite: cada recorte dá aos objetos
-pequenos uma área relativa maior, sem mudar a arquitetura do detector. A
+pequenos uma área relativa maior, sem mudar a arquitetura do detector.
+Como as fotografias deste trabalho têm resolução pouco acima da de
+entrada, de 1280 pixels, o ganho de detalhe por recorte seria limitado
+sem uma captura com resolução maior. A
 cabeça P2 pode ser testada partindo de pesos pré-treinados também nas
 camadas que aqui começaram com valores aleatórios, o que separaria o seu
 efeito do da falta de pré-treino, ou com um módulo de atenção ao
@@ -3716,7 +3726,10 @@ realce do efeito da retirada da cor. Como a curva de aprendizado sugere
 ganho com mais cartas, ampliar o conjunto de dados e obter a curva nas
 demais dobras são passos diretos. O aumento de dados por cópia e cola seletiva
 de pequenos objetos, usado por \citeonline{Chen2024NHD}, poderia ampliar os
-exemplos de defeitos sem novas cartas.
+exemplos de defeitos sem novas cartas. Uma ablação das transformações
+do aumento de dados, a começar pela rotação, separaria a contribuição
+de cada uma e verificaria se a rotação explica a revocação menor
+abaixo de 8 pixels.
 
 A repetição de cada configuração com várias sementes aleatórias mediria
 a variação entre treinamentos. Uma segunda anotação, feita por outro
@@ -3726,7 +3739,8 @@ verificar se o reflexo da superfície holográfica explica a revocação
 menor na frente das cartas.
 
 Em síntese, com 206 cartas, o aumento de dados foi a única estratégia
-que melhorou o YOLOv8 com avaliação nas cinco dobras, enquanto o realce
+que melhorou o YOLOv8 com avaliação nas cinco dobras, exceto nos defeitos menores que 8 pixels, em que
+reduziu a revocação, enquanto o realce
 de micro-relevo, tal como definido aqui, e a cabeça P2 não trouxeram
 ganho. A resolução de entrada e o número de cartas apontaram ganho, mas
 em análises que ainda precisam ser confirmadas. Os defeitos menores que
