@@ -1,5 +1,5 @@
 {
-  "Acertos (TP)": [
+  "Acertos": [
     {
       "imagem": "carta_070_verso_png.rf.HVxiAs3R4N3L9NJaTWsc",
       "valor": 29.967,
@@ -41,7 +41,7 @@
       ]
     }
   ],
-  "Detecções sem anotação (FP)": [
+  "Detecções sem anotação": [
     {
       "imagem": "carta_073_verso_png.rf.PnB5cL8RvVWsMpBJ00oM",
       "valor": 0.646,
@@ -83,7 +83,7 @@
       ]
     }
   ],
-  "Defeitos grandes perdidos (FN > 20 px)": [
+  "Defeitos grandes não encontrados": [
     {
       "imagem": "carta_072_verso_png.rf.Rj1oaxypBrpIKtc4Wxrj",
       "valor": 310.007,
