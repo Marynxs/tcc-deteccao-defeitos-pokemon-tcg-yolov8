@@ -127,3 +127,29 @@ linhas.append('limiares por dobra (sem P2, com P2): ' + '; '.join(f'Dobra {k + 1
 txt = '\n'.join(linhas)
 print(txt)
 (SAIDA / 'saida_h4_limiar_comum.txt').write_text(txt + '\n')
+
+# Mesmo teste por carta da P2 (Wilcoxon na faixa < 8 px) para o aumento de dados: configs. 1 x 2 e 3 x 4,
+# com o limiar de cada rodada e com limiar comum. A P2 recebeu esse teste; o aumento de dados nao tinha.
+def por_carta(rot_a, rot_b, so_humano, base_a=None, base_b=None):
+    a = rodada(rot_a, so_humano, base_a)[1]
+    b = rodada(rot_b, so_humano, base_b)[1]
+    cs = sorted(c for c in a if a[c][1] > 0)
+    ra = np.array([a[c][0] / a[c][1] for c in cs]); rb = np.array([b[c][0] / b[c][1] for c in cs]); d = rb - ra
+    p = wilcoxon(rb, ra).pvalue if (d != 0).any() else 1.0
+    return (f'n={len(cs)} recall medio por carta {rot_a} {ra.mean():.3f} {rot_b} {rb.mean():.3f}; '
+            f'{rot_b} melhor/pior/empate {(d > 0).sum()}/{(d < 0).sum()}/{(d == 0).sum()}; Wilcoxon p = {p:.3g}')
+
+
+linhas = []
+for so_humano, nome_ref in ((False, 'anotacao completa'), (True, 'anotacao sem as caixas sugeridas')):
+    linhas.append(f'== {nome_ref} ==')
+    for x, y in (('cfg1_1280', 'cfg2_1280'), ('cfg3_1280', 'cfg4_1280')):
+        linhas.append(f'  {x} x {y}, limiar de cada rodada: ' + por_carta(x, y, so_humano))
+        for base in (x, y):
+            linhas.append(f'  {x} x {y}, limiar de {base}: ' + por_carta(x, y, so_humano, base, base))
+            for r in (x, y):
+                a, b = rodada(r, so_humano, base)[0]['<8 px']
+                linhas.append(f'    contagem < 8 px, {r} com limiar de {base}: {a}/{b} = {a / max(b, 1):.3f}')
+txt = '\n'.join(linhas)
+print(txt)
+(SAIDA / 'saida_h4_aumento_por_carta.txt').write_text(txt + '\n')

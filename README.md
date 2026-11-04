@@ -23,7 +23,7 @@ O desenho central é um estudo fatorial 2x2, que cruza dois fatores:
 | **Com aumento de dados** | Configuração 2 | Configuração 4 |
 
 Sobre a configuração de melhor desempenho (Configuração 2), uma ablação avalia um componente por vez:
-a cabeça de detecção adicional P2 e a resolução de entrada (640 contra 1280
+a cabeça P2 e a resolução de entrada (640 contra 1280
 pixels). Completam o estudo uma curva de aprendizado e um teste de capacidade
 (yolov8m). A avaliação usa validação cruzada estratificada em cinco dobras, fixas
 entre as configurações, e comparação por teste de Wilcoxon pareado com a carta
@@ -31,7 +31,7 @@ como unidade de análise (206 pares), com correção de Holm.
 
 ## Conjunto de dados
 
-206 cartas fornecidas por empresa brasileira especializada em graduação,
+Fotografias de 206 cartas, cedidas por empresa brasileira especializada em graduação,
 totalizando 412 imagens (frente e verso) e 4.808 instâncias anotadas em classe
 única, `defeito`, pelo autor, com apoio nos laudos de graduação. Parte das caixas
 (892) foi sugerida por modelos treinados nos testes preliminares e validada uma
@@ -128,7 +128,8 @@ Os detalhes estão na Seção 3.4 e no Capítulo 4 da monografia.
 
 - O aumento de dados melhorou o detector nas duas representações: com imagens
   RGB, o F1 médio por carta passou de 0,332 para 0,376 (Configurações 1 e 2).
-  Abaixo de 8 pixels, porém, a revocação foi menor com aumento de dados.
+  Abaixo de 8 pixels, a revocação foi menor com aumento de dados nas duas
+  representações, em análise exploratória, feita depois dos resultados.
 - O realce de micro-relevo não superou as imagens RGB. Como a representação
   também retira a cor, o efeito do realce não foi isolado.
 - A cabeça P2 não trouxe ganho: o F1 por carta foi menor, e a diferença na
@@ -156,7 +157,7 @@ dobras vão de 0 a 4; no texto, de 1 a 5 (dobra 0 = Dobra 1, dobra 4 = Dobra 5).
 | `src/analise/resolution_wilcoxon.py` | 1280 × 640 e yolov8s × yolov8m, por carta, na dobra 4 (Dobra 5 no texto) |
 | `src/analise/learning_curve_bootstrap*.py` | Intervalos de confiança da curva de aprendizado (bootstrap por carta, 2.000 repetições) |
 | `src/analise/h4_small_recall.py` | Revocação dos defeitos menores que 8 px, com e sem a cabeça P2 |
-| `src/analise/h4_small_recall_human_only.py` | Revocação por faixa de tamanho das quatro configurações e da P2, nas duas referências de anotação, e o controle com limiar comum (P2 e aumento de dados): `saida_h4_dois_gabaritos.txt`, `saida_h4_limiar_comum.txt` |
+| `src/analise/h4_small_recall_human_only.py` | Revocação por faixa de tamanho das quatro configurações e da P2, nas duas referências de anotação, e o controle com limiar comum (P2 e aumento de dados) e o Wilcoxon por carta abaixo de 8 px do aumento de dados: `saida_h4_dois_gabaritos.txt`, `saida_h4_limiar_comum.txt`, `saida_h4_aumento_por_carta.txt` |
 | `src/analise/recall_by_face.py` | Revocação da Configuração 2 por face da carta (frente e verso): `saida_recall_por_face.txt` |
 | `src/analise/error_summary.py` | Cartas com ao menos um defeito encontrado e métricas sem as cartas de desgaste difuso: `saida_resumo_erros.txt` |
 | `src/analise/box_origin.py` | Origem de cada caixa da anotação (original, sugerida ou manual), usada para a referência sem as caixas sugeridas: `origem_caixas.json`, `saida_box_origin.txt` |

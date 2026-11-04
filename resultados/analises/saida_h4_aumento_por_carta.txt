@@ -1,0 +1,30 @@
+== anotacao completa ==
+  cfg1_1280 x cfg2_1280, limiar de cada rodada: n=127 recall medio por carta cfg1_1280 0.054 cfg2_1280 0.021; cfg2_1280 melhor/pior/empate 3/14/110; Wilcoxon p = 0.00978
+  cfg1_1280 x cfg2_1280, limiar de cfg1_1280: n=127 recall medio por carta cfg1_1280 0.054 cfg2_1280 0.024; cfg2_1280 melhor/pior/empate 6/14/107; Wilcoxon p = 0.0274
+    contagem < 8 px, cfg1_1280 com limiar de cfg1_1280: 26/517 = 0.050
+    contagem < 8 px, cfg2_1280 com limiar de cfg1_1280: 17/517 = 0.033
+  cfg1_1280 x cfg2_1280, limiar de cfg2_1280: n=127 recall medio por carta cfg1_1280 0.049 cfg2_1280 0.021; cfg2_1280 melhor/pior/empate 4/12/111; Wilcoxon p = 0.0339
+    contagem < 8 px, cfg1_1280 com limiar de cfg2_1280: 22/517 = 0.043
+    contagem < 8 px, cfg2_1280 com limiar de cfg2_1280: 14/517 = 0.027
+  cfg3_1280 x cfg4_1280, limiar de cada rodada: n=127 recall medio por carta cfg3_1280 0.049 cfg4_1280 0.031; cfg4_1280 melhor/pior/empate 10/17/100; Wilcoxon p = 0.118
+  cfg3_1280 x cfg4_1280, limiar de cfg3_1280: n=127 recall medio por carta cfg3_1280 0.049 cfg4_1280 0.049; cfg4_1280 melhor/pior/empate 13/15/99; Wilcoxon p = 0.741
+    contagem < 8 px, cfg3_1280 com limiar de cfg3_1280: 26/517 = 0.050
+    contagem < 8 px, cfg4_1280 com limiar de cfg3_1280: 21/517 = 0.041
+  cfg3_1280 x cfg4_1280, limiar de cfg4_1280: n=127 recall medio por carta cfg3_1280 0.042 cfg4_1280 0.031; cfg4_1280 melhor/pior/empate 10/13/104; Wilcoxon p = 0.3
+    contagem < 8 px, cfg3_1280 com limiar de cfg4_1280: 22/517 = 0.043
+    contagem < 8 px, cfg4_1280 com limiar de cfg4_1280: 15/517 = 0.029
+== anotacao sem as caixas sugeridas ==
+  cfg1_1280 x cfg2_1280, limiar de cada rodada: n=126 recall medio por carta cfg1_1280 0.054 cfg2_1280 0.021; cfg2_1280 melhor/pior/empate 3/14/109; Wilcoxon p = 0.00978
+  cfg1_1280 x cfg2_1280, limiar de cfg1_1280: n=126 recall medio por carta cfg1_1280 0.054 cfg2_1280 0.024; cfg2_1280 melhor/pior/empate 6/14/106; Wilcoxon p = 0.0274
+    contagem < 8 px, cfg1_1280 com limiar de cfg1_1280: 26/513 = 0.051
+    contagem < 8 px, cfg2_1280 com limiar de cfg1_1280: 17/513 = 0.033
+  cfg1_1280 x cfg2_1280, limiar de cfg2_1280: n=126 recall medio por carta cfg1_1280 0.049 cfg2_1280 0.021; cfg2_1280 melhor/pior/empate 4/12/110; Wilcoxon p = 0.0339
+    contagem < 8 px, cfg1_1280 com limiar de cfg2_1280: 22/513 = 0.043
+    contagem < 8 px, cfg2_1280 com limiar de cfg2_1280: 14/513 = 0.027
+  cfg3_1280 x cfg4_1280, limiar de cada rodada: n=126 recall medio por carta cfg3_1280 0.050 cfg4_1280 0.031; cfg4_1280 melhor/pior/empate 10/17/99; Wilcoxon p = 0.118
+  cfg3_1280 x cfg4_1280, limiar de cfg3_1280: n=126 recall medio por carta cfg3_1280 0.050 cfg4_1280 0.049; cfg4_1280 melhor/pior/empate 13/15/98; Wilcoxon p = 0.741
+    contagem < 8 px, cfg3_1280 com limiar de cfg3_1280: 26/513 = 0.051
+    contagem < 8 px, cfg4_1280 com limiar de cfg3_1280: 21/513 = 0.041
+  cfg3_1280 x cfg4_1280, limiar de cfg4_1280: n=126 recall medio por carta cfg3_1280 0.043 cfg4_1280 0.031; cfg4_1280 melhor/pior/empate 10/13/103; Wilcoxon p = 0.3
+    contagem < 8 px, cfg3_1280 com limiar de cfg4_1280: 22/513 = 0.043
+    contagem < 8 px, cfg4_1280 com limiar de cfg4_1280: 15/513 = 0.029
