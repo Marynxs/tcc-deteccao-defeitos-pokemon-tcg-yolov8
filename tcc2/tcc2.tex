@@ -923,7 +923,7 @@ na identificação de defeitos visuais em cartas TCG.
 
 A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: a cada etapa, os mapas ficam menores e resumem regiões maiores da imagem. Cada pilha reúne alguns dos vários mapas gerados na etapa.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1 a P5 identificam os níveis descritos na Seção~\ref{subsec:yolo}.}
     \label{fig:cnn}
@@ -978,13 +978,13 @@ em relação às bordas, é uma propriedade geométrica da carta inteira e
 não se localiza por caixa delimitadora; por isso, fica fora do escopo
 da detecção neste trabalho.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Critérios de avaliação no processo de graduação de 
     cartas TCG: cantos, bordas, superfície e centralização, 
     ilustrados sobre carta do conjunto de dados.}
     \label{fig:criterios_graduacao}
-    \includegraphics[width=0.78\textwidth]{assets/criterios_1.png}
+    \includegraphics[width=\textwidth]{assets/criterios_1.png}
 
     
     \legend{Fonte: Elaborado pelo autor (2026).}
@@ -1020,7 +1020,7 @@ incluem:
 
 A Figura~\ref{fig:tipos_defeito} mostra exemplos de defeitos do conjunto de dados deste trabalho.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Exemplos de defeitos anotados no conjunto de dados: \textit{whitening} de canto, risco e mancha. O quadro azul é a caixa anotada.}
     \label{fig:tipos_defeito}
@@ -1230,7 +1230,7 @@ passo vale 2 pixels no nível P1, 4 no P2, 8 no P3, 16 no P4 e 32 no P5
 resumida por cada ponto e menor o detalhe espacial que o mapa preserva.
 A Figura~\ref{fig:niveis_p} mostra os blocos dos níveis P2 a P5 sobre
 um defeito do conjunto de dados deste trabalho, na resolução de entrada
-de 1280 pixels: o menor lado do defeito, de 7,5 pixels, é menor que o
+de 1280 pixels: o menor lado do defeito, de 7,7 pixels, é menor que o
 lado de um bloco do nível P3. O \textit{neck} mistura a informação desses
 níveis nos dois sentidos. No caminho de cima para baixo, de desenho
 inspirado na rede de pirâmide de características (FPN, do inglês
@@ -1248,7 +1248,7 @@ a arquitetura com a cabeça P2, que acrescenta uma saída e passa a produzir
 predições também a partir do nível P2, de passo 4; ela é
 descrita na Seção~\ref{subsec:objetos_pequenos}.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Blocos resumidos por um ponto nos níveis P2 a P5, sobre um
     defeito do conjunto de dados, na imagem de entrada de 1280 pixels.}
@@ -1259,7 +1259,7 @@ descrita na Seção~\ref{subsec:objetos_pequenos}.
 
 A Figura~\ref{fig:mapas_niveis} mostra os mapas de cada nível em uma carta: em P1, os detalhes da carta ainda são legíveis; em P5, restam regiões amplas, e cada ponto resume um bloco de 32 pixels, muito maior que um defeito pequeno.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Média dos mapas gerados em cada nível, de P1 a P5, pelo modelo treinado neste trabalho em uma carta que não participou do treinamento desse modelo. Exemplo ilustrativo.}
     \label{fig:mapas_niveis}
@@ -1653,7 +1653,7 @@ imagens a 640 pixels e 4 a 1280), o que limita a comparação direta.
 Neste trabalho, a cabeça P2 foi avaliada na resolução de 1280 pixels,
 condição que os autores não mediram.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{O mesmo defeito na imagem de entrada de 640 e de 1280 pixels,
     com a grade de 8 pixels do nível P3 sobre a mesma região da carta.}
@@ -1675,9 +1675,9 @@ pixels, parte dos defeitos pequenos pode não atingir o limiar de IoU mesmo
 com uma predição bem localizada, o que limita o desempenho mensurável
 nesses defeitos independentemente da capacidade do detector de percebê-los.
 
-A Figura~\ref{fig:iou_defeitos} reproduz esse efeito em defeitos do conjunto de dados: o mesmo deslocamento de 2 pixels em cada eixo leva o IoU a 0,42 em um defeito de menor lado de 7,5 pixels, na resolução de 1280 pixels, e a 0,76 em outro, de 25,7 pixels.
+A Figura~\ref{fig:iou_defeitos} reproduz esse efeito em defeitos do conjunto de dados: o mesmo deslocamento de 2 pixels em cada eixo leva o IoU a 0,42 em um defeito de menor lado de 7,7 pixels, na resolução de 1280 pixels, e a 0,76 em outro, de 25,1 pixels.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Efeito de um deslocamento de 2 pixels em cada eixo sobre o IoU, em dois defeitos do conjunto de dados. A predição é hipotética.}
     \label{fig:iou_defeitos}
@@ -2067,7 +2067,7 @@ O trabalho seguiu as etapas abaixo, na ordem em que foram executadas:
 
 A Figura~\ref{fig:fluxo} resume as etapas do trabalho.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Etapas do trabalho, da fotografia à avaliação, em uma carta do conjunto de dados.}
     \label{fig:fluxo}
@@ -2248,11 +2248,11 @@ textura. Em seguida, determina os limites da carta pela contagem dessas
 marcações ao longo das linhas e das colunas da imagem e confere o
 resultado pela proporção física da carta, de 63 por 88 milímetros. A Figura~\ref{fig:recorte} mostra uma fotografia e a carta recortada.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Recorte automático da carta: fotografia com a caixa detectada e resultado.}
     \label{fig:recorte}
-    \includegraphics[width=0.6\textwidth]{assets/figuras/206/figE4_recorte.png}
+    \includegraphics[width=0.9\textwidth]{assets/figuras/206/figE4_recorte.png}
     \legend{Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -2370,7 +2370,7 @@ avaliação de cada rodada não participou da parada antecipada nem da
 escolha do limiar dessa rodada; a ressalva sobre a escolha da variante
 de realce é apresentada na Seção~\ref{subsec:estrategias}.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Esquema da validação cruzada estratificada em cinco dobras
     aplicada às 206 cartas. Em cada iteração, uma dobra é reservada para
@@ -2977,7 +2977,7 @@ decorrer tanto do realce quanto da retirada da cor.
 A Figura~\ref{fig:rgb_fotometrica} mostra uma carta do conjunto de
 dados em RGB e na composição de três canais adotada.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Carta do conjunto de dados em RGB e na variante de realce de micro-relevo adotada nas Configurações 3 e 4}
     \label{fig:rgb_fotometrica}
@@ -3065,7 +3065,7 @@ Seção~\ref{sec:trabalhos_correlatos} (Seção~\ref{subsec:discussao}).
 
 A Figura~\ref{fig:desenho_resultados} antecipa o percurso desta seção: com a anotação completa, a Configuração 2 teve o maior mAP@0,5 médio, critério de escolha, e também o maior F1 por carta entre as quatro, e os demais estudos partiram dela.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{F1 por carta médio das quatro configurações, com a anotação completa, e resultado das comparações feitas a partir da Configuração 2.}
     \label{fig:desenho_resultados}
@@ -3159,7 +3159,7 @@ duas no sentido contrário ao previsto por H2. A revocação por carta teve
 diferenças significativas nas mesmas quatro comparações, no mesmo
 sentido. A Figura~\ref{fig:diferenca_carta} mostra a distribuição da diferença de F1 por carta em três comparações com a Configuração 2, incluindo a da cabeça P2, analisada na Seção~\ref{subsec:res_p2}.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Diferença de F1 por carta em três comparações com a Configuração 2. A linha laranja marca a mediana; a linha preta, o zero.}
     \label{fig:diferenca_carta}
@@ -3363,7 +3363,7 @@ nessas condições de treinamento.
 Fonte: Elaborado pelo autor (2026).}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Revocação por faixa de tamanho da Configuração 2 sem e com a
     cabeça P2, com o limiar de confiança de cada modelo e com um limiar
@@ -3449,7 +3449,7 @@ uma única rodada.
 Fonte: Elaborado pelo autor (2026).}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Curva de aprendizado da Configuração 2 nas Dobras 3 e 5.}
     \label{fig:curva_aprendizado}
@@ -3476,7 +3476,7 @@ pela face da carta: a revocação na frente, de 0,170, foi cerca de metade da ob
 valores agregados da Tabela~\ref{tab:desempenho_configuracoes} refletem
 principalmente o desempenho nessa face.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Revocação da Configuração 2 na frente e no verso das cartas.}
     \label{fig:revocacao_face}
@@ -3493,11 +3493,11 @@ encontrado; nas seis restantes, nenhum foi encontrado. Esse valor
 indica em quantas cartas o modelo apontou ao menos um ponto para
 inspeção, e não é uma taxa de acerto dos defeitos. A Figura~\ref{fig:qualitativa} traz exemplos de acertos, de detecções sem anotação e de defeitos grandes não encontrados.
 
-\begin{figure}[H]
+\begin{figure}[!htb]
     \centering
     \caption{Exemplos ilustrativos de predições da Configuração 2, escolhidos para mostrar cada caso, sem indicar padrão de erro.}
     \label{fig:qualitativa}
-    \includegraphics[width=0.92\textwidth]{assets/figuras/206/fig9_qualitativa.png}
+    \includegraphics[width=\textwidth]{assets/figuras/206/fig9_qualitativa.png}
     \legend{Nos acertos e nos defeitos não encontrados, o número é o menor lado da caixa, em pixels, na entrada de 1280; nas detecções sem anotação, é a confiança da predição.
 Fonte: Elaborado pelo autor (2026).}
 \end{figure}
