@@ -927,7 +927,7 @@ A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: 
     \centering
     \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1 a P5 identificam os níveis descritos na Seção~\ref{subsec:yolo}.}
     \label{fig:cnn}
-    \includegraphics[width=\textwidth]{assets/figuras/206/figE10_cnn.png}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE10_cnn.jpg}
     \legend{Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -984,7 +984,7 @@ da detecção neste trabalho.
     cartas TCG: cantos, bordas, superfície e centralização, 
     ilustrados sobre carta do conjunto de dados.}
     \label{fig:criterios_graduacao}
-    \includegraphics[width=\textwidth]{assets/criterios_1.png}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/criterios_1.jpg}
 
     
     \legend{Fonte: Elaborado pelo autor (2026).}
@@ -1263,7 +1263,7 @@ A Figura~\ref{fig:mapas_niveis} mostra os mapas de cada nível em uma carta: em 
     \centering
     \caption{Média dos mapas gerados em cada nível, de P1 a P5, pelo modelo treinado neste trabalho em uma carta que não participou do treinamento desse modelo. Exemplo ilustrativo.}
     \label{fig:mapas_niveis}
-    \includegraphics[width=\textwidth]{assets/figuras/206/figE11_mapas_niveis.png}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE11_mapas_niveis.jpg}
     \legend{Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -2071,7 +2071,7 @@ A Figura~\ref{fig:fluxo} resume as etapas do trabalho.
     \centering
     \caption{Etapas do trabalho, da fotografia à avaliação, em uma carta do conjunto de dados.}
     \label{fig:fluxo}
-    \includegraphics[width=\textwidth]{assets/figuras/206/figE1_fluxo.png}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE1_fluxo.jpg}
     \legend{Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -2252,7 +2252,7 @@ resultado pela proporção física da carta, de 63 por 88 milímetros. A Figura~
     \centering
     \caption{Recorte automático da carta: fotografia com a caixa detectada e resultado.}
     \label{fig:recorte}
-    \includegraphics[width=0.9\textwidth]{assets/figuras/206/figE4_recorte.png}
+    \includegraphics[width=0.9\textwidth]{assets/figuras/otimizadas/figE4_recorte.jpg}
     \legend{Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -2983,7 +2983,7 @@ dados em RGB e na composição de três canais adotada.
     \label{fig:rgb_fotometrica}
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.90\textwidth]{assets/figuras/206/realce_carta074_rgb.png}
+        \includegraphics[width=0.90\textwidth]{assets/figuras/otimizadas/realce_carta074_rgb.jpg}
 
         \vspace{0.2cm}
         {\small (a) Imagem RGB}
@@ -2991,7 +2991,7 @@ dados em RGB e na composição de três canais adotada.
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
-        \includegraphics[width=0.90\textwidth]{assets/figuras/206/realce_carta074_composicao.png}
+        \includegraphics[width=0.90\textwidth]{assets/figuras/otimizadas/realce_carta074_composicao.jpg}
 
         \vspace{0.2cm}
         {\small (b) Composição de três canais}
@@ -3497,7 +3497,7 @@ inspeção, e não é uma taxa de acerto dos defeitos. A Figura~\ref{fig:qualita
     \centering
     \caption{Exemplos ilustrativos de predições da Configuração 2, escolhidos para mostrar cada caso, sem indicar padrão de erro.}
     \label{fig:qualitativa}
-    \includegraphics[width=\textwidth]{assets/figuras/206/fig9_qualitativa.png}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/fig9_qualitativa.jpg}
     \legend{Nos acertos e nos defeitos não encontrados, o número é o menor lado da caixa, em pixels, na entrada de 1280; nas detecções sem anotação, é a confiança da predição.
 Fonte: Elaborado pelo autor (2026).}
 \end{figure}
@@ -3718,7 +3718,7 @@ do que o modelo sem ela.
 Quanto à pergunta de pesquisa, a estratégia que melhorou a detecção,
 com avaliação nas cinco dobras, foi o aumento de dados, exceto na faixa
 abaixo de 8 pixels, em que a revocação foi menor com ele (com o limiar de cada rodada, 14 contra 26
-dos 517 defeitos nas imagens RGB e 15 contra 26 nas de realce), em
+dos 517 defeitos nas imagens RGB e 15 contra 26 nas de realce), com queda significativa carta a carta só nas imagens RGB (valor-p de 0,010, contra 0,12 nas de realce, sem correção de Holm), em
 análise exploratória, feita depois dos resultados. O realce de
 micro-relevo e a cabeça P2 não trouxeram ganho. A resolução de entrada
 de 1280 pixels superou a de 640 pixels em uma única dobra, o que indica
@@ -3856,7 +3856,7 @@ menor na frente das cartas.
 
 Em síntese, com 206 cartas, o aumento de dados foi a única estratégia
 que melhorou o YOLOv8 com avaliação nas cinco dobras, exceto nos defeitos menores que 8 pixels, em que a
-revocação foi menor, enquanto o realce
+revocação foi menor, com queda significativa carta a carta só nas imagens RGB, enquanto o realce
 de micro-relevo, tal como definido aqui, e a cabeça P2 não trouxeram
 ganho. A resolução de entrada e o número de cartas apontaram ganho, mas
 em análises que ainda precisam ser confirmadas. Os defeitos menores que
