@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lupa de Defeitos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600&display=swap">
+<style>
+/* layout: aplicativo de tela cheia; o palco escuro da carta ocupa tudo a esquerda, a lateral rola por conta propria,
+   e a faixa de comandos fica presa embaixo do palco. Tema unico e claro, pensado para projetor;
+   cores e fontes da apresentacao (marinho do SENAC, laranja da predicao, verde-agua da anotacao) */
+:root{
+  --fundo:#ECEEF3; --sup:#FFFFFF; --tinta:#1F2350; --mudo:#5E6475; --linha:#D5D9E2;
+  --pred:#F28C1E; --pred-suave:#FDE9D3; --anot:#0E9C93; --palco:#1B1F3B;
+  --titulo:"Montserrat",system-ui,sans-serif; --corpo:"Open Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--fundo);color:var(--tinta);font:400 15px/1.5 var(--corpo);display:grid;grid-template-rows:auto minmax(0,1fr)}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));background:var(--tinta);color:#fff}
+header h1{font:800 22px/1.1 var(--titulo);margin:0;letter-spacing:.01em}
+header p{margin:0;color:#C9CCE0;font-size:14px;flex:1}
+.ir{display:flex;gap:8px;align-items:center;font-size:13px;color:#C9CCE0}
+.ir input{width:130px;font:600 14px var(--titulo);padding:7px 10px;border-radius:7px;border:0;background:#2E3366;color:#fff}
+.ir input::placeholder{color:#8F94B8}
+main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;min-height:0;padding-block:14px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.esquerda{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px;min-height:0}
+@media (max-width:980px){body{display:block;height:auto}main{grid-template-columns:1fr}.palco{height:70vh}}
+
+/* palco: a carta se move e amplia por transformacao; as caixas sao SVG por cima e acompanham */
+.palco{background:var(--palco);border-radius:14px;position:relative;overflow:hidden;min-height:0;cursor:grab;touch-action:none}
+.palco.movendo{cursor:grabbing}
+.palco.arrastando{outline:3px dashed var(--pred);outline-offset:-10px}
+.carta{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;z-index:1}
+.carta img{display:block;width:100%;height:100%;border-radius:4px;user-select:none;-webkit-user-drag:none}
+.carta svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.caixa{fill:transparent;stroke:var(--pred);stroke-width:2.5;vector-effect:non-scaling-stroke;cursor:pointer}
+.caixa.sel{stroke:#fff;stroke-width:3.5}
+.anot{fill:none;stroke:var(--anot);stroke-width:2;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.escondidas .caixa{display:none}
+.vazio{position:absolute;inset:0;color:#C9CCE0;text-align:center;display:grid;align-content:center;gap:10px;justify-items:center;cursor:default}
+.vazio b{font:700 20px var(--titulo);color:#fff}
+.carregando{position:absolute;inset:0;display:none;place-items:center;background:rgba(27,31,59,.72);color:#fff;font:700 18px var(--titulo);z-index:3}
+.carregando.on{display:grid}
+.giro{width:42px;height:42px;border:4px solid rgba(255,255,255,.25);border-top-color:var(--pred);border-radius:50%;animation:g .9s linear infinite;margin:0 auto 12px}
+@keyframes g{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.giro{animation:none}}
+.zoomtag{position:absolute;right:12px;top:12px;z-index:5;background:rgba(255,255,255,.12);color:#fff;font:700 13px var(--titulo);padding:5px 9px;border-radius:6px;font-variant-numeric:tabular-nums;z-index:2}
+.ferramentas{position:absolute;left:12px;top:12px;display:flex;gap:6px;z-index:5}
+.ferramentas button{font:700 13px var(--titulo);background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:6px;padding:6px 10px;cursor:pointer}
+.ferramentas button:hover,.ferramentas button.on{background:var(--pred);color:var(--tinta)}
+.ferramentas button:focus-visible{outline:2px solid #fff}
+
+.botao{font:700 14px var(--titulo);border:0;border-radius:8px;padding:10px 16px;background:var(--pred);color:var(--tinta);cursor:pointer}
+.botao:focus-visible{outline:3px solid var(--tinta);outline-offset:2px}
+.botao.claro{background:var(--fundo);color:var(--tinta)}
+/* faixa de comandos: dois grupos, mouse e teclado, cada comando com a tecla grande e a acao ao lado */
+.comandos{background:var(--sup);border:1px solid var(--linha);border-radius:12px;padding:12px 16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1.6fr);gap:10px 18px;align-items:start}
+.comandos h3{font:700 12px var(--titulo);text-transform:uppercase;letter-spacing:.08em;color:var(--mudo);margin:6px 0 0;writing-mode:horizontal-tb}
+.grupo{display:flex;flex-wrap:wrap;gap:8px 18px}
+.cmd{display:flex;align-items:center;gap:8px;font-size:15px;white-space:nowrap}
+kbd{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 8px;font:700 14px var(--titulo);background:var(--fundo);border:1px solid var(--linha);border-bottom-width:3px;border-radius:7px;color:var(--tinta)}
+kbd.largo{min-width:auto}
+@media (max-width:1300px){.comandos{grid-template-columns:auto minmax(0,1fr)}}
+
+/* exemplos na lateral */
+.exemplos{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.ex{border:2px solid transparent;border-radius:6px;padding:0;background:none;cursor:pointer;line-height:0}
+.ex img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:4px;display:block}
+.ex:hover,.ex:focus-visible{border-color:var(--pred);outline:none}
+.ex.atual{border-color:var(--tinta)}
+.acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* painel lateral */
+aside{display:grid;gap:12px;align-content:start;overflow:auto;min-height:0;padding-right:2px}
+.bloco{background:var(--sup);border:1px solid var(--linha);border-radius:12px;padding:16px}
+.bloco h2{font:700 12px var(--titulo);text-transform:uppercase;letter-spacing:.08em;color:var(--mudo);margin:0 0 10px}
+.numeros{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.num b{display:block;font:800 32px/1 var(--titulo);font-variant-numeric:tabular-nums}
+.num small{color:var(--mudo);font-size:13px}
+.num.destaque b{color:var(--pred)}
+.legenda{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mudo);margin-top:12px}
+.legenda i{display:inline-block;width:18px;height:12px;vertical-align:-1px;margin-right:6px;border:2.5px solid var(--pred);border-radius:2px}
+.legenda i.a{border:2px dashed var(--anot)}
+label.chave{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;cursor:pointer}
+label.chave input{accent-color:var(--anot);width:16px;height:16px}
+.lupa{display:grid;gap:8px}
+.lupa canvas{width:100%;aspect-ratio:1;background:var(--palco);border-radius:8px}
+.lupa p{margin:0;font-size:14px}
+.lista{display:grid;gap:6px;max-height:260px;overflow:auto;padding-right:4px;position:relative}
+.item{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;padding:6px;border-radius:8px;border:1px solid transparent;cursor:pointer;background:none;text-align:left;font:inherit;color:inherit}
+.item:hover{background:var(--fundo)}
+.item.sel{border-color:var(--pred);background:var(--pred-suave)}
+.item canvas{width:52px;height:52px;border-radius:5px;background:var(--palco)}
+.barra{height:6px;background:var(--fundo);border-radius:3px;overflow:hidden;margin-top:4px}
+.barra div{height:100%;background:var(--pred)}
+.item b{font:700 14px var(--titulo);font-variant-numeric:tabular-nums}
+.nota{font-size:13px;color:var(--mudo);margin:0}
+/* etapas do processo: a mesma ordem do trabalho, localizar a carta, recortar, detectar */
+.passos{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;display:flex;gap:4px;background:rgba(255,255,255,.1);padding:4px;border-radius:9px;white-space:nowrap}
+.passos span{font:700 13px var(--titulo);color:#C9CCE0;padding:6px 11px;border-radius:6px;transition:background .25s,color .25s}
+.passos span.on{background:var(--pred);color:var(--tinta)}
+.passos span.feito{color:#fff}
+.corte{fill:none;stroke:#FFC27A;stroke-width:4;stroke-dasharray:12 7;vector-effect:non-scaling-stroke}
+.fora{fill:rgba(27,31,59,.62);fill-rule:evenodd}
+.etapas{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.etapas figure{margin:0;display:grid;gap:6px;align-content:start}
+.etapas canvas{width:100%;aspect-ratio:3/4;background:var(--palco);border-radius:6px;display:block}
+.etapas figcaption{font-size:12.5px;line-height:1.35;color:var(--mudo)}
+.etapas figcaption b{display:block;font:700 13px var(--titulo);color:var(--tinta)}
+.bloco .nota.etapa{margin-top:10px}
+.erro{color:#B42318;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>Lupa de Defeitos</h1>
+  <p>YOLOv8s · Configuração 2 (RGB com aumento de dados) · entrada de 1280 pixels</p>
+  <label class="ir">Ir para a carta <input id="ir" placeholder="039 ou 039v" aria-label="Número da carta"></label>
+</header>
+<main>
+  <section class="esquerda">
+    <div class="palco" id="palco">
+      <div class="vazio" id="vazio">
+        <b>Escolha a foto de uma carta</b>
+        <span>Arraste a imagem para cá, escolha um exemplo à direita ou digite o número de uma carta no alto.</span>
+        <button class="botao" id="escolher">Escolher foto</button>
+      </div>
+      <div class="carta" id="carta" hidden>
+        <img id="img" alt="Carta analisada" draggable="false">
+        <svg id="svg" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="ferramentas" id="ferramentas" hidden>
+        <button id="bAjustar" title="Ajustar à tela (0)">Ajustar</button>
+        <button id="bZoomDef" title="Zoom no defeito selecionado (Z)">Zoom no defeito</button>
+        <button id="bEsconder" title="Esconder as caixas (H)">Esconder caixas</button>
+      </div>
+      <div class="zoomtag" id="zoomtag" hidden>100%</div>
+      <div class="passos" id="passos" hidden><span>1 · Localiza a carta</span><span>2 · Recorta</span><span>3 · Detecta defeitos</span></div>
+      <div class="carregando" id="carregando"><div><div class="giro"></div>Processando a foto…</div></div>
+    </div>
+    <div class="comandos" aria-label="Comandos">
+      <h3>Mouse</h3>
+      <div class="grupo">
+        <span class="cmd"><kbd class="largo">roda</kbd>zoom</span>
+        <span class="cmd"><kbd class="largo">arrastar</kbd>andar pela carta</span>
+        <span class="cmd"><kbd class="largo">clique</kbd>escolher uma caixa</span>
+        <span class="cmd"><kbd class="largo">duplo clique</kbd>ampliar ali</span>
+      </div>
+      <h3>Teclado</h3>
+      <div class="grupo">
+        <span class="cmd"><kbd>←</kbd><kbd>→</kbd>defeito anterior e seguinte</span>
+        <span class="cmd"><kbd>Z</kbd>zoom no defeito</span>
+        <span class="cmd"><kbd>0</kbd>ajustar à tela</span>
+        <span class="cmd"><kbd>+</kbd><kbd>−</kbd>zoom</span>
+        <span class="cmd"><kbd>H</kbd>esconder caixas</span>
+        <span class="cmd"><kbd>A</kbd>anotações</span>
+        <span class="cmd"><kbd class="largo">PgUp</kbd><kbd class="largo">PgDn</kbd>outra carta</span>
+      </div>
+    </div>
+    <input type="file" id="arquivo" accept="image/*" hidden>
+  </section>
+
+  <aside>
+    <div class="bloco">
+      <h2>Cartas de exemplo</h2>
+      <div class="exemplos" id="exemplos"></div>
+      <div class="acoes"><button class="botao" id="outra">Outra foto</button></div>
+    </div>
+
+    <div class="bloco">
+      <h2 id="tituloCarta">Resultado</h2>
+      <div class="numeros">
+        <div class="num destaque"><b id="nPrev">–</b><small>defeitos previstos</small></div>
+        <div class="num"><b id="nAnot">–</b><small id="nAnotRot">defeitos anotados</small></div>
+        <div class="num"><b id="nMax">–</b><small>maior confiança</small></div>
+        <div class="num"><b id="nLim">–</b><small>limiar de confiança</small></div>
+      </div>
+      <div class="legenda"><span><i></i>previsto pelo modelo</span><span id="legAnot"><i class="a"></i>anotado pelo autor</span></div>
+      <label class="chave" id="chaveAnot"><input type="checkbox" id="mostrarAnot">Mostrar as anotações</label>
+      <p class="nota" id="origem" style="margin-top:10px"></p>
+    </div>
+
+    <div class="bloco">
+      <h2>Etapas, na ordem do trabalho</h2>
+      <div class="etapas">
+        <figure><canvas id="e1" width="240" height="320"></canvas><figcaption><b>1. Foto recebida</b><span id="e1t">–</span></figcaption></figure>
+        <figure><canvas id="e2" width="240" height="320"></canvas><figcaption><b>2. Recorte</b><span id="e2t">–</span></figcaption></figure>
+        <figure><canvas id="e3" width="240" height="320"></canvas><figcaption><b>3. Detecção</b><span id="e3t">–</span></figcaption></figure>
+      </div>
+      <p class="nota etapa" id="eNota" hidden></p>
+    </div>
+
+    <div class="bloco lupa">
+      <h2>Lupa</h2>
+      <canvas id="lupa" width="480" height="480"></canvas>
+      <p id="lupaTxt">Clique numa caixa para ampliar o defeito.</p>
+    </div>
+
+    <div class="bloco">
+      <h2>Caixas, da maior confiança para a menor</h2>
+      <div class="lista" id="lista"></div>
+    </div>
+
+    <p class="nota">Na média das cinco dobras, cerca de 4 em cada 10 caixas apontadas coincidiram com um defeito anotado (precisão 0,413), e cerca de 3 em cada 10 defeitos anotados foram encontrados (revocação 0,285). O uso como apoio à inspeção não foi avaliado.</p>
+  </aside>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = v => v.toFixed(2).replace(".", ",");
+let dados = null, sel = -1, cartas = [], atual = null, dim = null, sequencia = 0;
+const vista = {s: 1, tx: 0, ty: 0};
+const TOPO = 52;          // altura da faixa da barra de ferramentas
+let zoomAoAbrir = false;   // escala e deslocamento da carta dentro do palco
+const foto = new Image();
+const palco = $("palco"), carta = $("carta");
+
+function carregando(on){ $("carregando").classList.toggle("on", on); }
+
+async function enviar(url, corpo, cab, animar){
+  carregando(true);
+  try{
+    const r = await fetch(url, {method:"POST", body:corpo, headers:cab||{}});
+    const j = await r.json();
+    if(j.erro) throw new Error(j.erro);
+    j.animar = !!animar;
+    carregando(false);
+    await etapas(j);
+  }catch(e){
+    $("origem").innerHTML = `<span class="erro">${e.message}</span>`;
+  }finally{ carregando(false); }
+}
+const abrirCarta = (c, animar) => enviar("/api/exemplo", JSON.stringify({carta: c}), {"Content-Type":"application/json"}, animar);
+
+/* ---------- etapas: foto original -> carta localizada -> recorte -> defeitos ---------- */
+const espera = ms => new Promise(r => setTimeout(r, ms));
+const origImg = new Image(), recImg = new Image();
+function passo(n){
+  $("passos").hidden = false;
+  [...$("passos").children].forEach((el,i) => { el.classList.toggle("on", i === n-1); el.classList.toggle("feito", i < n-1); });
+}
+async function etapas(j){
+  const minha = ++sequencia;
+  await Promise.all([carregar(origImg, j.original), carregar(recImg, j.imagem)]);
+  miniaturas(j);
+  if(!j.animar){ mostrar(j); passo(3); return; }
+  // 1) a foto como chegou, com a carta localizada e o fundo escurecido
+  dados = null; sel = -1;
+  dim = {w: j.orig_largura, h: j.orig_altura};
+  $("img").src = j.original;
+  carta.style.width = dim.w + "px"; carta.style.height = dim.h + "px";
+  $("vazio").hidden = true; carta.hidden = false; $("ferramentas").hidden = true; $("zoomtag").hidden = true;
+  palco.classList.remove("escondidas");
+  const [x0,y0,x1,y1] = j.corte, W = dim.w, H = dim.h;
+  $("svg").setAttribute("viewBox", `0 0 ${W} ${H}`);
+  $("svg").innerHTML = `<path class="fora" d="M0 0H${W}V${H}H0Z M${x0} ${y0}V${y1}H${x1}V${y0}Z"/><rect class="corte" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}"/>`;
+  ajustar(); passo(1);
+  await espera(1500); if(minha !== sequencia) return;
+  // 2) aproxima ate o recorte ocupar o palco, como a carta recortada vai aparecer
+  passo(2);
+  const r = palco.getBoundingClientRect(), cw = x1-x0, ch = y1-y0;
+  const sc = Math.min((r.width - 24) / cw, (r.height - TOPO - 14) / ch);
+  vista.s = sc; vista.tx = (r.width - cw*sc)/2 - x0*sc; vista.ty = TOPO + (r.height - TOPO - ch*sc)/2 - y0*sc;
+  carta.style.transition = "transform .7s ease"; aplicar();
+  await espera(1300); if(minha !== sequencia) return;
+  carta.style.transition = "";
+  // 3) troca pela carta recortada e desenha o que o modelo apontou
+  mostrar(j); passo(3);
+}
+function carregar(im, src){ return new Promise(ok => { im.onload = ok; im.onerror = ok; im.src = src; }); }
+function caber(ctx, im, cv){
+  const k = Math.min(cv.width / im.width, cv.height / im.height), w = im.width*k, h = im.height*k;
+  const x = (cv.width - w)/2, y = (cv.height - h)/2;
+  ctx.fillStyle = "#1B1F3B"; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(im, x, y, w, h);
+  return {k, x, y};
+}
+function miniaturas(j){
+  const c1 = $("e1"), g1 = c1.getContext("2d"), a = caber(g1, origImg, c1);
+  const [x0,y0,x1,y1] = j.corte.map(v => v * a.k);
+  g1.fillStyle = "rgba(27,31,59,.6)";
+  g1.beginPath(); g1.rect(a.x, a.y, origImg.width*a.k, origImg.height*a.k); g1.rect(a.x+x0, a.y+y1, x1-x0, y0-y1); g1.fill("evenodd");
+  g1.setLineDash([6,4]); g1.strokeStyle = "#FFC27A"; g1.lineWidth = 2.5; g1.strokeRect(a.x+x0, a.y+y0, x1-x0, y1-y0);
+  const c2 = $("e2"); caber(c2.getContext("2d"), recImg, c2);
+  const c3 = $("e3"), g3 = c3.getContext("2d"), b = caber(g3, recImg, c3);
+  g3.strokeStyle = "#F28C1E"; g3.lineWidth = 1.5;
+  for(const c of j.caixas) g3.strokeRect(b.x + c.x0*b.k - 2, b.y + c.y0*b.k - 2, (c.x1-c.x0)*b.k + 4, (c.y1-c.y0)*b.k + 4);
+  const px = v => v.toLocaleString("pt-BR");
+  $("e1t").textContent = `${px(j.orig_px[0])} × ${px(j.orig_px[1])} px, fundo ${j.fundo || "não identificado"}`;
+  $("e2t").textContent = j.motivo ? "sem recorte" : `${px(j.recorte_px[0])} × ${px(j.recorte_px[1])} px, folga de 25 px`;
+  $("e3t").textContent = `${j.caixas.length} ${j.caixas.length === 1 ? "caixa" : "caixas"} a 1280 px`;
+  $("eNota").hidden = !j.motivo; $("eNota").textContent = j.motivo ? `Recorte: ${j.motivo}.` : "";
+}
+
+function mostrar(j){
+  dados = j; sel = -1; atual = j.carta; dim = {w: j.largura, h: j.altura};
+  document.querySelectorAll(".ex").forEach(e => e.classList.toggle("atual", e.dataset.carta === j.carta));
+  foto.onload = () => { listar(); if(j.caixas.length){ selecionar(0, false); if(zoomAoAbrir){ zoomAoAbrir = false; zoomNoDefeito(); } } else lupaVazia(); };
+  foto.src = j.imagem;
+  $("img").src = j.imagem;
+  carta.style.width = j.largura + "px"; carta.style.height = j.altura + "px";
+  $("vazio").hidden = true; carta.hidden = false; $("ferramentas").hidden = false; $("zoomtag").hidden = false;
+  ajustar(); desenhar();
+  $("tituloCarta").textContent = j.carta ? nomeCarta(j.carta) : "Foto nova";
+  $("nPrev").textContent = j.caixas.length;
+  $("nMax").textContent = j.caixas.length ? fmt(j.caixas[0].conf) : "–";
+  $("nLim").textContent = fmt(j.limiar);
+  const temAnot = Array.isArray(j.anotacoes);
+  $("nAnot").textContent = temAnot ? j.anotacoes.length : "–";
+  $("nAnotRot").textContent = temAnot ? "defeitos anotados" : "sem anotação (carta nova)";
+  $("chaveAnot").hidden = !temAnot; $("legAnot").hidden = !temAnot;
+  $("origem").textContent = j.do_conjunto
+    ? `Analisada pelo modelo da Dobra ${j.dobra_modelo}, que não treinou com esta carta. ${j.ms} ms.`
+    : `Foto fora do conjunto. Modelo da Dobra ${j.dobra_modelo}. ${j.ms} ms.`;
+}
+
+function nomeCarta(s){
+  const m = /carta_(\d+)_(frente|verso)/.exec(s||"");
+  return m ? `Carta ${m[1]}, ${m[2]}` : "Carta";
+}
+
+/* ---------- vista: zoom e deslocamento ---------- */
+function aplicar(){
+  carta.style.transform = `translate(${vista.tx}px,${vista.ty}px) scale(${vista.s})`;
+  if(dados) $("zoomtag").textContent = Math.round(vista.s / escalaAjuste() * 100) + "%";
+}
+function escalaAjuste(){
+  // reserva a faixa de cima para a barra de ferramentas
+  const r = palco.getBoundingClientRect();
+  return Math.min((r.width - 24) / dim.w, (r.height - TOPO - 14) / dim.h);
+}
+function ajustar(){
+  if(!dim) return;
+  const r = palco.getBoundingClientRect(), s = escalaAjuste();
+  vista.s = s; vista.tx = (r.width - dim.w*s)/2; vista.ty = TOPO + (r.height - TOPO - dim.h*s)/2; aplicar();
+}
+function zoomEm(px, py, f){
+  // amplia mantendo parado o ponto da carta que esta sob (px, py)
+  const min = escalaAjuste()*0.5, max = escalaAjuste()*24;
+  const s = Math.min(max, Math.max(min, vista.s*f));
+  const x = (px - vista.tx)/vista.s, y = (py - vista.ty)/vista.s;
+  vista.s = s; vista.tx = px - x*s; vista.ty = py - y*s; aplicar();
+}
+function zoomNoDefeito(){
+  if(!dados || sel < 0) return;
+  const c = dados.caixas[sel], r = palco.getBoundingClientRect();
+  const lado = Math.max(c.x1-c.x0, c.y1-c.y0, 20) * 7;   // o defeito ocupa cerca de 1/7 da tela, com contexto
+  const s = Math.min(r.width, r.height) / lado;
+  vista.s = Math.min(s, escalaAjuste()*24);
+  vista.tx = r.width/2 - (c.x0+c.x1)/2*vista.s; vista.ty = r.height/2 - (c.y0+c.y1)/2*vista.s;
+  carta.style.transition = "transform .35s ease"; aplicar();
+  setTimeout(() => carta.style.transition = "", 380);
+}
+palco.addEventListener("wheel", e => {
+  if(!dados) return; e.preventDefault();
+  const r = palco.getBoundingClientRect();
+  zoomEm(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.2 : 1/1.2);
+}, {passive:false});
+let arrasto = null;
+palco.addEventListener("pointerdown", e => {
+  if(!dados || e.button !== 0 || e.target.closest(".ferramentas")) return;
+  arrasto = {x:e.clientX, y:e.clientY, tx:vista.tx, ty:vista.ty, moveu:false, alvo:e.target};
+  palco.setPointerCapture(e.pointerId);
+});
+palco.addEventListener("pointermove", e => {
+  if(!arrasto) return;
+  const dx = e.clientX - arrasto.x, dy = e.clientY - arrasto.y;
+  if(Math.abs(dx) + Math.abs(dy) > 3){ arrasto.moveu = true; palco.classList.add("movendo"); }
+  if(arrasto.moveu){ vista.tx = arrasto.tx + dx; vista.ty = arrasto.ty + dy; aplicar(); }
+});
+palco.addEventListener("pointerup", () => {
+  if(arrasto && !arrasto.moveu && arrasto.alvo.classList && arrasto.alvo.classList.contains("caixa"))
+    selecionar(+arrasto.alvo.dataset.i, false);
+  arrasto = null; palco.classList.remove("movendo");
+});
+palco.addEventListener("dblclick", e => {
+  if(!dados) return; const r = palco.getBoundingClientRect(); zoomEm(e.clientX - r.left, e.clientY - r.top, 2);
+});
+window.addEventListener("resize", ajustar);
+$("bAjustar").onclick = ajustar;
+$("bZoomDef").onclick = zoomNoDefeito;
+$("bEsconder").onclick = alternarCaixas;
+function alternarCaixas(){ const on = palco.classList.toggle("escondidas"); $("bEsconder").classList.toggle("on", on); }
+
+/* ---------- caixas, lista e lupa ---------- */
+function desenhar(){
+  const svg = $("svg"), j = dados;
+  svg.setAttribute("viewBox", `0 0 ${j.largura} ${j.altura}`);
+  let h = "";
+  if($("mostrarAnot").checked && j.anotacoes)
+    for(const a of j.anotacoes) h += `<rect class="anot" x="${a[0]}" y="${a[1]}" width="${a[2]-a[0]}" height="${a[3]-a[1]}"/>`;
+  j.caixas.forEach((c,i) => {
+    const m = 3; // folga para a caixa nao cobrir o defeito
+    h += `<rect class="caixa${i===sel?" sel":""}" data-i="${i}" x="${c.x0-m}" y="${c.y0-m}" width="${c.x1-c.x0+2*m}" height="${c.y1-c.y0+2*m}"><title>confiança ${fmt(c.conf)}</title></rect>`;
+  });
+  svg.innerHTML = h;
+}
+
+function recorte(c, lado){
+  // janela quadrada em volta da caixa, com contexto, para o defeito aparecer inteiro
+  const w = c.x1-c.x0, h = c.y1-c.y0, l = Math.max(w, h, 24) * lado;
+  const cx = (c.x0+c.x1)/2, cy = (c.y0+c.y1)/2;
+  return {x: Math.max(0, Math.min(dados.largura-l, cx-l/2)), y: Math.max(0, Math.min(dados.altura-l, cy-l/2)), l};
+}
+function pintar(canvas, c, lado, comCaixa){
+  const ctx = canvas.getContext("2d"), r = recorte(c, lado), k = canvas.width / r.l;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(foto, r.x, r.y, r.l, r.l, 0, 0, canvas.width, canvas.height);
+  if(comCaixa){
+    ctx.strokeStyle = "#F28C1E"; ctx.lineWidth = 3;
+    ctx.strokeRect((c.x0-r.x)*k-4, (c.y0-r.y)*k-4, (c.x1-c.x0)*k+8, (c.y1-c.y0)*k+8);
+  }
+}
+function listar(){
+  const lista = $("lista"); lista.innerHTML = "";
+  if(!dados.caixas.length){ lista.innerHTML = '<p class="nota">Nenhuma caixa acima do limiar.</p>'; return; }
+  dados.caixas.forEach((c,i) => {
+    const b = document.createElement("button"); b.className = "item"; b.dataset.i = i;
+    const cv = document.createElement("canvas"); cv.width = cv.height = 104;
+    b.append(cv);
+    b.insertAdjacentHTML("beforeend", `<div>Defeito ${i+1}<div class="barra"><div style="width:${Math.round(c.conf*100)}%"></div></div></div><b>${fmt(c.conf)}</b>`);
+    b.addEventListener("click", () => selecionar(i, true));
+    lista.append(b); pintar(cv, c, 3, false);
+  });
+}
+function selecionar(i, comZoom){
+  sel = i; desenhar();
+  document.querySelectorAll(".item").forEach(el => el.classList.toggle("sel", +el.dataset.i === i));
+  // rola so a lista, nunca a pagina, para o cabecalho nao sumir durante a apresentacao
+  const item = document.querySelector(`.item[data-i="${i}"]`), lista = $("lista");
+  if(item){
+    const topo = item.offsetTop;
+    if(topo < lista.scrollTop) lista.scrollTop = topo;
+    else if(topo + item.offsetHeight > lista.scrollTop + lista.clientHeight) lista.scrollTop = topo + item.offsetHeight - lista.clientHeight;
+  }
+  const c = dados.caixas[i];
+  pintar($("lupa"), c, 4, true);
+  const px = v => Math.round(v);
+  $("lupaTxt").textContent = `Defeito ${i+1} de ${dados.caixas.length} · confiança ${fmt(c.conf)} · ${px(c.x1-c.x0)} × ${px(c.y1-c.y0)} pixels na entrada de 1280`;
+  if(comZoom) zoomNoDefeito();
+}
+function lupaVazia(){
+  $("lupa").getContext("2d").clearRect(0,0,480,480);
+  $("lupaTxt").textContent = "O modelo não apontou defeitos nesta carta.";
+}
+
+/* ---------- navegacao entre cartas ---------- */
+function vizinha(d){
+  if(!cartas.length) return;
+  let i = cartas.indexOf(atual);
+  i = i < 0 ? 0 : (i + d + cartas.length) % cartas.length;
+  abrirCarta(cartas[i]);
+}
+$("ir").addEventListener("keydown", e => {
+  if(e.key !== "Enter") return;
+  const m = e.target.value.trim().toLowerCase().match(/^(\d{1,3})\s*([fv]?)/);
+  if(!m) return;
+  const alvo = `carta_${m[1].padStart(3,"0")}_${m[2]==="v" ? "verso" : "frente"}`;
+  if(cartas.includes(alvo)){ abrirCarta(alvo); e.target.value = ""; e.target.blur(); }
+  else $("origem").innerHTML = `<span class="erro">Não há ${nomeCarta(alvo).toLowerCase()} no conjunto.</span>`;
+});
+
+/* ---------- teclado ---------- */
+document.addEventListener("keydown", e => {
+  if(e.target.tagName === "INPUT") return;
+  const k = e.key.toLowerCase();
+  if(e.key === "PageDown"){ e.preventDefault(); vizinha(1); return; }
+  if(e.key === "PageUp"){ e.preventDefault(); vizinha(-1); return; }
+  if(!dados) return;
+  const r = palco.getBoundingClientRect();
+  if(k === "0") ajustar();
+  else if(k === "+" || k === "=") zoomEm(r.width/2, r.height/2, 1.25);
+  else if(k === "-") zoomEm(r.width/2, r.height/2, 1/1.25);
+  else if(k === "z") zoomNoDefeito();
+  else if(k === "h") alternarCaixas();
+  else if(k === "a" && dados.anotacoes){ $("mostrarAnot").checked = !$("mostrarAnot").checked; desenhar(); }
+  else if(dados.caixas.length && (e.key === "ArrowRight" || e.key === "ArrowDown")){ e.preventDefault(); selecionar(Math.min(sel+1, dados.caixas.length-1), palcoAmpliado()); }
+  else if(dados.caixas.length && (e.key === "ArrowLeft" || e.key === "ArrowUp")){ e.preventDefault(); selecionar(Math.max(sel-1, 0), palcoAmpliado()); }
+});
+// se a carta ja esta ampliada, as setas levam o zoom junto para a proxima caixa
+const palcoAmpliado = () => vista.s > escalaAjuste()*1.5;
+
+/* ---------- escolha da foto ---------- */
+$("escolher").onclick = () => $("arquivo").click();
+$("outra").onclick = () => $("arquivo").click();
+$("arquivo").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if(f) enviar("/api/detectar", f, {"X-Nome": f.name}, true); };
+palco.addEventListener("dragover", e => { e.preventDefault(); palco.classList.add("arrastando"); });
+palco.addEventListener("dragleave", () => palco.classList.remove("arrastando"));
+palco.addEventListener("drop", e => {
+  e.preventDefault(); palco.classList.remove("arrastando");
+  const f = e.dataTransfer.files[0]; if(f) enviar("/api/detectar", f, {"X-Nome": f.name}, true);
+});
+$("mostrarAnot").onchange = desenhar;
+
+fetch("/api/cartas").then(r => r.json()).then(l => cartas = l);
+fetch("/api/exemplos").then(r => r.json()).then(itens => {
+  for(const it of itens){
+    const b = document.createElement("button"); b.className = "ex"; b.title = nomeCarta(it.carta);
+    b.innerHTML = `<img src="${it.miniatura}" alt="${nomeCarta(it.carta)}">`;
+    b.dataset.carta = it.carta;
+    b.onclick = () => abrirCarta(it.carta, true);
+    $("exemplos").append(b);
+  }
+  // ?carta=carta_155_frente abre direto numa carta; &zoom=1 ja entra ampliado no primeiro defeito
+  const q = new URLSearchParams(location.search);
+  if(q.get("carta")){ zoomAoAbrir = !!q.get("zoom"); abrirCarta(q.get("carta")); }
+});
+</script>
+</body>
+</html>
