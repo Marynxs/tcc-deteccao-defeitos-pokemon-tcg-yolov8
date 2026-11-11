@@ -541,42 +541,37 @@ estabelecido, o YOLOv8, nesse cenário.
 
 \subsection{Objetivo geral}
 
-Avaliar o desempenho de estratégias de treinamento aplicadas ao modelo YOLOv8 para detecção de defeitos pequenos em cartas Pokémon TCG com baixo volume de dados.
+Identificar, por meio de uma comparação controlada, com o mesmo conjunto de dados e o mesmo protocolo de avaliação para todas as alternativas, quais estratégias de treinamento melhoram a capacidade do YOLOv8 de localizar defeitos superficiais pequenos em cartas Pokémon TCG quando há poucas imagens anotadas disponíveis.
 
 \subsection{Objetivos específicos}
 
-Para alcançar o objetivo geral, foram definidos os seguintes objetivos específicos:
+Para alcançar o objetivo geral, foram definidos os seguintes objetivos específicos, todos com o YOLOv8 com \textit{transfer learning}, o mesmo conjunto de dados e o mesmo protocolo de avaliação:
 
 \begin{enumerate}
-    \item Organizar e preparar um conjunto de dados de imagens de cartas 
-    Pokémon TCG, adotando uma classe única de detecção denominada 
-    \textit{defeito}.
-    
-    \item Implementar quatro configurações experimentais baseadas em YOLOv8 com
-    \textit{transfer learning}, cruzando o uso de aumento de dados
-    (\textit{data augmentation}) com duas representações de entrada,
-    imagens RGB convencionais e imagens de realce de micro-relevo, e
-    comparar as quatro combinações resultantes.
+    \item Medir o efeito do aumento de dados (\textit{data augmentation})
+    sobre o desempenho do detector, tanto com imagens RGB convencionais
+    quanto com imagens de realce de micro-relevo.
 
-    \item Avaliar, sobre a configuração de melhor desempenho nessa
-    comparação, o efeito de uma cabeça de detecção adicional voltada a
-    objetos pequenos (P2), pela revocação (a proporção dos defeitos
-    anotados que o modelo encontra) dos defeitos cujo menor lado da
-    caixa delimitadora é menor que 8 pixels, e o efeito da resolução de
-    entrada, comparando 1280 e 640 pixels pelo F1 por carta, com teste
-    estatístico pareado por carta.
+    \item Medir o efeito de usar imagens de realce de micro-relevo como
+    representação de entrada, em lugar das imagens RGB, sem aumento de
+    dados e combinadas com ele.
 
-    \item Comparar o desempenho das diferentes configurações por meio
-    de métricas quantitativas consolidadas em detecção de objetos,
-    incluindo precisão (\textit{precision}), revocação (\textit{recall}),
-    F1-\textit{score} e \textit{mean Average Precision} (mAP@0,5).
+    \item Avaliar, sobre a configuração de melhor desempenho entre as
+    quatro combinações dos objetivos anteriores, o efeito de uma cabeça de
+    detecção adicional voltada a objetos pequenos (P2), pela revocação (a
+    proporção dos defeitos anotados que o modelo encontra) dos defeitos
+    cujo menor lado da caixa delimitadora é menor que 8 pixels, e o efeito
+    da resolução de entrada, comparando 1280 e 640 pixels pelo F1 por
+    carta, com teste estatístico pareado por carta, ambos descritos na
+    Seção~\ref{subsec:hipotese}.
 
-    \item Avaliar, por meio de uma curva de aprendizado, se o desempenho
-    do detector aumenta com o número de cartas disponíveis para treino.
+    \item Verificar, por meio de uma curva de aprendizado, se o desempenho
+    do detector ainda aumenta com o número de cartas disponíveis para
+    treino.
 
-    \item Analisar os resultados obtidos, identificando quais estratégias
-    de treinamento apresentam melhor desempenho em cenários com baixo
-    volume de dados no domínio de inspeção de cartas TCG.
+    \item Identificar a estratégia de treinamento de melhor desempenho
+    nesse cenário e discutir se o detector obtido com ela pode servir de
+    apoio à inspeção visual das cartas.
 \end{enumerate}
 
 \subsection{Hipótese ou critério de validação}
@@ -750,6 +745,7 @@ Tabela~\ref{tab:strings_busca} é mais específica que as demais.
 \bottomrule
 \endfoot
 \bottomrule
+\multicolumn{4}{@{}c@{}}{\parbox{\textwidth}{\centering\vspace{4pt}\footnotesize GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.\\Fonte: Elaborado pelo autor (2026).}} \\
 \endlastfoot
 \textit{``trading card'' OR ``collectible card'' AND ``computer vision''}
     & GS, IEEE, SD, MDPI & 14 & 4 \\
@@ -820,8 +816,14 @@ Fontes não acadêmicas (contextualização de mercado e documentação técnica
 \textbf{Total} & & \textbf{198} & \textbf{44} \\
 \end{longtable}
 \endgroup
-\legend{GS = Google Scholar; IEEE = IEEE Xplore; SD = ScienceDirect; MDPI = Multidisciplinary Digital Publishing Institute.
-Fonte: Elaborado pelo autor (2026).}
+
+As 21 strings da
+Tabela~\ref{tab:strings_busca}, aplicadas às bases indicadas na tabela, levaram a 198
+trabalhos triados pelo título e pelo resumo; desses, 41 foram
+selecionados e lidos na íntegra. Com 3 fontes não acadêmicas, usadas
+para contextualizar o mercado de cartas e documentar as ferramentas, o
+total chegou a 44 trabalhos selecionados.
+
 
 Foram priorizados trabalhos acadêmicos publicados entre 2021 e 2026,
 em língua inglesa, disponíveis em periódicos ou anais de conferências.
@@ -906,6 +908,16 @@ imagem, nas quais camadas iniciais capturam padrões simples, como bordas e
 texturas, enquanto camadas mais profundas representam formas e estruturas mais
 complexas.
 
+A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: a cada etapa, os mapas ficam menores e resumem regiões maiores da imagem. Cada pilha reúne alguns dos vários mapas gerados na etapa, e as linhas laranja mostram que uma pequena região de uma etapa corresponde a um único ponto da etapa seguinte.
+
+\begin{figure}[!htb]
+    \centering
+    \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1, P3 e P5 identificam três dos níveis descritos na Seção~\ref{subsec:yolo}; o bloco de detecção é esquemático.}
+    \label{fig:cnn}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE10_cnn_linha.jpg}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{figure}
+
 Na inspeção visual automatizada, essa capacidade é especialmente importante
 porque defeitos de superfície podem variar em forma, escala, textura e contraste.
 Segundo \citeonline{Zheng2021}, métodos tradicionais dependiam de atributos
@@ -921,15 +933,6 @@ objetos de interesse \cite{Hussain2023}. Assim, a compreensão das CNNs é
 necessária para fundamentar o uso de detectores baseados em \textit{deep learning}
 na identificação de defeitos visuais em cartas TCG.
 
-A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: a cada etapa, os mapas ficam menores e resumem regiões maiores da imagem. Cada pilha reúne alguns dos vários mapas gerados na etapa.
-
-\begin{figure}[!htb]
-    \centering
-    \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1 a P5 identificam os níveis descritos na Seção~\ref{subsec:yolo}.}
-    \label{fig:cnn}
-    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE10_cnn.jpg}
-    \legend{Fonte: Elaborado pelo autor (2026).}
-\end{figure}
 
 \subsection{Visão computacional e inspeção visual automatizada}
 \label{subsec:avi}
@@ -1136,6 +1139,13 @@ média harmônica:
     F1 = 2 \cdot \frac{\text{Precisão} \times \text{Revocação}}
     {\text{Precisão} + \text{Revocação}}
 \end{equation}
+
+Diferentemente da média aritmética, a média harmônica fica mais próxima
+do menor dos dois valores. Um detector que fizesse uma única predição,
+correta, em um conjunto com muitos defeitos teria precisão de 1 e
+revocação próxima de 0: a média aritmética seria próxima de 0,5, e o
+F1, próximo de 0. Assim, o F1 só é alto quando a precisão e a revocação
+são altas ao mesmo tempo.
 
 Cada caixa predita pelo detector vem acompanhada de um escore de
 confiança, como apresentado na Seção~\ref{subsec:deteccao_objetos}.
@@ -1847,6 +1857,15 @@ a diferença entre eles se sustenta ao variar as cartas avaliadas, mas não
 inclui a variação que surgiria ao repetir o treinamento, por exemplo com
 outra semente aleatória.
 
+Como exemplo, com valores ilustrativos, suponha que a diferença de F1
+entre duas configurações em cinco cartas seja de $+0{,}10$, $-0{,}02$,
+$+0{,}05$, $+0{,}20$ e $+0{,}01$. Ordenados pelo valor absoluto, esses
+valores recebem os postos 4, 2, 3, 5 e 1. A soma dos postos das
+diferenças positivas é $R^+ = 4 + 3 + 5 + 1 = 13$, e a das negativas,
+$R^- = 2$, de modo que $T = 2$: quase todas as diferenças, inclusive as
+maiores, favorecem a mesma configuração. Ainda assim, com cinco pares,
+nenhum resultado poderia ser significativo, como se mostra a seguir.
+
 O número de pares condiciona o menor valor-p que o teste pode alcançar. Com
 $n$ pares existem $2^n$ arranjos de sinais igualmente prováveis sob a hipótese
 nula, de modo que o menor valor-p bilateral possível é $2/2^n$. Para $n = 5$
@@ -1866,7 +1885,12 @@ das comparações: sendo $m$ o número de comparações, os valores-p são
 ordenados do menor para o maior; o menor é comparado a $\alpha/m$, o segundo
 a $\alpha/(m-1)$, e assim por diante; assim que uma comparação não atinge o
 seu limite, ela e todas as seguintes não são rejeitadas, isto é, não indicam
-diferença significativa.
+diferença significativa. Por exemplo, com três comparações e
+$\alpha = 0{,}05$, valores-p de 0,001, 0,03 e 0,04 seriam comparados a
+$0{,}05/3 \approx 0{,}017$, a $0{,}05/2 = 0{,}025$ e a $0{,}05$. O
+primeiro indica diferença significativa, mas o segundo não atinge o seu
+limite, e assim o segundo e o terceiro não são rejeitados, embora ambos
+estejam abaixo de 0,05.
 \citeonline{Demsar2006} apresenta o procedimento como etapa posterior ao
 teste de Friedman, usado para comparar vários classificadores ao mesmo tempo,
 mas registra que ele pode ser usado, de forma geral, para controlar o erro do
@@ -1941,11 +1965,9 @@ dados disponível.
 
 \citeonline{Liu2026} investigaram a detecção de objetos pequenos em imagens aéreas capturadas por drones, com o YOLOv8. O problema se aproxima deste trabalho pelo tamanho reduzido dos objetos e pela pergunta sobre quais estratégias melhoram o detector nessa condição. O método comparou, sob as mesmas condições experimentais, a capacidade do modelo, a resolução de entrada de 640 e de 1280 pixels e o acréscimo de uma cabeça de detecção no nível P2. Os resultados, apresentados na Seção~\ref{subsec:objetos_pequenos}, favoreceram a resolução de entrada sobre essa cabeça, e os autores concluíram que, nesse cenário, a resolução de entrada e a capacidade do modelo devem ser priorizadas antes de mudanças na arquitetura. Como limitações para o presente contexto, o domínio é outro, com cenas abertas e várias categorias de objetos, e essa cabeça foi avaliada apenas na resolução de 640 pixels. O presente trabalho diferencia-se por avaliar a cabeça P2 na resolução de 1280 pixels, em defeitos de cartas colecionáveis, e por comparar as configurações carta a carta, com teste pareado.
 
-\vspace{0.5cm}
-
 A Tabela~\ref{tab:trabalhos_relacionados} sintetiza as diferenças entre os trabalhos analisados e este trabalho.
 
-\begin{table}[htb]
+\begin{table}[!htb]
     \centering
     \caption{Comparação entre os trabalhos correlatos e este trabalho}
     \label{tab:trabalhos_relacionados}
@@ -2180,6 +2202,19 @@ critério acima também às caixas da primeira etapa, das quais removeu
 assim, 4.808 caixas: 892 (18,6\%) sugeridas pelos modelos e aceitas
 pelo autor e 3.916 traçadas pelo próprio autor
 (Seção~\ref{sec:formulacao}).
+A Figura~\ref{fig:cascata_anotacao} mostra as duas etapas: a primeira
+reuniu 1.038 caixas nas 82 cartas recebidas inicialmente e 2.071 nas
+124 restantes, 3.109 ao todo; a revisão, feita nas 206 cartas, levou
+esse total a 4.808. As 414 sugestões rejeitadas e as 3 caixas ajustadas
+não alteram o total.
+
+\begin{figure}[!htb]
+    \centering
+    \caption{Número de caixas anotadas em cada etapa da anotação}
+    \label{fig:cascata_anotacao}
+    \includegraphics[width=0.9\textwidth]{assets/figuras/206/figF2_cascata_anotacao.pdf}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{figure}
 
 Os modelos que sugeriram as caixas trabalhavam com imagens RGB. Por
 isso, as caixas sugeridas tendem a marcar defeitos que um detector com
@@ -2314,9 +2349,15 @@ Fonte: Elaborado pelo autor (2026).}
 A divisão das cartas em dobras foi feita por carta: a frente e o verso
 de uma carta ficaram sempre na mesma dobra, porque são o mesmo
 exemplar físico, e separá-los permitiria ao modelo encontrar na
-avaliação uma carta que já viu no treinamento. Pelo mesmo motivo,
+avaliação uma carta que já viu no treinamento. As duas faces guardam
+marcas do mesmo exemplar, como o desgaste das bordas e dos cantos nos
+mesmos pontos ou uma dobra, que aparece dos dois lados; com a frente no
+treinamento e o verso na avaliação, o modelo poderia acertar por
+reconhecer o exemplar, e não por ter aprendido a encontrar defeitos, e
+a avaliação ficaria otimista. Pelo mesmo motivo,
 cartas diferentes que compartilham a mesma ilustração foram mantidas
-juntas: o conjunto tem 12 grupos de cartas com a mesma ilustração, que
+juntas, porque o modelo poderia aprender a distinguir defeito e desenho
+naquela ilustração específica e encontrá-la de novo na avaliação: o conjunto tem 12 grupos de cartas com a mesma ilustração, que
 somam 28 cartas, e cada grupo ficou inteiro em uma única dobra.
 Adotou-se k = 5, dentro da faixa de 5 a 10 dobras frequentemente
 relatada na literatura de seleção de modelos \cite{Arlot2010}. Com
@@ -2975,29 +3016,15 @@ por isso, uma diferença entre as imagens RGB e as de realce pode
 decorrer tanto do realce quanto da retirada da cor.
 
 A Figura~\ref{fig:rgb_fotometrica} mostra uma carta do conjunto de
-dados em RGB e na composição de três canais adotada.
+dados em RGB e nas quatro variantes, com um detalhe ampliado da mesma
+região em cada uma; a composição de três canais foi a adotada.
 
 \begin{figure}[!htb]
     \centering
-    \caption{Carta do conjunto de dados em RGB e na variante de realce de micro-relevo adotada nas Configurações 3 e 4}
+    \caption{Carta do conjunto de dados em RGB e nas quatro variantes de realce de micro-relevo comparadas}
     \label{fig:rgb_fotometrica}
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=0.90\textwidth]{assets/figuras/otimizadas/realce_carta074_rgb.jpg}
-
-        \vspace{0.2cm}
-        {\small (a) Imagem RGB}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.45\textwidth}
-        \centering
-        \includegraphics[width=0.90\textwidth]{assets/figuras/otimizadas/realce_carta074_composicao.jpg}
-
-        \vspace{0.2cm}
-        {\small (b) Composição de três canais}
-    \end{minipage}
-
-    \legend{Na imagem (b), exibida como imagem colorida, os canais azul, verde e vermelho contêm, respectivamente, a luminosidade, a luminosidade com CLAHE e a medida de Frangi; as cores não têm significado para a rede.
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figF3_variantes_realce.jpg}
+    \legend{Da esquerda para a direita: imagem RGB; \textit{emboss} em uma direção (variante \textit{emboss} e CLAHE); \textit{emboss} em oito direções (variante CLAHE e \textit{emboss} em oito direções); Frangi; e composição de três canais. Todas usam o CLAHE, e a coluna destacada é a adotada; abaixo de cada coluna, o F1 na validação interna da Dobra 1. Na composição de três canais, exibida como imagem colorida, os canais azul, verde e vermelho contêm, respectivamente, a luminosidade, a luminosidade com CLAHE e a medida de Frangi; as cores não têm significado para a rede. O quadrado laranja marca a região ampliada na linha de baixo.
 Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -3683,22 +3710,27 @@ delas decorrem.
 \label{sec:retomada}
 Este trabalho tratou da detecção de defeitos superficiais em cartas
 Pokémon TCG em um cenário com duas dificuldades: a maior parte dos
-defeitos é pequena em relação à imagem, e há poucos dados anotados. O objetivo geral foi avaliar estratégias de treinamento
-aplicadas ao YOLOv8 nesse cenário, sobre um mesmo conjunto de dados e um
-mesmo protocolo de avaliação.
+defeitos é pequena em relação à imagem, e há poucos dados anotados. O objetivo geral foi identificar quais estratégias de
+treinamento melhoram a capacidade do YOLOv8 de localizar esses defeitos,
+comparando-as sobre um mesmo conjunto de dados e um mesmo protocolo de
+avaliação.
 
-Os objetivos específicos foram atendidos. A preparação dos dados
-resultou em um conjunto de 206 cartas com 4.808 anotações da classe
-única \textit{defeito} (Seção~\ref{subsec:dados}). As quatro
-configurações do estudo fatorial foram implementadas e comparadas pela
-precisão, pela revocação, pelo F1, pelo mAP@0,5 e pelo F1 por carta, e a
+Os objetivos específicos foram atendidos, sobre um conjunto de 206
+cartas com 4.808 anotações da classe única \textit{defeito}
+(Seção~\ref{subsec:dados}). Os efeitos do aumento de dados e do realce
+de micro-relevo (primeiro e segundo objetivos) foram medidos pelas
+quatro configurações do estudo fatorial, comparadas pela precisão, pela
+revocação, pelo F1, pelo mAP@0,5 e pelo F1 por carta, e a
 Configuração 2 (RGB com aumento de dados) teve o melhor desempenho.
 Sobre ela, a avaliação da cabeça P2 mediu a revocação dos defeitos
 menores que 8 pixels, e a da resolução de entrada comparou 1280 e 640
-pixels pelo F1 por carta. A curva de aprendizado, obtida em duas dobras,
-verificou se o desempenho ainda crescia com o número de cartas. A
-análise conjunta desses resultados, na Seção~\ref{subsec:discussao},
-levou à decisão sobre as hipóteses, resumida a seguir.
+pixels pelo F1 por carta (terceiro objetivo). A curva de aprendizado,
+obtida em duas dobras, verificou se o desempenho ainda crescia com o
+número de cartas (quarto objetivo). A análise conjunta desses
+resultados, na Seção~\ref{subsec:discussao}, levou à decisão sobre as
+hipóteses, resumida a seguir; a estratégia de melhor desempenho e o uso
+possível do detector como apoio à inspeção (quinto objetivo) são
+retomados ao fim desta seção.
 
 A Tabela~\ref{tab:sintese_hipoteses} resume a decisão sobre as
 hipóteses. H1 foi confirmada: o aumento de dados elevou o F1 por carta
