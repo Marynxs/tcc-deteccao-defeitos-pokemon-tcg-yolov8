@@ -166,7 +166,8 @@ carta de 0,376 contra 0,270. Os defeitos menores que 8 pixels quase
 não foram encontrados; aplicar os modelos também a recortes
 ampliados da imagem elevou a revocação desses
 defeitos, mas reduziu o F1 médio por carta. Uma curva de aprendizado,
-em duas dobras, sugeriu ganho com mais cartas. O detector ainda não é suficiente
+nas cinco dobras, mostrou que o desempenho cresceu com mais cartas, com
+ganho menor a cada acréscimo. O detector ainda não é suficiente
 para a graduação automática, mas pode vir a servir de apoio à inspeção
 feita pelo avaliador, uso que não foi testado aqui.
 O código e os resultados estão disponíveis em repositório público.
@@ -216,8 +217,9 @@ Pokémon TCG. Baixo Volume de Dados. YOLOv8. Realce de Micro-Relevo.
       mean per-card F1 of 0.376 against 0.270. Defects smaller than 8
       pixels were almost never found; also applying the models to enlarged crops
       of the image raised the recall of these defects, but
-      lowered the mean per-card F1. A learning curve, in two folds,
-      suggested gains with more cards. The detector is not
+      lowered the mean per-card F1. A learning curve, across the five
+      folds, showed that performance grew with more cards, with a smaller
+      gain at each increment. The detector is not
       yet sufficient for automatic grading, but it could support the
       inspection carried out by the grader, a use not tested here. The code and results are available in a public
       repository.
@@ -277,6 +279,7 @@ FN     & \textit{False Negative} (Falso Negativo) \\
 FP     & \textit{False Positive} (Falso Positivo) \\
 FPN    & \textit{Feature Pyramid Network} (Rede de Pirâmide de Características) \\
 HSV    & \textit{Hue, Saturation, Value} (Matiz, Saturação, Valor) \\
+IC     & Intervalo de Confiança \\
 IoU    & \textit{Intersection over Union} \\
 mAP    & \textit{mean Average Precision} (Média das Precisões Médias) \\
 MDPI   & \textit{Multidisciplinary Digital Publishing Institute} \\
@@ -649,8 +652,8 @@ ampliados da imagem e um novo treino da configuração de melhor desempenho
 sem as cartas cujo desgaste, espalhado pela superfície, não pôde ser marcado
 por caixas foram análises decididas depois dos resultados do estudo fatorial e sem
 hipótese formal; seus resultados complementam a leitura
-das hipóteses, sem alterar a decisão sobre elas, e os obtidos em uma ou
-duas dobras indicam direções a confirmar. A primeira verificou a
+das hipóteses, sem alterar a decisão sobre elas, e o obtido em uma
+única dobra, o do YOLOv8m, indica uma direção a confirmar. A primeira verificou a
 expectativa que motivou a escolha da resolução de 1280 pixels antes dos
 testes preliminares, a partir da medição do tamanho dos defeitos nas 82
 cartas recebidas inicialmente; a análise do tamanho dos defeitos no
@@ -1959,6 +1962,23 @@ teste de Friedman, usado para comparar vários classificadores ao mesmo tempo,
 mas registra que ele pode ser usado, de forma geral, para controlar o erro do
 conjunto de testes quando várias hipóteses são testadas.
 
+A Figura~\ref{fig:conceitos_teste} reúne, com valores ilustrativos, os
+três procedimentos: a validação cruzada em cinco dobras
+(Seção~\ref{subsec:validacao_cruzada}), em que cada dobra é reservada
+para avaliação em uma das iterações e as outras quatro são usadas no
+treinamento; o teste de Wilcoxon pareado, em que o F1 de uma mesma carta
+sob dois modelos forma um par, aqui com dez cartas, oito com F1 maior no
+segundo modelo e duas com F1 menor; e a correção de Holm, com os três
+valores-p do exemplo anterior.
+
+\begin{figure}[H]
+    \centering
+    \caption{Validação cruzada em cinco dobras (a), teste de Wilcoxon pareado (b) e correção de Holm (c), com valores ilustrativos.}
+    \label{fig:conceitos_teste}
+    \includegraphics[width=\textwidth]{assets/figuras/206/figE_conceitos_teste.pdf}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{figure}
+
 O teste pareado responde se uma configuração supera a outra, mas não informa
 a incerteza de uma métrica isolada, como o mAP@0,5 de um modelo. Para isso,
 pode-se usar um intervalo de confiança por \textit{bootstrap}. No
@@ -2140,7 +2160,7 @@ feita depois das análises complementares:
     1280 pixels com a de 640 pixels, ambos avaliados nas cinco dobras.
 
     \item Análises complementares sobre a mesma configuração: a curva de
-    aprendizado, com 25\%, 50\% e 75\% das cartas do treino efetivo, em duas
+    aprendizado, com 25\%, 50\% e 75\% das cartas do treino efetivo, nas cinco
     dobras, um teste de capacidade do modelo com um tamanho maior do
     YOLOv8, o YOLOv8m, em uma dobra, e a inferência por fatias
     (Seção~\ref{subsec:objetos_pequenos}), com os modelos já treinados,
@@ -2508,8 +2528,9 @@ a 34 cartas, formaram a validação interna, sorteadas mantendo juntas
 as cartas de mesma ilustração, e o treino efetivo ficou com 129 a 134
 cartas. Essas listas, de treino efetivo, de validação interna e de
 avaliação, foram definidas uma única vez para cada iteração e usadas sem
-alteração em todas as configurações; só a curva de aprendizado reduziu
-o treino efetivo (Seção~\ref{subsec:ablacao}).
+alteração em todas as configurações; só a curva de aprendizado e o
+treino sem as cartas com desgaste difuso reduziram o treino efetivo
+(Seção~\ref{subsec:ablacao}).
 
 A validação interna foi usada nas escolhas descritas na
 Seção~\ref{subsec:validacao_cruzada}: a parada antecipada, o limiar de
@@ -2690,22 +2711,34 @@ mesma forma, e a revocação de cada faixa de tamanho foi calculada como
 em H4, com as faixas definidas na resolução de 1280 pixels. O mAP@0,5
 de cada dobra foi reportado como descrição, sem teste.
 
-A curva de aprendizado foi avaliada nas Dobras 3 e 5. Em cada dobra, os
+A curva de aprendizado foi avaliada nas cinco dobras. Em cada dobra, os
 modelos treinados com 25\%, 50\% e 75\% das cartas do treino efetivo e
 a rodada com todas elas foram avaliados nas mesmas cartas da dobra de
-avaliação, pelo mAP@0,5. A curva usou o mAP@0,5, e não o F1 por carta,
-porque o mAP@0,5 não depende do limiar de confiança. Com o F1, cada
+avaliação; assim, cada uma das 206 cartas foi avaliada uma vez em cada
+ponto da curva, pelo modelo da sua dobra. A medida principal da curva
+foi o mAP@0,5, e não o F1 por carta, porque o mAP@0,5 não depende do
+limiar de confiança. Com o F1, cada
 ponto da curva teria um limiar próprio, escolhido na validação interna
 por um modelo treinado com menos cartas, e a variação dessa escolha
 entre os pontos se somaria à variação causada pelo número de cartas de
-treino, que é o que a curva mede. A incerteza das diferenças entre os
+treino, que é o que a curva mede. O mAP@0,5 de cada ponto foi
+recalculado a partir das predições salvas, como nas demais análises, de
+duas formas: em cada dobra, como descrição; e uma única vez sobre as
+predições das 206 cartas reunidas. A
+incerteza deste último e das diferenças entre os
 pontos da curva foi estimada pelo intervalo de confiança por
 \textit{bootstrap} descrito na
 Seção~\ref{subsec:comparacao_estatistica}, com a carta como unidade
 sorteada. Em cada repetição, a mesma amostra de cartas foi usada para
 recalcular o mAP@0,5 de todos os pontos. O intervalo foi obtido para a
 diferença entre pontos consecutivos e entre 50\% e 100\% das cartas do
-treino efetivo.
+treino efetivo. Nesses mesmos quatro pares de pontos, o F1 por carta e
+a revocação por carta, com o limiar fixado na validação interna de cada
+rodada, foram comparados pelo teste de Wilcoxon pareado bilateral, com
+206 pares e correção de Holm sobre as quatro comparações ($m = 4$),
+aplicada separadamente a cada métrica e à parte das demais comparações;
+nessas comparações, a diferença entre os pontos inclui também a
+variação na escolha do limiar.
 
 A representação de controle, com a luminosidade (L$^*$) sem realce
 repetida nos três canais (Seção~\ref{subsec:estrategias}), foi
@@ -2788,7 +2821,7 @@ Ablação da cabeça P2 & H4 & Cabeça P2 (sem ou com) & Configuração de melho
 \midrule
 Ablação da resolução de entrada & Sem hipótese formal; verificar a expectativa que motivou a escolha de 1280 pixels & 640 ou 1280 pixels & Configuração de melhor desempenho, YOLOv8s & 1 a 5 & F1 por carta e revocação por carta; Wilcoxon pareado bilateral (206 e 201 pares), sem Holm; revocação por faixa, e mAP@0,5 por dobra, sem teste \\
 \midrule
-Curva de aprendizado & Análise complementar, sem hipótese & Fração das cartas do treino efetivo (25\%, 50\%, 75\% e 100\%) & Configuração de melhor desempenho, YOLOv8s, 1280 pixels & Dobras 3 e 5 & mAP@0,5, que não depende do limiar de confiança; intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta como unidade \\
+Curva de aprendizado & Análise complementar, sem hipótese & Fração das cartas do treino efetivo (25\%, 50\%, 75\% e 100\%) & Configuração de melhor desempenho, YOLOv8s, 1280 pixels & 1 a 5 & mAP@0,5, que não depende do limiar de confiança, por dobra e nas 206 cartas reunidas, com intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta como unidade; F1 por carta e revocação por carta, com Wilcoxon pareado bilateral (206 pares) e correção de Holm sobre as quatro comparações de cada métrica \\
 \midrule
 Teste de capacidade & Análise complementar, sem hipótese & YOLOv8s ou YOLOv8m & Configuração de melhor desempenho, 1280 pixels & Dobra 5 & F1 por carta; Wilcoxon pareado bilateral (45 pares), sem Holm \\
 \midrule
@@ -3173,7 +3206,9 @@ de 2\%. Como cada variante foi
 treinada uma única vez, em uma única dobra, essa diferença não foi
 testada e não permite afirmar que a composição de três canais seja
 superior às demais: a escolha foi uma seleção de hiperparâmetro, e não
-um resultado do trabalho.
+um resultado do trabalho. A comparação desses valores com o da
+Configuração 1 na mesma validação interna, feita depois do estudo
+fatorial, é apresentada na Seção~\ref{subsec:discussao}.
 
 A Figura~\ref{fig:rgb_fotometrica} mostra uma carta do conjunto de
 dados em RGB e nas quatro variantes, com um detalhe ampliado da mesma
@@ -3231,25 +3266,26 @@ fatorial na mesma dobra. Os elementos alterados foram a cabeça P2, nas
 cinco dobras, que trouxe junto a perda dos pesos pré-treinados em parte
 das camadas (Seção~\ref{subsec:modelo_base}); a resolução de entrada de
 640 pixels, também nas cinco dobras; o YOLOv8m, em uma rodada na Dobra
-5; a fração das cartas do treino efetivo, na curva de aprendizado; e o
+5; a fração das cartas do treino efetivo, na curva de aprendizado,
+também nas cinco dobras; e o
 conjunto de treino, sem as nove cartas com desgaste difuso, nas cinco
 dobras. A
 inferência por fatias usou os modelos já treinados da configuração de
 melhor desempenho, sem novas rodadas. A exceção foi a representação de
 controle, que partiu da Configuração 3 e trocou apenas a representação
 de entrada, nas cinco dobras. Ao todo,
-contadas as quatro rodadas da escolha da variante de realce, foram 51
+contadas as quatro rodadas da escolha da variante de realce, foram 60
 rodadas de treinamento.
 
 Na curva de aprendizado, a configuração de melhor desempenho foi
 treinada com 25\%, 50\% e 75\% das cartas do treino efetivo, nas
-Dobras 3 e 5, com a validação interna e a dobra de avaliação
+cinco dobras, com a validação interna e a dobra de avaliação
 inalteradas; o ponto de 100\% é a rodada do estudo fatorial na mesma
 dobra. As cartas foram sorteadas uma única vez, com semente fixa, de
 modo que cada fração contivesse a anterior e que as cartas de mesma
 ilustração ficassem juntas.
 
-As dobras do teste de capacidade e da curva de aprendizado foram escolhidas depois do estudo fatorial. A
+A dobra do teste de capacidade foi escolhida depois do estudo fatorial. A
 Dobra 5 foi escolhida por ter, na avaliação, o número de anotações mais
 próximo do típico entre as cinco dobras (783, a mediana) e por não
 conter as cartas com desgaste mais extenso, que ficaram nas Dobras 1 e
@@ -3261,11 +3297,11 @@ tendem a favorecê-la: a comparação com o YOLOv8m pode estar
 desfavorável a ele. A resolução de 640 pixels, avaliada primeiro nessa
 dobra, foi depois treinada também nas outras quatro, e a sua comparação
 usa as cinco dobras, sem essa ressalva. O YOLOv8m foi avaliado na mesma
-dobra, o que permitiu compará-lo com a rodada que também é o ponto de
-100\% da curva. A
-curva de aprendizado foi repetida na Dobra 3, que, como a 5, não contém
-as cartas com desgaste mais extenso, para verificar se sua forma se
-mantinha em outra dobra.
+dobra, o que permitiu compará-lo com a rodada que também é, nessa
+dobra, o ponto de 100\% da curva de aprendizado. A curva, obtida
+primeiro nas Dobras 3 e 5, que não contêm as cartas com desgaste mais
+extenso, foi depois estendida às outras três, e os seus resultados
+usam as cinco dobras.
 
 % ---------------------------------------------------------------
 \section{Resultados e análises}
@@ -3730,59 +3766,76 @@ O resultado do YOLOv8m vem de uma única rodada em uma única dobra
 \label{subsec:res_curva}
 
 A Figura~\ref{fig:curva_aprendizado} mostra a curva de aprendizado da
-Configuração 2 nas Dobras 3 e 5. Com 25\%, 50\%, 75\% e 100\% das cartas do
-treino efetivo, o mAP@0,5 foi de 0,220, 0,243, 0,266 e 0,286 na Dobra 3 e
-de 0,198, 0,262, 0,267 e 0,313 na Dobra 5. A
-Tabela~\ref{tab:curva_diferencas} apresenta as diferenças entre os pontos,
-com os intervalos de confiança de 95\% por \textit{bootstrap}.
+Configuração 2 nas cinco dobras. Com 25\%, 50\%, 75\% e 100\% das cartas
+do treino efetivo, o mAP@0,5 calculado sobre as 206 cartas reunidas foi
+de 0,167, 0,198, 0,214 e 0,230. O mAP@0,5 de cada dobra foi de 0,152,
+0,167, 0,193 e 0,191 na Dobra 1; de 0,166, 0,207, 0,235 e 0,217 na
+Dobra 2; de 0,220, 0,243, 0,266 e 0,286 na Dobra 3; de 0,167, 0,200,
+0,196 e 0,225 na Dobra 4; e de 0,198, 0,262, 0,267 e 0,313 na Dobra 5,
+com médias de 0,181, 0,216, 0,231 e 0,247. O ponto de 100\% de cada
+dobra é a rodada da Configuração 2 no estudo fatorial
+(Tabela~\ref{tab:desempenho_configuracoes}).
 
-Para a leitura da curva, adotou-se um critério definido depois dos
-resultados: considerou-se que o último acréscimo de cartas, de 75\% para
-100\%, teve efeito distinguível de zero quando o intervalo de confiança
-da sua diferença não continha o zero. Esse efeito foi distinguível na
-Dobra 5, com diferença de $+0{,}046$ e intervalo de
-$[+0{,}017;\ +0{,}072]$, e não na Dobra 3, com $+0{,}021$ e intervalo de
-$[-0{,}011;\ +0{,}048]$, embora nesta o mAP@0,5 tenha continuado a subir
-em ritmo semelhante ao dos acréscimos anteriores. A diferença entre
-100\% e 50\% das cartas excluiu o zero nas duas dobras.
+A Tabela~\ref{tab:curva_diferencas} apresenta as diferenças entre os
+pontos, no mAP@0,5 das 206 cartas, com os intervalos de confiança de
+95\% por \textit{bootstrap}, e no F1 por carta e na revocação por carta,
+com o teste de Wilcoxon. Para a leitura da curva, adotou-se um critério
+definido depois dos resultados: considerou-se que um acréscimo de
+cartas teve efeito distinguível de zero no mAP@0,5 quando o intervalo de
+confiança da sua diferença não continha o zero. Por esse critério, os
+três acréscimos tiveram efeito distinguível de zero, mas o ganho
+diminuiu a cada um: $+0{,}031$ de 25\% para 50\% das cartas, $+0{,}017$
+de 50\% para 75\% e $+0{,}016$ de 75\% para 100\%. O F1 por carta médio
+foi de 0,316, 0,351, 0,376 e 0,376: subiu de forma significativa nos
+dois primeiros acréscimos e não mudou no último, de 75\% para 100\%, em
+que 99 cartas tiveram F1 maior, 94 menor e 13 igual, com valor-p
+ajustado de 0,29. A revocação por carta média foi de 0,323, 0,363,
+0,369 e 0,376, e só o primeiro acréscimo, de 25\% para 50\%, teve
+diferença significativa. Em duas dobras, a 1 e a 2, o mAP@0,5 com 75\%
+das cartas ficou acima do obtido com todas elas. O desempenho,
+portanto, cresceu com mais cartas, cada vez menos, sem chegar a um
+patamar claro no mAP@0,5.
 
 Na Dobra 5, o ponto de 100\% é a rodada de comparação discutida na
 Seção~\ref{subsec:ablacao}. Os
 intervalos refletem apenas a incerteza devida às cartas avaliadas, e não a
 variação entre treinamentos repetidos, porque cada ponto da curva vem de
-uma única rodada.
+uma única rodada em cada dobra.
 
 \begin{table}[H]
 \centering
-\caption{Diferenças de mAP@0,5 entre os pontos da curva de aprendizado}
+\caption{Diferenças entre os pontos da curva de aprendizado}
 \label{tab:curva_diferencas}
 \scriptsize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{>{\raggedright\arraybackslash}p{3.6cm}cc}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm}ccccccc}
 \toprule
-\textbf{Diferença} & \textbf{Dobra 3} & \textbf{Dobra 5} \\
+ & & \multicolumn{3}{c}{\textbf{F1 por carta}} & \multicolumn{3}{c}{\textbf{Revocação por carta}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Diferença} & \textbf{mAP@0,5} & \textbf{Médias} & \textbf{Nulos} & \textbf{Holm} & \textbf{Médias} & \textbf{Nulos} & \textbf{Holm} \\
 \midrule
-50\% menos 25\% & $+0{,}022$ $[-0{,}006;\ +0{,}054]$ & $+0{,}064$ $[+0{,}027;\ +0{,}098]$ \\
-75\% menos 50\% & $+0{,}023$ $[-0{,}007;\ +0{,}051]$ & $+0{,}005$ $[-0{,}025;\ +0{,}037]$ \\
-100\% menos 75\% & $+0{,}021$ $[-0{,}011;\ +0{,}048]$ & $+0{,}046$ $[+0{,}017;\ +0{,}072]$ \\
+50\% menos 25\% & $+0{,}031$ $[+0{,}018;\ +0{,}046]$ & 0,351 e 0,316 & 14 & $<$ 0,001 & 0,363 e 0,323 & 53 & $<$ 0,001 \\
+75\% menos 50\% & $+0{,}017$ $[+0{,}004;\ +0{,}029]$ & 0,376 e 0,351 & 22 & 0,007 & 0,369 e 0,363 & 76 & 0,93 \\
+100\% menos 75\% & $+0{,}016$ $[+0{,}003;\ +0{,}029]$ & 0,376 e 0,376 & 13 & 0,29 & 0,376 e 0,369 & 72 & 0,46 \\
 \midrule
-100\% menos 50\% & $+0{,}044$ $[+0{,}012;\ +0{,}068]$ & $+0{,}051$ $[+0{,}026;\ +0{,}077]$ \\
+100\% menos 50\% & $+0{,}032$ $[+0{,}020;\ +0{,}045]$ & 0,376 e 0,351 & 13 & 0,003 & 0,376 e 0,363 & 49 & 0,46 \\
 \bottomrule
 \end{tabular}
-\legend{Porcentagens das cartas do treino efetivo. Diferença observada entre os pontos, calculada sobre os valores sem arredondamento; entre colchetes, o intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta da dobra de avaliação como unidade sorteada e a mesma amostra de cartas usada em todos os pontos de cada repetição.
+\legend{Porcentagens das cartas do treino efetivo; 206 cartas, cada uma avaliada pelo modelo da sua dobra. mAP@0,5: diferença entre os pontos no mAP@0,5 calculado sobre as 206 cartas reunidas, sobre os valores sem arredondamento; entre colchetes, o intervalo de confiança de 95\% por \textit{bootstrap} percentil, com a carta como unidade sorteada e a mesma amostra de cartas usada em todos os pontos de cada repetição. Médias: F1 por carta médio, ou revocação por carta média, do primeiro e do segundo ponto indicados; de 75\% para 100\%, o F1 por carta médio variou $-0{,}0002$. Nulos: pares com diferença nula, excluídos do cálculo do teste. Holm: valor-p do teste de Wilcoxon pareado bilateral, ajustado pela correção de Holm com $m = 4$, aplicada separadamente ao F1 por carta e à revocação por carta.
 Fonte: Elaborado pelo autor (2026).}
 \end{table}
 
 \begin{figure}[H]
     \centering
-    \caption{Curva de aprendizado da Configuração 2 nas Dobras 3 e 5.}
+    \caption{Curva de aprendizado da Configuração 2 nas cinco dobras.}
     \label{fig:curva_aprendizado}
     \includegraphics[width=0.85\textwidth]{assets/curva_aprendizado.png}
     \legend{mAP@0,5 na dobra de avaliação em função da fração das cartas
-    do treino efetivo; o ponto de 100\% é a rodada do estudo fatorial na
-    mesma dobra. As barras indicam o intervalo de confiança de 95\% por
-    \textit{bootstrap} percentil de cada ponto, com a carta como unidade
-    sorteada.
+    do treino efetivo; o ponto de 100\% é a rodada do estudo fatorial em
+    cada dobra. Linhas cinza: mAP@0,5 de cada dobra. Linha azul: mAP@0,5 calculado sobre as 206 cartas
+    reunidas, cada uma avaliada pelo modelo da sua dobra; as barras
+    indicam o intervalo de confiança (IC) de 95\% por \textit{bootstrap}
+    percentil de cada ponto, com a carta como unidade sorteada.
     Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
@@ -3948,7 +4001,17 @@ com essa possibilidade, sem significância estatística. Entre as variantes
 comparadas, a adotada foi a única que manteve a luminosidade original em
 um dos canais, o que também é compatível com a segunda hipótese; a escolha,
 porém, foi uma seleção de hiperparâmetro, e não permite afirmar que essa
-variante seja superior às demais (Seção~\ref{subsec:estrategias}). Como a escolha da variante pode favorecer ligeiramente as Configurações 3 e 4, o
+variante seja superior às demais (Seção~\ref{subsec:estrategias}). Na
+mesma validação interna da Dobra 1 em que a variante foi escolhida, com
+o F1 calculado da mesma forma, as quatro variantes, de 0,151 a 0,208,
+ficaram abaixo da Configuração 1, com 0,270, e da representação de
+controle, com 0,256, ambas também treinadas sem aumento de dados. Como
+cada valor vem de um único treinamento, em uma única dobra, sem teste
+estatístico, isso é um indício, e não um resultado: como as outras três
+variantes ficaram abaixo da adotada nessa validação interna, ele sugere
+que a escolha de outra delas dificilmente teria invertido a comparação
+com as imagens RGB, o que não foi verificado nas dobras de avaliação.
+Como a escolha da variante pode favorecer ligeiramente as Configurações 3 e 4, o
 resultado contrário a elas não se deve a essa escolha.
 
 A cabeça P2 não aumentou a revocação dos defeitos menores que 8 pixels
@@ -3975,11 +4038,15 @@ entrada pesou mais que a capacidade do modelo. Isso é
 coerente com a análise de tamanho da Seção~\ref{sec:contextualizacao}: a
 640 pixels, a maior parte dos defeitos fica abaixo do passo do nível P3,
 e, em objetos diminutos, o IoU é altamente sensível ao desvio de
-localização \cite{Xu2022}. Na curva de aprendizado, o mAP@0,5 subiu até o último ponto nas duas
-dobras, e a diferença entre 100\% e 50\% das cartas excluiu o zero em
-ambas, o que sugere que mais dados tendem a melhorar o modelo
-\cite{Viering2023}; o último acréscimo, porém, só se distinguiu de zero
-na Dobra 5, cuja rodada de 100\% pode estar acima do típico. O número de cartas necessário não foi estimado,
+localização \cite{Xu2022}. Na curva de aprendizado, nas cinco dobras, o
+mAP@0,5 das 206 cartas subiu em todos os acréscimos de cartas, com
+intervalos de confiança que não incluíram o zero, o que indica que mais
+dados tendem a melhorar o modelo \cite{Viering2023}. O ganho, porém,
+diminuiu a cada acréscimo, de $+0{,}031$ para $+0{,}017$ e $+0{,}016$;
+o F1 por carta não melhorou de 75\% para 100\% das cartas; e, em duas
+dobras, o mAP@0,5 com 75\% das cartas superou o obtido com todas elas.
+A curva desacelerou sem chegar a um patamar claro, e mais cartas
+tendem a render ganhos menores a cada acréscimo. O número de cartas necessário não foi estimado,
 porque extrapolar a curva a partir de poucos dados produz estimativas
 pouco confiáveis \cite{Mahmood2022}.
 
@@ -4012,9 +4079,16 @@ A revocação menor na frente das cartas, que em todas tem superfície
 holográfica, é compatível com a observação de que, em superfícies
 altamente refletoras, artefatos de reflexo podem mascarar as
 características visuais necessárias para identificar defeitos
-\cite{KimMG2026}. Como a frente e o verso diferem também em outros
-aspectos, como a arte impressa, essa é uma hipótese explicativa, não
-testada.
+\cite{KimMG2026}. A frente e o verso, porém, diferem também em outros
+aspectos, e duas outras explicações são compatíveis com essa
+diferença. A primeira é o fundo em torno dos defeitos: o verso tem o
+mesmo desenho impresso em 204 das 206 cartas, de modo que a superfície sem
+defeito ao redor de cada marca se repete de uma carta para outra,
+enquanto a frente muda a cada carta, com a ilustração, o texto e a
+superfície holográfica. A segunda é o número de exemplos: o verso reúne
+3.111 das 4.808 anotações (Seção~\ref{subsec:dados}), cerca de dois
+terços, e concentra, assim, a maior parte dos exemplos de defeitos. Nenhuma das três explicações foi testada, e elas não se
+excluem.
 
 O desempenho absoluto ficou baixo, e o tamanho dos defeitos, sozinho, não
 explica esse valor. Com a anotação completa, a Configuração 2 deixou de
@@ -4025,7 +4099,7 @@ assim, por cerca de 15\% dos defeitos perdidos; se todos os defeitos dela
 fossem encontrados, a revocação iria de 0,285 a cerca de 0,39. A maior
 parte dos perdidos tem 8 pixels ou mais. Reúnem-se aqui causas possíveis,
 nenhuma testada isoladamente como explicação do desempenho absoluto: o volume de dados,
-já que a curva de aprendizado ainda subia no último ponto, nas duas dobras avaliadas; a rigidez do
+já que, nas cinco dobras, o mAP@0,5 da curva de aprendizado ainda subia no último acréscimo de cartas, embora cada vez menos; a rigidez do
 critério de IoU de 0,5 diante de caixas traçadas à mão
 (Seção~\ref{subsec:objetos_pequenos}); a anotação por um único anotador,
 cuja consistência não foi medida (Seção~\ref{sec:formulacao}); o desgaste
@@ -4115,7 +4189,7 @@ Configuração 2 (RGB com aumento de dados) teve o melhor desempenho.
 Sobre ela, a avaliação da cabeça P2 mediu a revocação dos defeitos
 menores que 8 pixels, e a da resolução de entrada comparou 1280 e 640
 pixels pelo F1 por carta, nas cinco dobras (terceiro objetivo). A curva de aprendizado,
-obtida em duas dobras, verificou se o desempenho ainda crescia com o
+obtida nas cinco dobras, verificou se o desempenho ainda crescia com o
 número de cartas (quarto objetivo). A análise conjunta desses
 resultados, na Seção~\ref{subsec:discussao}, levou à decisão sobre as
 hipóteses, resumida a seguir; a estratégia de melhor desempenho e o uso
@@ -4150,12 +4224,12 @@ micro-relevo e a cabeça P2 não trouxeram ganho; sem aumento de dados, a
 troca de dois canais pela luminosidade com CLAHE e pela medida de
 Frangi piorou o desempenho nas duas referências de anotação, e a
 retirada da cor só o piorou com a anotação completa. Na curva de aprendizado,
-o mAP@0,5 com todas as cartas do treino superou o obtido com metade
-delas nas duas dobras, e o intervalo de confiança dessa diferença não
-incluiu o zero em nenhuma delas (Tabela~\ref{tab:curva_diferencas}).
-Isso sugere que mais cartas tendem a melhorar o modelo. O último
-acréscimo, de 75\% para 100\% das cartas, só se distinguiu de zero na
-Dobra 5. Quanto à capacidade, a comparação entre o YOLOv8m e o
+nas cinco dobras, o mAP@0,5 das 206 cartas subiu a cada acréscimo de
+cartas, com intervalos de confiança que não incluíram o zero
+(Tabela~\ref{tab:curva_diferencas}), mas o ganho diminuiu a cada
+acréscimo, e o F1 por carta não melhorou de 75\% para 100\% das cartas.
+Isso indica que mais cartas tendem a melhorar o modelo, com ganhos
+cada vez menores. Quanto à capacidade, a comparação entre o YOLOv8m e o
 YOLOv8s foi inconclusiva.
 
 Os valores absolutos, porém, continuaram baixos. Com a anotação
@@ -4222,7 +4296,14 @@ Os resultados deste trabalho devem ser lidos com as limitações a seguir.
 Quanto aos dados e à anotação, todas as caixas foram traçadas ou
 validadas por um único anotador, e a concordância entre anotadores não
 foi medida; o desempenho medido fica limitado pela consistência dessa
-anotação. Os modelos foram treinados com a anotação completa, que inclui
+anotação. Mesmo a anotação completa pode não conter todos os
+defeitos das cartas. A revisão traçou 963 caixas novas e aceitou 892 caixas sugeridas
+(Seção~\ref{subsec:dados}), o que mostra que a primeira etapa tinha
+lacunas, e nada garante que a revisão as tenha eliminado. Uma predição
+sobre um defeito sem caixa conta como falso positivo, de modo que a
+precisão medida tende a ficar abaixo da que seria obtida com uma
+anotação sem lacunas, e a revocação mede apenas os defeitos anotados; a
+extensão dessas lacunas não foi medida. Os modelos foram treinados com a anotação completa, que inclui
 as caixas sugeridas, e a verificação com as duas referências alcança apenas
 a avaliação; uma eventual influência dessas caixas sobre o treinamento
 não foi medida. O desgaste difuso não recebeu caixa, e as predições sobre ele
@@ -4259,11 +4340,10 @@ caracterizados.
 
 Quanto ao alcance, a capacidade do modelo foi comparada em uma única
 dobra, a Dobra 5, cuja rodada de comparação pode
-estar acima do seu desempenho típico. A curva de aprendizado foi obtida
-em duas dobras, com um critério de leitura definido depois dos
-resultados, e o seu ponto com todas as cartas, na Dobra 5, é essa mesma
-rodada. A única dobra em que o último acréscimo de cartas se distinguiu
-de zero é, portanto, a que pode estar acima do típico. Na resolução de
+estar acima do seu desempenho típico. A curva de aprendizado teve um
+critério de leitura definido depois dos resultados, e cada um dos seus
+pontos vem de uma única rodada em cada dobra; o seu intervalo de
+confiança, portanto, não inclui a variação entre treinamentos. Na resolução de
 640 pixels, a rodada da Dobra 1 foi encerrada pelo teto de épocas, e
 não pela paciência (Seção~\ref{subsec:hiperparametros}). A inferência
 por fatias usou modelos treinados com a imagem inteira, foi avaliada
@@ -4292,10 +4372,10 @@ ruído de fundo do nível P2.
 Para o realce de micro-relevo, resta testar por que a troca de dois
 canais pela luminosidade com CLAHE e pela medida de Frangi piorou o
 desempenho, e treinar a representação de controle também com aumento
-de dados, condição em que ela não foi avaliada. Como a curva de aprendizado sugere
-ganho com mais cartas, ampliar o conjunto de dados é um passo direto, assim como repetir nas
-demais dobras as análises feitas em uma ou duas delas: a curva de
-aprendizado e a comparação com o YOLOv8m. O aumento de dados por cópia e cola seletiva
+de dados, condição em que ela não foi avaliada. Como a curva de aprendizado indica
+ganho com mais cartas, ainda que menor a cada acréscimo, ampliar o
+conjunto de dados é um passo direto, assim como repetir nas demais
+dobras a comparação com o YOLOv8m, feita em uma só. O aumento de dados por cópia e cola seletiva
 de pequenos objetos, usado por \citeonline{Chen2024NHD}, poderia ampliar os
 exemplos de defeitos sem novas cartas. Uma ablação das transformações
 do aumento de dados, a começar pela rotação, separaria a contribuição

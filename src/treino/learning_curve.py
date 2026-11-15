@@ -75,6 +75,9 @@ def main():
                "--config", str(args.config), "--fold", str(args.fold), "--pool", args.pool,
                "--imgsz", str(args.imgsz), "--cache", "ram", "--name", nome, "--train-list", str(lista)]
         runs = ROOT / "Dataset_YOLO" / f"runs{sufixo}" / nome
+        if (runs / "resumo.json").is_file():
+            print(f"\n{nome}: ja concluida, pulando")
+            continue
         if (runs / "weights" / "last.pt").is_file() and not (runs / "resumo.json").is_file():
             cmd.append("--resume")
         print("\n$", " ".join(cmd))
