@@ -166,11 +166,23 @@ def variante_e(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
     return cv2.merge([L, c, relevo])
 
 
+def variante_l(bgr: np.ndarray, limite: float, lado: int, **_) -> np.ndarray:
+    """Controle sem realce: so a luminancia (L*) repetida nos tres canais.
+
+    Separa as duas coisas que as Configuracoes 3 e 4 mudam ao mesmo tempo em relacao as
+    1 e 2: a perda da cor e o realce. Contra a Configuracao 1 mede o efeito de tirar a
+    cor; contra a 3 (variante e) mede o efeito do realce com a cor ja fora.
+    """
+    L = luminancia(bgr)
+    return cv2.merge([L, L, L])
+
+
 VARIANTES = {
     "a": ("gradiente direcional seguido de CLAHE", variante_a),
     "b": ("CLAHE seguido de gradiente de 8 direcoes", variante_b),
     "d": ("cristas multiescala por Hessiana", variante_d),
     "e": ("composto: L original, L com CLAHE, Frangi", variante_e),
+    "l": ("controle: luminancia repetida nos tres canais, sem realce", variante_l),
 }
 
 

@@ -71,6 +71,9 @@ kbd.largo{min-width:auto}
 .ex img{width:100%;aspect-ratio:63/88;object-fit:cover;border-radius:4px;display:block}
 .ex:hover,.ex:focus-visible{border-color:var(--pred);outline:none}
 .ex.atual{border-color:var(--tinta)}
+.bloco h2.sub{margin-top:14px}
+.ex{position:relative}
+.ex .n{position:absolute;right:3px;bottom:3px;line-height:1;font:700 11px var(--titulo);background:var(--pred);color:var(--tinta);border-radius:4px;padding:2px 4px}
 .acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 
 /* painel lateral */
@@ -167,6 +170,8 @@ label.chave input{accent-color:var(--anot);width:16px;height:16px}
     <div class="bloco">
       <h2>Cartas de exemplo</h2>
       <div class="exemplos" id="exemplos"></div>
+      <h2 class="sub" id="tituloEnviadas" hidden>Enviadas por você</h2>
+      <div class="exemplos" id="enviadas" hidden></div>
       <div class="acoes"><button class="botao" id="outra">Outra foto</button></div>
     </div>
 
@@ -227,6 +232,7 @@ async function enviar(url, corpo, cab, animar){
     const j = await r.json();
     if(j.erro) throw new Error(j.erro);
     j.animar = !!animar;
+    if(url === "/api/detectar") guardarEnviada(j, cab && cab["X-Nome"]);
     carregando(false);
     await etapas(j);
   }catch(e){
@@ -295,16 +301,29 @@ function miniaturas(j){
   $("eNota").hidden = !j.motivo; $("eNota").textContent = j.motivo ? `Recorte: ${j.motivo}.` : "";
 }
 
+const enviadas = [];
+function guardarEnviada(j, nome){
+  // cada foto enviada fica disponivel na lateral ate a pagina ser recarregada, para voltar a ela sem reenviar
+  j.id = "env" + (enviadas.length + 1);
+  j.nomeArquivo = nome || `Foto ${enviadas.length + 1}`;
+  enviadas.push(j);
+  const b = document.createElement("button"); b.className = "ex"; b.dataset.id = j.id;
+  b.title = `${j.nomeArquivo} · ${j.caixas.length} ${j.caixas.length === 1 ? "caixa" : "caixas"}`;
+  b.innerHTML = `<img src="${j.imagem}" alt="${j.nomeArquivo}"><span class="n">${j.caixas.length}</span>`;
+  b.onclick = () => etapas(Object.assign(j, {animar: false}));
+  $("enviadas").append(b); $("enviadas").hidden = false; $("tituloEnviadas").hidden = false;
+}
+
 function mostrar(j){
   dados = j; sel = -1; atual = j.carta; dim = {w: j.largura, h: j.altura};
-  document.querySelectorAll(".ex").forEach(e => e.classList.toggle("atual", e.dataset.carta === j.carta));
+  document.querySelectorAll(".ex").forEach(e => e.classList.toggle("atual", j.id ? e.dataset.id === j.id : (!!j.carta && e.dataset.carta === j.carta)));
   foto.onload = () => { listar(); if(j.caixas.length){ selecionar(0, false); if(zoomAoAbrir){ zoomAoAbrir = false; zoomNoDefeito(); } } else lupaVazia(); };
   foto.src = j.imagem;
   $("img").src = j.imagem;
   carta.style.width = j.largura + "px"; carta.style.height = j.altura + "px";
   $("vazio").hidden = true; carta.hidden = false; $("ferramentas").hidden = false; $("zoomtag").hidden = false;
   ajustar(); desenhar();
-  $("tituloCarta").textContent = j.carta ? nomeCarta(j.carta) : "Foto nova";
+  $("tituloCarta").textContent = j.carta ? nomeCarta(j.carta) : (j.nomeArquivo || "Foto nova");
   $("nPrev").textContent = j.caixas.length;
   $("nMax").textContent = j.caixas.length ? fmt(j.caixas[0].conf) : "–";
   $("nLim").textContent = fmt(j.limiar);
