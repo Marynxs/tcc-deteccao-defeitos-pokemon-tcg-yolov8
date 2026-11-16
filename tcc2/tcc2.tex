@@ -734,9 +734,9 @@ trabalho, os conceitos teóricos necessários para compreender os
 experimentos e os trabalhos correlatos. A
 Seção~\ref{sec:metodologia_pesquisa_bib} descreve como a literatura foi
 buscada e selecionada. A Seção~\ref{sec:fundamentos} apresenta os
-fundamentos, do geral para o específico. Começa pela base:
-\textit{deep learning} e redes neurais convolucionais, inspeção visual automatizada,
-defeitos visuais em cartas colecionáveis, detecção de objetos, métricas
+fundamentos, partindo do problema para as ferramentas. Começa pela base:
+defeitos visuais em cartas colecionáveis, inspeção visual automatizada,
+\textit{deep learning} e redes neurais convolucionais, detecção de objetos, métricas
 de avaliação de detectores e a arquitetura YOLO. Em seguida, trata do
 \textit{transfer learning} usado em todos os experimentos, do cenário
 com baixo volume de dados e das estratégias avaliadas neste trabalho:
@@ -913,95 +913,16 @@ especializados.
 \label{sec:referencial}
 
 Esta seção apresenta os conceitos teóricos que sustentam os
-experimentos, organizados do geral para o específico. As
-Seções~\ref{subsec:dl_cnn} a~\ref{subsec:yolo} tratam da base:
-\textit{deep learning}, inspeção visual automatizada, defeitos em cartas
-colecionáveis, detecção de objetos, métricas de avaliação e a
+experimentos, organizados a partir do problema: primeiro os defeitos
+que se pretende detectar, depois as ferramentas usadas para detectá-los. As
+Seções~\ref{subsec:defeitos_visuais} a~\ref{subsec:yolo} tratam da base:
+defeitos em cartas colecionáveis, inspeção visual automatizada,
+\textit{deep learning}, detecção de objetos, métricas de avaliação e a
 arquitetura YOLO. As Seções~\ref{subsec:transfer_learning}
 a~\ref{subsec:objetos_pequenos} tratam do cenário com baixo volume de
 dados e das estratégias avaliadas. As Seções~\ref{subsec:ablacao_conceito}
 a~\ref{subsec:comparacao_estatistica} tratam de como essas estratégias
 foram comparadas.
-
-\subsection{\textit{Deep learning} e redes neurais convolucionais}
-\label{subsec:dl_cnn}
-
-\textit{Deep Learning} é uma subárea do aprendizado de máquina que utiliza
-redes neurais artificiais com múltiplas camadas para aprender representações
-diretamente a partir dos dados. Em visão computacional, essa abordagem reduziu
-a dependência de características projetadas manualmente, permitindo que os
-modelos extraíssem padrões visuais complexos a partir das próprias imagens
-\cite{Zheng2021}. Nesse contexto, as CNNs tornaram-se a arquitetura central
-para tarefas como classificação de imagens, detecção de objetos e inspeção de
-defeitos, pois utilizam camadas convolucionais para aprender características
-visuais em diferentes níveis de abstração \cite{Hussain2023}.
-
-A relevância das CNNs em visão computacional foi consolidada por arquiteturas
-como AlexNet, VGGNet, GoogLeNet, ResNet e DenseNet, que demonstraram a eficácia
-de redes profundas na extração automática de características visuais
-\cite{Zheng2021,Hussain2023}. Embora apresentem diferenças estruturais, essas
-arquiteturas compartilham a ideia de aprender representações hierárquicas da
-imagem, nas quais camadas iniciais capturam padrões simples, como bordas e
-texturas, enquanto camadas mais profundas representam formas e estruturas mais
-complexas.
-
-A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: a cada etapa, os mapas ficam menores e resumem regiões maiores da imagem. Cada pilha reúne alguns dos vários mapas gerados na etapa, e as linhas laranja mostram que uma pequena região de uma etapa corresponde a um único ponto da etapa seguinte.
-
-Na inspeção visual automatizada, essa capacidade é especialmente importante
-porque defeitos de superfície podem variar em forma, escala, textura e contraste.
-Segundo \citeonline{Zheng2021}, métodos tradicionais dependiam de atributos
-manualmente projetados, o que os tornava sensíveis a variações nas condições de
-captura e no tipo de defeito. Já métodos baseados em \textit{deep learning}
-integram a extração e a aprendizagem de características em um mesmo processo,
-favorecendo maior adaptação a diferentes cenários de inspeção.
-
-Essa base também sustenta arquiteturas modernas de detecção, como a família
-YOLO, nas quais redes convolucionais são utilizadas para extrair características
-visuais que posteriormente são empregadas na localização e classificação dos
-objetos de interesse \cite{Hussain2023}. Assim, a compreensão das CNNs é
-necessária para fundamentar o uso de detectores baseados em \textit{deep learning}
-na identificação de defeitos visuais em cartas TCG.
-
-\begin{figure}[H]
-    \centering
-    \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1, P3 e P5 identificam três dos níveis descritos na Seção~\ref{subsec:yolo}; o bloco de detecção é esquemático.}
-    \label{fig:cnn}
-    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE10_cnn_linha.jpg}
-    \legend{Fonte: Elaborado pelo autor (2026).}
-\end{figure}
-
-
-\subsection{Visão computacional e inspeção visual automatizada}
-\label{subsec:avi}
-
-A visão computacional é a área da ciência da computação que desenvolve 
-métodos para que sistemas digitais interpretem e analisem imagens e 
-vídeos automaticamente. Uma de suas aplicações mais relevantes na prática 
-industrial está nos sistemas de inspeção visual automatizada 
-(\textit{Automated Visual Inspection} -- AVI), cuja função é substituir 
-ou apoiar a inspeção manual de qualidade em linhas de produção 
-\cite{Zheng2021}.
-
-Um sistema AVI é composto, em geral, por três etapas principais: aquisição 
-de imagem, detecção de defeitos e controle de qualidade. A etapa de 
-aquisição utiliza câmeras digitais combinadas com sistemas de iluminação 
-controlada para garantir contraste adequado entre as características do 
-produto e possíveis defeitos. Em seguida, a etapa de detecção aplica 
-algoritmos de processamento de imagem para identificar e classificar 
-anomalias. Por fim, os resultados são enviados ao sistema de controle 
-de qualidade, que determina a aceitação ou rejeição do produto 
-\cite{Zheng2021}.
-
-Antes da consolidação do \textit{deep learning}, muitos sistemas AVI 
-dependiam de características projetadas manualmente por especialistas, 
-o que os tornava sensíveis a variações nas condições de aplicação 
-\cite{Zheng2021}. Com o avanço das CNNs, passaram a ser desenvolvidos 
-métodos capazes de aprender padrões diretamente a partir dos dados de 
-treinamento, superando parte das limitações dos métodos tradicionais. 
-Sistemas baseados em CNNs têm sido avaliados na inspeção de defeitos
-em semicondutores, aço e tecidos, e alguns estudos relatam acurácias de
-classificação acima de 99\% em defeitos de aço e de placas de circuito
-impresso \cite{Zheng2021}.
 
 \subsection{Defeitos visuais em cartas colecionáveis}
 \label{subsec:defeitos_visuais}
@@ -1094,6 +1015,85 @@ subjetividade de cada avaliador \cite{Nahar2025}. Neste trabalho, o
 detector não atribui nota à carta: sua tarefa é localizar os defeitos
 por caixas delimitadoras, e a finalidade pretendida é indicar ao
 avaliador em que pontos concentrar a inspeção.
+
+\subsection{Visão computacional e inspeção visual automatizada}
+\label{subsec:avi}
+
+A visão computacional é a área da ciência da computação que desenvolve
+métodos para que sistemas digitais interpretem e analisem imagens e
+vídeos automaticamente. Uma de suas aplicações mais relevantes na prática
+industrial está nos sistemas de inspeção visual automatizada
+(\textit{Automated Visual Inspection} -- AVI), cuja função é substituir
+ou apoiar a inspeção manual de qualidade em linhas de produção
+\cite{Zheng2021}.
+
+Um sistema AVI é composto, em geral, por três etapas principais: aquisição
+de imagem, detecção de defeitos e controle de qualidade. A etapa de
+aquisição utiliza câmeras digitais combinadas com sistemas de iluminação
+controlada para garantir contraste adequado entre as características do
+produto e possíveis defeitos. Em seguida, a etapa de detecção aplica
+algoritmos de processamento de imagem para identificar e classificar
+anomalias. Por fim, os resultados são enviados ao sistema de controle
+de qualidade, que determina a aceitação ou rejeição do produto
+\cite{Zheng2021}.
+
+Antes da consolidação do \textit{deep learning}, muitos sistemas AVI
+dependiam de características projetadas manualmente por especialistas,
+o que os tornava sensíveis a variações nas condições de aplicação
+\cite{Zheng2021}. Com o avanço das CNNs, apresentadas na Seção~\ref{subsec:dl_cnn}, passaram a ser desenvolvidos
+métodos capazes de aprender padrões diretamente a partir dos dados de
+treinamento, superando parte das limitações dos métodos tradicionais.
+Sistemas baseados em CNNs têm sido avaliados na inspeção de defeitos
+em semicondutores, aço e tecidos, e alguns estudos relatam acurácias de
+classificação acima de 99\% em defeitos de aço e de placas de circuito
+impresso \cite{Zheng2021}.
+
+\subsection{\textit{Deep learning} e redes neurais convolucionais}
+\label{subsec:dl_cnn}
+
+\textit{Deep Learning} é uma subárea do aprendizado de máquina que utiliza
+redes neurais artificiais com múltiplas camadas para aprender representações
+diretamente a partir dos dados. Em visão computacional, essa abordagem reduziu
+a dependência de características projetadas manualmente, permitindo que os
+modelos extraíssem padrões visuais complexos a partir das próprias imagens
+\cite{Zheng2021}. Nesse contexto, as CNNs tornaram-se a arquitetura central
+para tarefas como classificação de imagens, detecção de objetos e inspeção de
+defeitos, pois utilizam camadas convolucionais para aprender características
+visuais em diferentes níveis de abstração \cite{Hussain2023}.
+
+A relevância das CNNs em visão computacional foi consolidada por arquiteturas
+como AlexNet, VGGNet, GoogLeNet, ResNet e DenseNet, que demonstraram a eficácia
+de redes profundas na extração automática de características visuais
+\cite{Zheng2021,Hussain2023}. Embora apresentem diferenças estruturais, essas
+arquiteturas compartilham a ideia de aprender representações hierárquicas da
+imagem, nas quais camadas iniciais capturam padrões simples, como bordas e
+texturas, enquanto camadas mais profundas representam formas e estruturas mais
+complexas.
+
+A Figura~\ref{fig:cnn} ilustra esse processo em uma carta do conjunto de dados: a cada etapa, os mapas ficam menores e resumem regiões maiores da imagem. Cada pilha reúne alguns dos vários mapas gerados na etapa, e as linhas laranja mostram que uma pequena região de uma etapa corresponde a um único ponto da etapa seguinte.
+
+Na inspeção visual automatizada, essa capacidade é especialmente importante
+porque defeitos de superfície podem variar em forma, escala, textura e contraste.
+Segundo \citeonline{Zheng2021}, métodos tradicionais dependiam de atributos
+manualmente projetados, o que os tornava sensíveis a variações nas condições de
+captura e no tipo de defeito. Já métodos baseados em \textit{deep learning}
+integram a extração e a aprendizagem de características em um mesmo processo,
+favorecendo maior adaptação a diferentes cenários de inspeção.
+
+Essa base também sustenta arquiteturas modernas de detecção, como a família
+YOLO, nas quais redes convolucionais são utilizadas para extrair características
+visuais que posteriormente são empregadas na localização e classificação dos
+objetos de interesse \cite{Hussain2023}. Assim, a compreensão das CNNs é
+necessária para fundamentar o uso de detectores baseados em \textit{deep learning}
+na identificação de defeitos visuais em cartas TCG.
+
+\begin{figure}[H]
+    \centering
+    \caption{Exemplo de detecção de defeitos por uma rede convolucional em uma carta do conjunto de dados, com mapas reais da rede. Os rótulos P1, P3 e P5 identificam três dos níveis descritos na Seção~\ref{subsec:yolo}; o bloco de detecção é esquemático.}
+    \label{fig:cnn}
+    \includegraphics[width=\textwidth]{assets/figuras/otimizadas/figE10_cnn_linha.jpg}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{figure}
 
 \subsection{Detecção de objetos}
 \label{subsec:deteccao_objetos}
@@ -1274,11 +1274,22 @@ metade a largura e a altura do mapa. Os mapas obtidos formam níveis,
 identificados pela letra P seguida do número da etapa: no nível P$k$,
 cada ponto resume um bloco de $2^k \times 2^k$ pixels, de modo que o
 passo vale 2 pixels no nível P1, 4 no P2, 8 no P3, 16 no P4 e 32 no P5
-\cite{Jocher2023}. Quanto mais alto o nível, maior a região da imagem
-resumida por cada ponto e menor o detalhe espacial que o mapa preserva.
+\cite{Jocher2023}. Quanto mais alto o nível, maior o bloco da imagem
+resumido por cada ponto e menor o detalhe espacial que o mapa preserva.
+Cada etapa de redução é uma convolução, operação que percorre o mapa com
+uma janela de $3 \times 3$ pontos e calcula, em cada posição, uma soma
+ponderada dos valores da janela em todos os mapas da etapa, com pesos
+aprendidos no treinamento. Como a janela avança 2 pontos por vez, cada
+ponto do nível seguinte é calculado a partir de nove pontos do nível
+anterior, e janelas vizinhas se sobrepõem em uma linha ou coluna. Assim,
+o bloco de $2^k \times 2^k$ pixels corresponde ao passo, isto é, à
+distância entre pontos vizinhos; a região da imagem que influencia o valor
+de um ponto é maior que esse bloco e cresce a cada nível, também pelos
+módulos C2f, que refinam o mapa sem reduzi-lo.
 A Figura~\ref{fig:niveis_p} mostra os blocos dos níveis P2 a P5 sobre
 um defeito do conjunto de dados deste trabalho, na resolução de entrada
-de 1280 pixels: o menor lado do defeito, de 7,7 pixels, é menor que o
+de 1280 pixels, com os nove blocos que formam um ponto do nível seguinte
+destacados nos painéis P2 a P4: o menor lado do defeito, de 7,7 pixels, é menor que o
 lado de um bloco do nível P3. A Figura~\ref{fig:mapas_niveis} mostra os mapas de cada nível em uma carta: em P1, os detalhes da carta ainda são legíveis; em P5, restam regiões amplas, e cada ponto resume um bloco de 32 pixels, muito maior que um defeito pequeno.
 
 O \textit{neck} mistura a informação desses
@@ -1301,7 +1312,9 @@ descrita na Seção~\ref{subsec:objetos_pequenos}.
 \begin{figure}[H]
     \centering
     \caption{Blocos resumidos por um ponto nos níveis P2 a P5, sobre um
-    defeito do conjunto de dados, na imagem de entrada de 1280 pixels.}
+    defeito do conjunto de dados, na imagem de entrada de 1280 pixels.
+    Em laranja, nos painéis P2 a P4, os $3 \times 3$ blocos combinados em
+    um ponto do nível seguinte; no painel P5, o ponto que contém o defeito.}
     \label{fig:niveis_p}
     \includegraphics[width=\textwidth]{assets/figuras/206/figE2_niveis_p_1280.pdf}
     \legend{Fonte: Elaborado pelo autor (2026).}
@@ -3095,9 +3108,9 @@ público (Apêndice~\ref{ap:repositorio}).
 \section{Experimentos e cenário de testes}
 \label{sec:experimentos}
 
-Esta seção define as quatro configurações comparadas no estudo
-fatorial e descreve como as imagens de realce de micro-relevo foram
-geradas e como a variante adotada foi escolhida
+Esta seção descreve como as imagens de realce de micro-relevo foram
+geradas e como a variante adotada foi escolhida, e define as quatro
+configurações comparadas no estudo fatorial
 (Seção~\ref{subsec:estrategias}); em seguida, descreve as rodadas de
 treinamento do estudo fatorial, da ablação e das análises
 complementares (Seção~\ref{subsec:ablacao}).
@@ -3105,32 +3118,9 @@ complementares (Seção~\ref{subsec:ablacao}).
 \subsection{Estratégias de treinamento avaliadas}
 \label{subsec:estrategias}
 
-O estudo fatorial (Seção~\ref{subsec:ablacao_conceito}) cruzou dois
-fatores: o aumento de dados, sem ou com, e a representação de entrada,
-imagens RGB ou imagens de realce de micro-relevo. As quatro
-combinações formaram as configurações comparadas:
-
-\begin{description}
-    \item[Configuração 1] imagens RGB, sem aumento de dados;
-    \item[Configuração 2] imagens RGB, com aumento de dados;
-    \item[Configuração 3] imagens de realce de micro-relevo, sem aumento
-    de dados;
-    \item[Configuração 4] imagens de realce de micro-relevo, com aumento
-    de dados.
-\end{description}
-
-As quatro configurações usaram o mesmo modelo, os mesmos pesos
-pré-treinados e os mesmos hiperparâmetros de treinamento, exceto os de
-aumento de dados (Seção~\ref{sec:implementacao}). Nas Configurações 2 e 4, o aumento de dados aplicou às imagens de
-treino a translação, o espelhamento horizontal e a rotação; na
-Configuração 2, aplicou também as variações de matiz, saturação e valor
-no espaço HSV, que ficaram desligadas na Configuração 4 pelo motivo
-exposto na Seção~\ref{subsec:hiperparametros}. Os valores de cada
-parâmetro estão na Tabela~\ref{tab:augmentation}, e a consequência
-dessa diferença para a comparação entre as representações de entrada
-é discutida adiante, nesta seção.
-
-As imagens de realce de micro-relevo das Configurações 3 e 4 foram
+As imagens de realce de micro-relevo, uma das duas representações de
+entrada comparadas no estudo fatorial
+(Seção~\ref{subsec:ablacao_conceito}), foram
 geradas a partir das imagens recortadas (Seção~\ref{subsec:dados}),
 sempre a partir do canal de luminosidade (L$^*$) do espaço CIELAB, com
 os operadores apresentados na Seção~\ref{subsec:fotometria}, aplicados
@@ -3191,9 +3181,10 @@ foram recebidas na mesma resolução, de $1280 \times 1771$ pixels
 (Seção~\ref{subsec:dados}).
 
 A variante foi escolhida uma única vez, antes do estudo fatorial, na
-iteração da Dobra 1. A Configuração 3 foi treinada com cada uma das
-quatro variantes, com os demais hiperparâmetros iguais aos das outras
-rodadas. Foi adotada nas Configurações 3 e 4 a variante de maior F1
+iteração da Dobra 1. O modelo foi treinado com cada uma das
+quatro variantes, sem aumento de dados e com os demais hiperparâmetros iguais aos das outras
+rodadas. Foi adotada, nas duas configurações do estudo fatorial com
+imagens de realce, a variante de maior F1
 agregado na validação interna dessa iteração, calculado com a anotação
 completa pela própria biblioteca de treinamento. A biblioteca escolhe o limiar no próprio conjunto em que mede o F1, aqui a validação interna, e associa predições e anotações percorrendo os pares em ordem decrescente de IoU, e não as predições em ordem decrescente de confiança. No procedimento da Seção~\ref{subsec:validacao}, o limiar escolhido na validação interna foi aplicado à dobra de avaliação, com a associação descrita naquela seção.
 
@@ -3206,8 +3197,8 @@ de 2\%. Como cada variante foi
 treinada uma única vez, em uma única dobra, essa diferença não foi
 testada e não permite afirmar que a composição de três canais seja
 superior às demais: a escolha foi uma seleção de hiperparâmetro, e não
-um resultado do trabalho. A comparação desses valores com o da
-Configuração 1 na mesma validação interna, feita depois do estudo
+um resultado do trabalho. A comparação desses valores com o das imagens RGB sem aumento de
+dados na mesma validação interna, feita depois do estudo
 fatorial, é apresentada na Seção~\ref{subsec:discussao}.
 
 A Figura~\ref{fig:rgb_fotometrica} mostra uma carta do conjunto de
@@ -3223,7 +3214,33 @@ região em cada uma; a composição de três canais foi a adotada.
 Fonte: Elaborado pelo autor (2026).}
 \end{figure}
 
-A escolha também não ficou isolada das rodadas seguintes. As 34 cartas
+O estudo fatorial (Seção~\ref{subsec:ablacao_conceito}) cruzou dois
+fatores: o aumento de dados, sem ou com, e a representação de entrada,
+imagens RGB ou imagens de realce de micro-relevo, na variante
+adotada. As quatro
+combinações formaram as configurações comparadas:
+
+\begin{description}
+    \item[Configuração 1] imagens RGB, sem aumento de dados;
+    \item[Configuração 2] imagens RGB, com aumento de dados;
+    \item[Configuração 3] imagens de realce de micro-relevo, sem aumento
+    de dados;
+    \item[Configuração 4] imagens de realce de micro-relevo, com aumento
+    de dados.
+\end{description}
+
+As quatro configurações usaram o mesmo modelo, os mesmos pesos
+pré-treinados e os mesmos hiperparâmetros de treinamento, exceto os de
+aumento de dados (Seção~\ref{sec:implementacao}). Nas Configurações 2 e 4, o aumento de dados aplicou às imagens de
+treino a translação, o espelhamento horizontal e a rotação; na
+Configuração 2, aplicou também as variações de matiz, saturação e valor
+no espaço HSV, que ficaram desligadas na Configuração 4 pelo motivo
+exposto na Seção~\ref{subsec:hiperparametros}. Os valores de cada
+parâmetro estão na Tabela~\ref{tab:augmentation}, e a consequência
+dessa diferença para a comparação entre as representações de entrada
+é discutida adiante, nesta seção.
+
+Além de ter sido uma seleção de hiperparâmetro, a escolha da variante não ficou isolada das rodadas seguintes. As 34 cartas
 da validação interna da Dobra 1 pertencem às outras quatro dobras e
 foram, portanto, avaliadas nas rodadas correspondentes. Como a variante
 adotada foi a de maior F1 justamente nessas cartas, a escolha pode
