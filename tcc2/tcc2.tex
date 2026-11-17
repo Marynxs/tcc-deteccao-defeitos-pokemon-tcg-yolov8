@@ -1521,7 +1521,18 @@ rede. A mudança de escala, por sua vez, amplia
 ou reduz a imagem por um fator sorteado; quando reduz, os
 objetos ficam menores, o que importa quando eles já estão
 próximos do passo do nível de detecção mais fino, apresentado
-na Seção~\ref{subsec:yolo}.
+na Seção~\ref{subsec:yolo}. A Figura~\ref{fig:aumento_dados} mostra essas transformações em cartas do conjunto de dados deste trabalho: nas geométricas, a caixa anotada muda de posição junto com a imagem; na de cor, permanece no lugar. Os valores usados e o motivo de desligar o mosaico e a redução de escala estão na Seção~\ref{subsec:hiperparametros}.
+
+\begin{figure}[H]
+    \centering
+    \caption{Transformações de aumento de dados em cartas do conjunto
+    de dados. Em cima, as usadas neste trabalho, com a caixa anotada
+    ajustada a cada uma; a variação de cor foi usada só nas imagens RGB.
+    Embaixo, o mosaico e a redução de escala, não usados.}
+    \label{fig:aumento_dados}
+    \includegraphics[width=\textwidth]{assets/figuras/206/figE12_aumento_dados.pdf}
+    \legend{Fonte: Elaborado pelo autor (2026).}
+\end{figure}
 
 Uma medição do tamanho do efeito do
 aumento de dados vem da classificação de imagens: com ajuste fino, o erro
