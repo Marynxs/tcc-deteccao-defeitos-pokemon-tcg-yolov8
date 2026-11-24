@@ -3870,7 +3870,7 @@ entrada, concorda com o uso dessa técnica como uma das soluções para
 cenários com baixo volume de dados, sujeitos ao sobreajuste \cite{Chen2021}, e com a
 sua interpretação, em classificação de imagens, como um multiplicador do
 valor de cada exemplo \cite{Hoiem2021}. Abaixo de 8 pixels, porém, a
-revocação foi menor com o aumento de dados nas duas representações, em
+contagem de defeitos encontrados foi menor com o aumento de dados nas duas representações, com diferença significativa só nas imagens RGB, em
 análise exploratória, feita depois dos resultados e com a maioria das
 cartas empatada (Seção~\ref{subsec:res_p2}). Como hipótese
 não testada, a queda pode decorrer do alargamento das caixas pela rotação, comum
@@ -4078,8 +4078,8 @@ modificação da cabeça avaliada, a cabeça P2, não.
 capacidade do modelo devem ser priorizadas antes de mudanças na
 arquitetura. Nas medições desses autores, aumentar a resolução de entrada rendeu mais que acrescentar uma cabeça de detecção no nível P2, a 640 pixels, e, nessa resolução, a passagem do YOLOv8s para o YOLOv8m elevou o mAP@0,5 de 6,12\% para 9,71\%.
 Os resultados deste trabalho concordam quanto à resolução, cuja
-vantagem se manteve nas cinco dobras, e em que a cabeça P2 não foi a alteração mais vantajosa, também a 1280
-pixels, resolução em que ela não trouxe ganho. Quanto à capacidade, a
+vantagem se manteve nas cinco dobras, e quanto à cabeça P2, que também
+aqui, a 1280 pixels, não trouxe ganho. Quanto à capacidade, a
 comparação deste trabalho foi inconclusiva: a 1280 pixels, em uma dobra,
 não se detectou diferença entre o YOLOv8m e o YOLOv8s, com o F1 por
 carta e o mAP@0,5 apontando em sentidos opostos.
@@ -4147,7 +4147,7 @@ testado pelas hipóteses, e a resolução de entrada de 1280 pixels,
 escolhida antes dos experimentos pela expectativa de superar a de 640
 pixels, o que se verificou nas cinco dobras e nas duas referências de
 anotação, em análise sem hipótese formal.
-O aumento de dados não melhorou a faixa abaixo de 8 pixels, em que a revocação foi menor com ele, em
+O aumento de dados não melhorou a faixa abaixo de 8 pixels, em que a contagem foi menor com ele nas duas representações, com diferença significativa só nas imagens RGB, em
 análise exploratória, feita depois dos resultados
 (Seção~\ref{subsec:res_p2}). O realce de
 micro-relevo e a cabeça P2 não trouxeram ganho. Sem aumento de dados, a
