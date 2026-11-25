@@ -1,0 +1,13 @@
+limiar de IoU para regiao ignorada: 0.5
+
+== recorte completo ==
+cfg2_1280      TP  1061 FP  1494 FN  2184 recall 0.327 precisao 0.415 F1 0.366 | AP50 medio dobras 0.267 (0.253 0.245 0.283 0.240 0.313) | F1 por carta medio 0.381 n=197
+cfg2_1280_semdifuso TP  1086 FP  1827 FN  2159 recall 0.335 precisao 0.373 F1 0.353 | AP50 medio dobras 0.257 (0.248 0.258 0.285 0.206 0.285) | F1 por carta medio 0.363 n=197
+  F1     cfg2_1280_semdifuso vs cfg2_1280: n=197 0.363 vs 0.381 melhor/pior/empate 84/94/19 p=0.052 (pratt 0.074) fora da familia de Holm
+  recall cfg2_1280_semdifuso vs cfg2_1280: n=197 0.387 vs 0.383 melhor/pior/empate 75/57/65 p=0.39 (pratt 0.22) fora da familia de Holm
+
+== recorte humano ==
+cfg2_1280      TP   749 FP  1455 FN  1973 recall 0.275 precisao 0.340 F1 0.304 | AP50 medio dobras 0.204 (0.197 0.190 0.218 0.169 0.247) | F1 por carta medio 0.312 n=192
+cfg2_1280_semdifuso TP   758 FP  1769 FN  1964 recall 0.278 precisao 0.300 F1 0.289 | AP50 medio dobras 0.194 (0.187 0.202 0.214 0.139 0.227) | F1 por carta medio 0.298 n=192
+  F1     cfg2_1280_semdifuso vs cfg2_1280: n=192 0.298 vs 0.312 melhor/pior/empate 74/91/27 p=0.15 (pratt 0.15) fora da familia de Holm
+  recall cfg2_1280_semdifuso vs cfg2_1280: n=192 0.334 vs 0.332 melhor/pior/empate 62/52/78 p=0.51 (pratt 0.4) fora da familia de Holm

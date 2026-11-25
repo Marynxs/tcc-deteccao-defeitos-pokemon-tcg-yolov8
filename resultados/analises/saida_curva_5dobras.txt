@@ -1,0 +1,33 @@
+n cartas 206
+AP@0,5 agregado 25%: 0.1667
+AP@0,5 agregado 50%: 0.1976
+AP@0,5 agregado 75%: 0.2142
+AP@0,5 agregado 100%: 0.2300
+AP 25% IC95 [0.151; 0.189]
+AP 50% IC95 [0.178; 0.222]
+AP 75% IC95 [0.194; 0.240]
+AP 100% IC95 [0.208; 0.256]
+AP 50-25: +0.031 IC95 [+0.018; +0.046]
+AP 75-50: +0.017 IC95 [+0.004; +0.029]
+AP 100-75: +0.016 IC95 [+0.003; +0.029]
+AP 100-50: +0.032 IC95 [+0.020; +0.045]
+--- F1 por carta
+  25%: media 0.3160
+  50%: media 0.3513
+  75%: media 0.3763
+  100%: media 0.3761
+  50 x 25: n 206 dif media +0.0353 melhor 124 pior 68 empate 14 p 5.7e-05
+  75 x 50: n 206 dif media +0.0250 melhor 111 pior 73 empate 22 p 0.0034
+  100 x 75: n 206 dif media -0.0002 melhor 99 pior 94 empate 13 p 0.29
+  100 x 50: n 206 dif media +0.0248 melhor 117 pior 76 empate 13 p 0.00091
+  Holm: [2.26981284e-04 6.78451264e-03 2.87761837e-01 2.72159812e-03]
+--- recall por carta
+  25%: media 0.3229
+  50%: media 0.3626
+  75%: media 0.3687
+  100%: media 0.3755
+  50 x 25: n 206 dif media +0.0397 melhor 97 pior 56 empate 53 p 0.0001
+  75 x 50: n 206 dif media +0.0061 melhor 63 pior 67 empate 76 p 0.93
+  100 x 75: n 206 dif media +0.0067 melhor 77 pior 57 empate 72 p 0.15
+  100 x 50: n 206 dif media +0.0129 melhor 90 pior 67 empate 49 p 0.19
+  Holm: [4.07061724e-04 9.27786013e-01 4.56010910e-01 4.56010910e-01]

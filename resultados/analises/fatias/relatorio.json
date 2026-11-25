@@ -1,0 +1,47 @@
+[
+ {
+  "dobra": 1,
+  "fatiamento": "s640_i640",
+  "limiar_inteira": 0.24,
+  "f1_inteira": 0.2993,
+  "limiar_sahi": 0.34,
+  "f1_sahi": 0.2956,
+  "segundos": 77
+ },
+ {
+  "dobra": 2,
+  "fatiamento": "s640_i640",
+  "limiar_inteira": 0.22,
+  "f1_inteira": 0.3336,
+  "limiar_sahi": 0.29,
+  "f1_sahi": 0.2988,
+  "segundos": 76
+ },
+ {
+  "dobra": 3,
+  "fatiamento": "s640_i640",
+  "limiar_inteira": 0.2,
+  "f1_inteira": 0.371,
+  "limiar_sahi": 0.25,
+  "f1_sahi": 0.353,
+  "segundos": 70
+ },
+ {
+  "dobra": 4,
+  "fatiamento": "s640_i640",
+  "limiar_inteira": 0.21,
+  "f1_inteira": 0.3329,
+  "limiar_sahi": 0.34,
+  "f1_sahi": 0.309,
+  "segundos": 69
+ },
+ {
+  "dobra": 5,
+  "fatiamento": "s640_i640",
+  "limiar_inteira": 0.2,
+  "f1_inteira": 0.3893,
+  "limiar_sahi": 0.3,
+  "f1_sahi": 0.3709,
+  "segundos": 70
+ }
+]

@@ -1,0 +1,31 @@
+dobra 1 val. interna inteira      limiar 0.24 F1 0.355
+dobra 1 val. interna s640_i640    limiar 0.34 F1 0.317
+dobra 1 val. interna s896_i1280   limiar 0.32 F1 0.252
+dobra 1 val. interna s640_i1280   limiar 0.41 F1 0.213
+   {'dobra': 1, 'fatiamento': 's640_i640', 'limiar_inteira': 0.24, 'f1_inteira': 0.2993, 'limiar_sahi': 0.34, 'f1_sahi': 0.2956, 'segundos': 77}
+dobra 2 val. interna inteira      limiar 0.22 F1 0.309
+dobra 2 val. interna s640_i640    limiar 0.29 F1 0.297
+dobra 2 val. interna s896_i1280   limiar 0.29 F1 0.233
+dobra 2 val. interna s640_i1280   limiar 0.29 F1 0.203
+   {'dobra': 2, 'fatiamento': 's640_i640', 'limiar_inteira': 0.22, 'f1_inteira': 0.3336, 'limiar_sahi': 0.29, 'f1_sahi': 0.2988, 'segundos': 76}
+dobra 3 val. interna inteira      limiar 0.20 F1 0.372
+dobra 3 val. interna s640_i640    limiar 0.25 F1 0.340
+dobra 3 val. interna s896_i1280   limiar 0.31 F1 0.272
+dobra 3 val. interna s640_i1280   limiar 0.32 F1 0.189
+   {'dobra': 3, 'fatiamento': 's640_i640', 'limiar_inteira': 0.2, 'f1_inteira': 0.371, 'limiar_sahi': 0.25, 'f1_sahi': 0.353, 'segundos': 70}
+dobra 4 val. interna inteira      limiar 0.21 F1 0.421
+dobra 4 val. interna s640_i640    limiar 0.34 F1 0.385
+dobra 4 val. interna s896_i1280   limiar 0.41 F1 0.263
+dobra 4 val. interna s640_i1280   limiar 0.38 F1 0.198
+   {'dobra': 4, 'fatiamento': 's640_i640', 'limiar_inteira': 0.21, 'f1_inteira': 0.3329, 'limiar_sahi': 0.34, 'f1_sahi': 0.309, 'segundos': 69}
+dobra 5 val. interna inteira      limiar 0.20 F1 0.373
+dobra 5 val. interna s640_i640    limiar 0.30 F1 0.340
+dobra 5 val. interna s896_i1280   limiar 0.34 F1 0.280
+dobra 5 val. interna s640_i1280   limiar 0.30 F1 0.239
+   {'dobra': 5, 'fatiamento': 's640_i640', 'limiar_inteira': 0.2, 'f1_inteira': 0.3893, 'limiar_sahi': 0.3, 'f1_sahi': 0.3709, 'segundos': 70}
+
+== total nas dobras retidas ==
+  inteira  TP 1388 FP 1997 FN 3420 | recall 0.289 precisao 0.410 | <8 px: 15/517 = 0.029  8 a 20 px: 1082/2853 = 0.379  >20 px: 291/1438 = 0.202
+  sahi     TP 1445 FP 2746 FN 3363 | recall 0.301 precisao 0.345 | <8 px: 75/517 = 0.145  8 a 20 px: 1161/2853 = 0.407  >20 px: 209/1438 = 0.145
+  F1 por carta, fatiado x inteira: n=206 media 0.355 x 0.379, melhor em 85, pior em 107, empate 14, Wilcoxon bilateral p=0.01004
+  recall por carta, fatiado x inteira: n=206 media 0.400 x 0.378, melhor em 89, pior em 61, empate 56, Wilcoxon bilateral p=0.01196

@@ -121,7 +121,7 @@ def predicoes(modelo, imagens, modo, device, cache):
     for img in imagens:
         d[img.stem] = prever(modelo, img, modo, device)
     cache.parent.mkdir(parents=True, exist_ok=True)
-    json.dump({k: v.round(4).tolist() for k, v in d.items()}, open(cache, "w"))
+    json.dump({k: v.tolist() for k, v in d.items()}, open(cache, "w"))  # sem arredondar: empates no limiar mudam a contagem
     return d
 
 
